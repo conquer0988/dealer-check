@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>經銷商案件進度查詢</title>
+<style>
+body { font-family: Arial, sans-serif; padding: 20px; }
+input, button { font-size: 16px; margin: 5px 0; padding: 5px; }
+table { border-collapse: collapse; margin-top: 20px; width: 100%; }
+th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+.status-等待派工 { color: green; font-weight: bold; }
+.status-排程中 { color: orange; font-weight: bold; }
+.status-施工中 { color: blue; font-weight: bold; }
+.status-完工 { color: gray; font-weight: bold; }
+.progress-bar { height: 16px; background: #eee; border-radius: 8px; overflow: hidden; width: 100%; }
+.progress-bar-fill { height: 100%; background: #4CAF50; width: 0%; }
+</style>
+</head>
+<body>
+
+<h2>經銷商案件進度查詢</h2>
+<label>輸入案件編號或經銷商名稱:</label><br>
+<input type="text" id="queryInput" placeholder="例如 A001 或 經銷商甲">
+<button onclick="queryData()">查詢</button>
+
+<div id="results"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tabletop.js/1.6.0/tabletop.min.js"></script>
+<script>
+var publicSpreadsheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSjbJC6VSPPicOPdwTHbcF3ETS5BSJnC_-HIvBNounFVLXik9NxzChJGqackA8HEWcfnkBMjUhWIUmQ/pubhtml'; // Google Sheets 公開網址
+
+function queryData() {
+    var query = document.getElementById('queryInput').value.trim();
+    var resultsDiv = document.getElementById('results');
+    resultsDiv.innerHTML = '查詢中...';
+
+    Tabletop.init({
+        key: publicSpreadsheetUrl,
+        simpleSheet: true,
+        callback: function(data, tabletop) {
+            var filtered = data.filter(function(row) {
+                return row['案件編號'] === query || row['經銷商名稱'] === query;
+            });
+
+            if(filtered.length === 0) {
+                resultsDiv.innerHTML = '查無資料';
+                return;
+            }
+
+            var html = '<table><tr><th>案件編號</th><th>案件名稱</th><th>狀態</th><th>排程日期</th><th>順位</th><th>進度</th></tr>';
+            filtered.forEach(function(row) {
+                var progressPercent = 0;
+                switch(row['狀態']) {
+                    case '等待派工': progressPercent=10; break;
+                    case '排程中': progressPercent=40; break;
+                    case '施工中': progressPercent=70; break;
+                    case '完工': progressPercent=100; break;
+                }
+
+                html += '<tr>'+
+                        '<td>'+row['案件編號']+'</td>'+
+                        '<td>'+row['案件名稱']+'</td>'+
+                        '<td class="status-'+row['狀態']+'">'+row['狀態']+'</td>'+
+                        '<td>'+row['排程日期']+'</td>'+
+                        '<td>'+row['排隊順位']+'</td>'+
+                        '<td><div class="progress-bar"><div class="progress-bar-fill" style="width:'+progressPercent+'%"></div></div></td>'+
+                        '</tr>';
+            });
+            html += '</table>';
+            resultsDiv.innerHTML = html;
+        }
+    });
+}
+</script>
+</body>
+</html>
