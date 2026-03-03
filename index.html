@@ -7,28 +7,19 @@
     <style>
         body { font-family: "Microsoft JhengHei", Arial, sans-serif; padding: 20px; background-color: #f4f7f6; color: #333; }
         .container { max-width: 950px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        
-        /* 導覽頁籤 */
         .tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid #ddd; }
         .tab-btn { padding: 10px 20px; cursor: pointer; border: none; background: none; font-size: 18px; font-weight: bold; color: #666; }
         .tab-btn.active { color: #2196F3; border-bottom: 3px solid #2196F3; }
         .content-section { display: none; }
         .content-section.active { display: block; }
-
-        /* 表單樣式 */
         .form-group { margin-bottom: 15px; }
         .form-group label { font-weight: bold; display: block; margin-bottom: 5px; }
         input, select, textarea { width: 100%; font-size: 16px; margin: 5px 0; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        
-        /* 備註說明樣式 */
         .notice-box { background-color: #fff9db; border-left: 5px solid #fcc419; padding: 15px; margin: 20px 0; font-size: 15px; line-height: 1.8; }
         .notice-title { font-weight: bold; color: #e67700; display: block; margin-bottom: 8px; font-size: 17px; }
-
         button { font-size: 16px; padding: 12px 20px; background-color: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer; width: 100%; font-weight: bold; }
         button:hover { background-color: #1976D2; }
         button:disabled { background-color: #ccc; }
-
-        /* 查詢結果表格 */
         table { border-collapse: collapse; margin-top: 20px; width: 100%; font-size: 14px; }
         th, td { border: 1px solid #ccc; padding: 12px 8px; text-align: left; }
         th { background-color: #2D5D46; color: white; } 
@@ -133,12 +124,12 @@
 </div>
 
 <script>
-// 已為您自動轉換為 CSV 資料格式網址
+// 您的 CSV 發佈網址
 const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSjbJC6VSPPicOPdwTHbcF3ETS5BSJnC_-HIvBNounFVLXik9NxzChJGqackA8HEWcfnkBMjUhWIUmQ/pub?output=csv";
 
-// ⚠️ 請填入您的 Google Apps Script 部署網址
-// 請將剛剛複製的網址貼在引號內
+// 您的 GAS 部署網址 (第 3 版)
 const gasUrl = "https://script.google.com/macros/s/AKfycbwTTP8B3nZDqvSRSuFRYEDMYqmv4-DTBn2lPLabB96ucLhhiERgeaciqkFFHrfztizxiQ/exec";
+
 function switchTab(tab) {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
@@ -151,6 +142,7 @@ function switchTab(tab) {
     }
 }
 
+// 修正後的直式查詢邏輯
 async function queryData() {
     var query = document.getElementById('queryInput').value.trim();
     var resultsDiv = document.getElementById('results');
@@ -159,11 +151,15 @@ async function queryData() {
     
     try {
         const response = await fetch(sheetUrl);
-        const data = await response.text();
-        const rows = data.split("\n").map(row => row.split(","));
-        const bodyRows = rows.slice(1);
-        let found = false;
+        const csvData = await response.text();
         
+        // 將 CSV 轉換為二維陣列 [列][欄]
+        const rows = csvData.split("\n").map(row => row.split(","));
+        
+        // 轉置矩陣 (將直式表格轉為橫式邏輯以便處理)
+        const transposed = rows[0].map((_, colIndex) => rows.map(row => row[colIndex]));
+        
+        let found = false;
         let html = `<table><tr>
             <th>經銷商名稱</th>
             <th>案件名稱</th>
@@ -174,16 +170,25 @@ async function queryData() {
             <th>工程師電話</th>
         </tr>`;
 
-        bodyRows.forEach(row => {
-            // 修正：經銷商名稱在 B 欄，所以索引要改成 row[1]
-            if (row[1] && row[1].trim() === query) { 
+        // transposed[1] 之後才是 B, C, D 欄的資料 (直式轉橫式後)
+        transposed.slice(1).forEach(record => {
+            // record[1] 對應原本 A 欄第 2 列的「經銷商名稱」
+            if (record[1] && record[1].trim() === query) { 
                 found = true;
-                // 狀態在 D 欄，索引為 row[3]
-                let status = row[3] ? row[3].trim() : ""; 
+                // 狀態在 A 欄第 4 列 (索引 3)，其他依序類推
+                let status = record[3] ? record[3].trim() : "處理中"; 
                 html += `<tr>
-                    <td>${row[1]}</td> <td>${row[2]}</td> <td class="status-${status}">${status}</td> <td>${row[4]}</td> <td>${row[5]}</td> <td>${row[6]}</td> <td>${row[7]}</td> </tr>`;
+                    <td>${record[1]}</td> 
+                    <td>${record[2]}</td> 
+                    <td class="status-${status}">${status}</td> 
+                    <td>${record[4] || ""}</td> 
+                    <td>${record[5] || ""}</td> 
+                    <td>${record[6] || ""}</td> 
+                    <td>${record[7] || ""}</td> 
+                </tr>`;
             }
         });
+        
         html += "</table>";
         resultsDiv.innerHTML = found ? html : "查無資料";
     } catch (e) {
@@ -198,6 +203,7 @@ form.addEventListener('submit', e => {
     btn.disabled = true;
     btn.innerText = '正在提交...';
 
+    // 提交到 GAS (會執行 doPost 並直向寫入 B, C, D 欄)
     fetch(gasUrl, { method: 'POST', body: new FormData(form)})
     .then(res => {
         alert("資料已成功送出！專人將於五天內與您聯繫。");
