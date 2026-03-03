@@ -20,7 +20,7 @@
         .form-group label { font-weight: bold; display: block; margin-bottom: 5px; }
         input, select, textarea { width: 100%; font-size: 16px; margin: 5px 0; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
         
-        /* 備註說明樣式 (黃色區塊) */
+        /* 備註說明樣式 */
         .notice-box { background-color: #fff9db; border-left: 5px solid #fcc419; padding: 15px; margin: 20px 0; font-size: 15px; line-height: 1.8; }
         .notice-title { font-weight: bold; color: #e67700; display: block; margin-bottom: 8px; font-size: 17px; }
 
@@ -28,10 +28,10 @@
         button:hover { background-color: #1976D2; }
         button:disabled { background-color: #ccc; }
 
-        /* 查詢結果表格 - 依照照片項目設定 */
+        /* 查詢結果表格 */
         table { border-collapse: collapse; margin-top: 20px; width: 100%; font-size: 14px; }
         th, td { border: 1px solid #ccc; padding: 12px 8px; text-align: left; }
-        th { background-color: #2D5D46; color: white; } /* 模擬照片中的深綠色標題 */
+        th { background-color: #2D5D46; color: white; } 
         .status-等待派工 { color: green; font-weight: bold; }
         .status-排程中 { color: orange; font-weight: bold; }
         .status-施工中 { color: blue; font-weight: bold; }
@@ -60,7 +60,7 @@
             </div>
             <div class="form-group">
                 <label>經銷商(寶號) <span class="required-mark">*</span></label>
-                <input type="text" name="dealerName" required placeholder="請填寫完整公司寶號">
+                <input type="text" name="dealerName" required placeholder="請填寫完整名稱">
             </div>
             <div class="form-group">
                 <label>經銷商聯絡人姓名 <span class="required-mark">*</span></label>
@@ -115,10 +115,7 @@
             <div class="notice-box">
                 <span class="notice-title">⚠️ 填單注意事項：</span>
                 一、填單後，五天內會由專人聯繫。<br>
-                二、應檢附資料：<br>
-                &nbsp;&nbsp;&nbsp;&nbsp;1. 設備明細表<br>
-                &nbsp;&nbsp;&nbsp;&nbsp;2. 圖面 (電子檔)<br>
-                &nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #d9480f; font-weight: bold;">※ 以上資料請於專人聯繫後提供。</span><br>
+                二、應檢附資料：1. 設備明細表 2. 圖面 (電子檔)。<br>
                 三、<span style="color: #d9480f; font-weight: bold;">煩請經銷商現場負責人全程會同。</span>
             </div>
 
@@ -129,16 +126,17 @@
     <section id="search-section" class="content-section">
         <h2>案件進度查詢</h2>
         <label>請輸入經銷商名稱：</label><br>
-        <input type="text" id="queryInput" placeholder="請輸入您填單時的經銷商名稱">
+        <input type="text" id="queryInput" placeholder="請輸入填單時的名稱">
         <button onclick="queryData()" style="width: auto; margin-top: 10px;">查詢</button>
         <div id="results"></div>
     </section>
 </div>
 
 <script>
-// ⚠️ 請確保此處為「工作表1」分頁發佈後的 CSV 連結
+// 已為您自動轉換為 CSV 資料格式網址
 const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSjbJC6VSPPicOPdwTHbcF3ETS5BSJnC_-HIvBNounFVLXik9NxzChJGqackA8HEWcfnkBMjUhWIUmQ/pub?output=csv";
-// ⚠️ 請確保此處為您 GAS 部署後產生的 URL
+
+// ⚠️ 請填入您的 Google Apps Script 部署網址
 const gasUrl = "您的GAS網頁應用程式URL"; 
 
 function switchTab(tab) {
@@ -166,7 +164,6 @@ async function queryData() {
         const bodyRows = rows.slice(1);
         let found = false;
         
-        // 依照照片指定項目建立表頭
         let html = `<table><tr>
             <th>經銷商名稱</th>
             <th>案件名稱</th>
@@ -178,18 +175,25 @@ async function queryData() {
         </tr>`;
 
         bodyRows.forEach(row => {
-            // 比對「工作表1」中的經銷商名稱 (假設在 A 欄，即 row[0])
+            // 對應 工作表1 的 A 欄 (row[0]) 到 G 欄 (row[6])
             if (row[0] && row[0].trim() === query) {
                 found = true;
-                let status = row[2] ? row[2].trim() : ""; // 狀態在 C 欄，即 row[2]
+                let status = row[2] ? row[2].trim() : "";
                 html += `<tr>
-                    <td>${row[0]}</td> <td>${row[1]}</td> <td class="status-${status}">${status}</td> <td>${row[3]}</td> <td>${row[4]}</td> <td>${row[5]}</td> <td>${row[6]}</td> </tr>`;
+                    <td>${row[0]}</td>
+                    <td>${row[1]}</td>
+                    <td class="status-${status}">${status}</td>
+                    <td>${row[3]}</td>
+                    <td>${row[4]}</td>
+                    <td>${row[5]}</td>
+                    <td>${row[6]}</td>
+                </tr>`;
             }
         });
         html += "</table>";
         resultsDiv.innerHTML = found ? html : "查無資料";
     } catch (e) {
-        resultsDiv.innerHTML = "讀取資料失敗，請確認試算表已發佈為 CSV 格式。";
+        resultsDiv.innerHTML = "讀取資料失敗，請確認試算表已正確發佈。";
     }
 }
 
@@ -208,7 +212,7 @@ form.addEventListener('submit', e => {
         btn.innerText = '提交申請';
     })
     .catch(err => {
-        alert("提交失敗，請檢查您的授權或 GAS URL 是否正確。");
+        alert("提交失敗，請檢查 GAS 部署是否正確設定為「所有人」。");
         btn.disabled = false;
         btn.innerText = '提交申請';
     });
