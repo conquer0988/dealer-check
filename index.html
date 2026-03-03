@@ -124,11 +124,11 @@
 </div>
 
 <script>
-// 您的 CSV 發佈網址
+// 您提供的 CSV 發佈網址 (保持不變)
 const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSjbJC6VSPPicOPdwTHbcF3ETS5BSJnC_-HIvBNounFVLXik9NxzChJGqackA8HEWcfnkBMjUhWIUmQ/pub?output=csv";
 
-// 您的 GAS 部署網址 (第 3 版)
-const gasUrl = "https://script.google.com/macros/s/AKfycbwTTP8B3nZDqvSRSuFRYEDMYqmv4-DTBn2lPLabB96ucLhhiERgeaciqkFFHrfztizxiQ/exec";
+// 您提供的最新 GAS 部署網址 (已更新)
+const gasUrl = "https://script.google.com/macros/s/AKfycbwU21rZke4QllBlocwAU3NDCR2ey_99PBN2XUYa_U32GJ3yXBt9LxvA_ytDK5Rcf-Pl2g/exec";
 
 function switchTab(tab) {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -142,7 +142,7 @@ function switchTab(tab) {
     }
 }
 
-// 修正後的直式查詢邏輯
+// 查詢邏輯
 async function queryData() {
     var query = document.getElementById('queryInput').value.trim();
     var resultsDiv = document.getElementById('results');
@@ -153,10 +153,8 @@ async function queryData() {
         const response = await fetch(sheetUrl);
         const csvData = await response.text();
         
-        // 將 CSV 轉換為二維陣列 [列][欄]
+        // 解析 CSV 並處理直式轉橫式
         const rows = csvData.split("\n").map(row => row.split(","));
-        
-        // 轉置矩陣 (將直式表格轉為橫式邏輯以便處理)
         const transposed = rows[0].map((_, colIndex) => rows.map(row => row[colIndex]));
         
         let found = false;
@@ -170,12 +168,10 @@ async function queryData() {
             <th>工程師電話</th>
         </tr>`;
 
-        // transposed[1] 之後才是 B, C, D 欄的資料 (直式轉橫式後)
+        // 搜尋邏輯
         transposed.slice(1).forEach(record => {
-            // record[1] 對應原本 A 欄第 2 列的「經銷商名稱」
             if (record[1] && record[1].trim() === query) { 
                 found = true;
-                // 狀態在 A 欄第 4 列 (索引 3)，其他依序類推
                 let status = record[3] ? record[3].trim() : "處理中"; 
                 html += `<tr>
                     <td>${record[1]}</td> 
@@ -196,6 +192,7 @@ async function queryData() {
     }
 }
 
+// 提交表單邏輯
 const form = document.getElementById('orderForm');
 form.addEventListener('submit', e => {
     e.preventDefault();
@@ -203,16 +200,21 @@ form.addEventListener('submit', e => {
     btn.disabled = true;
     btn.innerText = '正在提交...';
 
-    // 提交到 GAS (會執行 doPost 並直向寫入 B, C, D 欄)
-    fetch(gasUrl, { method: 'POST', body: new FormData(form)})
-    .then(res => {
+    // 使用 FormData 自動包裝 name 對應的資料
+    fetch(gasUrl, { 
+        method: 'POST', 
+        body: new FormData(form),
+        mode: 'no-cors' // 避免瀏覽器 CORS 擋掉
+    })
+    .then(() => {
         alert("資料已成功送出！專人將於五天內與您聯繫。");
         form.reset();
         btn.disabled = false;
         btn.innerText = '提交申請';
     })
     .catch(err => {
-        alert("提交失敗，請檢查 GAS 部署是否正確設定為「所有人」。");
+        alert("提交出錯，請確認網路連線或 GAS 設定。");
+        console.error(err);
         btn.disabled = false;
         btn.innerText = '提交申請';
     });
