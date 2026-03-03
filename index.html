@@ -60,7 +60,7 @@
             </div>
             <div class="form-group">
                 <label>經銷商(寶號) <span class="required-mark">*</span></label>
-                <input type="text" name="dealerName" required placeholder="請手動輸入經銷商名稱">
+                <input type="text" name="dealerName" required placeholder="請填寫完整公司寶號">
             </div>
             <div class="form-group">
                 <label>經銷商聯絡人姓名 <span class="required-mark">*</span></label>
@@ -127,16 +127,18 @@
     </section>
 
     <section id="search-section" class="content-section">
-        <h2>經銷商案件進度查詢</h2>
+        <h2>案件進度查詢</h2>
         <label>請輸入經銷商名稱：</label><br>
-        <input type="text" id="queryInput" placeholder="例如 王大明公司">
+        <input type="text" id="queryInput" placeholder="請輸入您填單時的經銷商名稱">
         <button onclick="queryData()" style="width: auto; margin-top: 10px;">查詢</button>
         <div id="results"></div>
     </section>
 </div>
 
 <script>
+// ⚠️ 請確保此處為「工作表1」分頁發佈後的 CSV 連結
 const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSjbJC6VSPPicOPdwTHbcF3ETS5BSJnC_-HIvBNounFVLXik9NxzChJGqackA8HEWcfnkBMjUhWIUmQ/pub?output=csv";
+// ⚠️ 請確保此處為您 GAS 部署後產生的 URL
 const gasUrl = "您的GAS網頁應用程式URL"; 
 
 function switchTab(tab) {
@@ -176,26 +178,18 @@ async function queryData() {
         </tr>`;
 
         bodyRows.forEach(row => {
-            // 比對經銷商名稱
-            if (row[1] && row[1].trim() === query) {
+            // 比對「工作表1」中的經銷商名稱 (假設在 A 欄，即 row[0])
+            if (row[0] && row[0].trim() === query) {
                 found = true;
-                let status = row[3] ? row[3].trim() : "";
-                // 依照 CSV 欄位索引填入資料 (請確保 CSV 順序正確)
+                let status = row[2] ? row[2].trim() : ""; // 狀態在 C 欄，即 row[2]
                 html += `<tr>
-                    <td>${row[1]}</td>
-                    <td>${row[2]}</td>
-                    <td class="status-${status}">${status}</td>
-                    <td>${row[4]}</td>
-                    <td>${row[5]}</td>
-                    <td>${row[6]}</td>
-                    <td>${row[7]}</td>
-                </tr>`;
+                    <td>${row[0]}</td> <td>${row[1]}</td> <td class="status-${status}">${status}</td> <td>${row[3]}</td> <td>${row[4]}</td> <td>${row[5]}</td> <td>${row[6]}</td> </tr>`;
             }
         });
         html += "</table>";
         resultsDiv.innerHTML = found ? html : "查無資料";
     } catch (e) {
-        resultsDiv.innerHTML = "讀取資料失敗，請確認試算表已發佈。";
+        resultsDiv.innerHTML = "讀取資料失敗，請確認試算表已發佈為 CSV 格式。";
     }
 }
 
@@ -214,7 +208,7 @@ form.addEventListener('submit', e => {
         btn.innerText = '提交申請';
     })
     .catch(err => {
-        alert("提交失敗，請檢查網路或 GAS 設定。");
+        alert("提交失敗，請檢查您的授權或 GAS URL 是否正確。");
         btn.disabled = false;
         btn.innerText = '提交申請';
     });
