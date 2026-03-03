@@ -175,19 +175,13 @@ async function queryData() {
         </tr>`;
 
         bodyRows.forEach(row => {
-            // 對應 工作表1 的 A 欄 (row[0]) 到 G 欄 (row[6])
-            if (row[0] && row[0].trim() === query) {
+            // 修正：經銷商名稱在 B 欄，所以索引要改成 row[1]
+            if (row[1] && row[1].trim() === query) { 
                 found = true;
-                let status = row[2] ? row[2].trim() : "";
+                // 狀態在 D 欄，索引為 row[3]
+                let status = row[3] ? row[3].trim() : ""; 
                 html += `<tr>
-                    <td>${row[0]}</td>
-                    <td>${row[1]}</td>
-                    <td class="status-${status}">${status}</td>
-                    <td>${row[3]}</td>
-                    <td>${row[4]}</td>
-                    <td>${row[5]}</td>
-                    <td>${row[6]}</td>
-                </tr>`;
+                    <td>${row[1]}</td> <td>${row[2]}</td> <td class="status-${status}">${status}</td> <td>${row[4]}</td> <td>${row[5]}</td> <td>${row[6]}</td> <td>${row[7]}</td> </tr>`;
             }
         });
         html += "</table>";
