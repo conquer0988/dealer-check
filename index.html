@@ -124,11 +124,11 @@
 </div>
 
 <script>
-// 您提供的 CSV 發佈網址 (保持不變)
+// 您的 CSV 發佈網址
 const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSjbJC6VSPPicOPdwTHbcF3ETS5BSJnC_-HIvBNounFVLXik9NxzChJGqackA8HEWcfnkBMjUhWIUmQ/pub?output=csv";
 
-// 您提供的最新 GAS 部署網址 (已更新)
-const gasUrl = "https://script.google.com/macros/s/AKfycbwU21rZke4QllBlocwAU3NDCR2ey_99PBN2XUYa_U32GJ3yXBt9LxvA_ytDK5Rcf-Pl2g/exec";
+// 您提供的最新網頁應用程式網址
+const gasUrl = "https://script.google.com/macros/s/AKfycbydkRtSF_FeidEHkgUCStISZv-u07k0SmsaMq6-7twmP714lglPTh7AqUWKdwKvb5czNg/exec";
 
 function switchTab(tab) {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -153,7 +153,6 @@ async function queryData() {
         const response = await fetch(sheetUrl);
         const csvData = await response.text();
         
-        // 解析 CSV 並處理直式轉橫式
         const rows = csvData.split("\n").map(row => row.split(","));
         const transposed = rows[0].map((_, colIndex) => rows.map(row => row[colIndex]));
         
@@ -168,7 +167,6 @@ async function queryData() {
             <th>工程師電話</th>
         </tr>`;
 
-        // 搜尋邏輯
         transposed.slice(1).forEach(record => {
             if (record[1] && record[1].trim() === query) { 
                 found = true;
@@ -192,7 +190,7 @@ async function queryData() {
     }
 }
 
-// 提交表單邏輯
+// 提交表單邏輯 (使用 GET 模式配合 URLSearchParams 以獲得最佳穩定性)
 const form = document.getElementById('orderForm');
 form.addEventListener('submit', e => {
     e.preventDefault();
@@ -200,20 +198,24 @@ form.addEventListener('submit', e => {
     btn.disabled = true;
     btn.innerText = '正在提交...';
 
-    // 使用 FormData 自動包裝 name 對應的資料
-    fetch(gasUrl, { 
-        method: 'POST', 
-        body: new FormData(form),
-        mode: 'no-cors' // 避免瀏覽器 CORS 擋掉
+    // 將 Form 資料轉為 Query String
+    const formData = new FormData(form);
+    const params = new URLSearchParams(formData).toString();
+    const finalUrl = gasUrl + "?" + params;
+
+    fetch(finalUrl, { 
+        method: 'GET',
+        mode: 'no-cors' 
     })
     .then(() => {
+        // 在 no-cors 模式下，即便成功也不會回傳內容，直接提示成功
         alert("資料已成功送出！專人將於五天內與您聯繫。");
         form.reset();
         btn.disabled = false;
         btn.innerText = '提交申請';
     })
     .catch(err => {
-        alert("提交出錯，請確認網路連線或 GAS 設定。");
+        alert("提交失敗，請檢查網路或 GAS 部署權限。");
         console.error(err);
         btn.disabled = false;
         btn.innerText = '提交申請';
