@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>經銷商服務系統-全欄位校正版</title>
+    <title>經銷商服務系統-連動修復版</title>
     <style>
         body { font-family: "Microsoft JhengHei", sans-serif; padding: 15px; background-color: #f4f7f6; }
         .container { max-width: 900px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
@@ -41,27 +41,27 @@
             </div>
             <div class="form-group"><label>案件地址 *</label><input type="text" name="案件地址" required></div>
             
-            <div style="background:#f9f9f9; padding:10px; border-radius:8px; margin-bottom:15px;">
-                <p style="margin:0 0 10px 0; font-weight:bold; color:#2196F3;">經銷商聯絡人資訊</p>
+            <div style="background:#f0f7ff; padding:15px; border-radius:8px; margin-bottom:15px;">
+                <p style="margin-top:0; font-weight:bold; color:#007bff;">經銷商聯絡資訊</p>
                 <div class="grid-row">
                     <div class="form-group"><label>姓名 *</label><input type="text" name="經銷商聯絡人姓名" required></div>
                     <div class="form-group"><label>電話 *</label><input type="tel" name="經銷商聯絡人電話" required></div>
                 </div>
                 <div class="grid-row">
                     <div class="form-group"><label>電子信箱</label><input type="email" name="經銷商聯絡人電子信箱"></div>
-                    <div class="form-group"><label>LINE ID</label><input type="text" name="經銷商聯絡人 LINE"></div>
+                    <div class="form-group"><label>LINE</label><input type="text" name="經銷商聯絡人 LINE"></div>
                 </div>
             </div>
 
-            <div style="background:#fff0f0; padding:10px; border-radius:8px; margin-bottom:15px;">
-                <p style="margin:0 0 10px 0; font-weight:bold; color:#e91e63;">現場負責聯絡人</p>
+            <div style="background:#fff5f5; padding:15px; border-radius:8px; margin-bottom:15px;">
+                <p style="margin-top:0; font-weight:bold; color:#dc3545;">現場負責聯絡人 (非業主)</p>
                 <div class="grid-row">
                     <div class="form-group"><label>姓名 *</label><input type="text" name="現場負責聯絡人姓名" required></div>
                     <div class="form-group"><label>電話 *</label><input type="tel" name="現場負責人電話" required></div>
                 </div>
                 <div class="grid-row">
                     <div class="form-group"><label>電子信箱</label><input type="email" name="現場負責人電子信箱"></div>
-                    <div class="form-group"><label>LINE ID</label><input type="text" name="現場負責人 LINE"></div>
+                    <div class="form-group"><label>LINE</label><input type="text" name="現場負責人 LINE"></div>
                 </div>
             </div>
 
@@ -82,9 +82,9 @@
     </section>
 
     <section id="search-section" class="content-section">
-        <div class="form-group"><label>請輸入經銷商名稱</label><input type="text" id="qD" placeholder="如：和泰大金"></div>
-        <div class="form-group"><label>請輸入案件名稱</label><input type="text" id="qC" placeholder="如：大金空調A"></div>
-        <button onclick="queryData()">開始查詢</button>
+        <div class="form-group"><label>經銷商名稱</label><input type="text" id="qD" placeholder="如：和泰大金"></div>
+        <div class="form-group"><label>案件名稱</label><input type="text" id="qC" placeholder="如：大金空調A"></div>
+        <button onclick="queryData()">確認進度查詢</button>
         <div id="results"></div>
     </section>
 </div>
@@ -105,48 +105,43 @@ async function queryData() {
     const res = document.getElementById('results');
     if(!d || !c) return alert("請輸入完整名稱");
     
-    res.innerHTML = "🔍 正在查詢...";
+    res.innerHTML = "🔍 資料同步中...";
     try {
         const response = await fetch(sheetUrl + "&t=" + Date.now());
-        const rawData = await response.text();
-        // 解析 CSV 並過濾掉空行
-        const rows = rawData.split("\n").filter(r => r.trim() !== "").map(r => r.split(",").map(cell => cell.trim()));
+        const rawText = await response.text();
+        // 嚴格解析 CSV，確保每一列都被正確切分
+        const allRows = rawText.split(/\r?\n/).map(row => row.split(",").map(cell => cell.trim()));
         
-        let html = `<table><tr><th>案件名稱</th><th>狀態</th><th>排定日期</th><th>負責工程師</th><th>工程師電話</th></tr>`;
+        let html = `<table><tr><th>案件名稱</th><th>狀態</th><th>排定日期</th><th>負責工程師</th><th>電話</th></tr>`;
         let found = false;
 
-        // B 欄開始遍歷 (j=1)
-        for (let j = 1; j < rows[0].length; j++) {
-            // 第 2 列(index 1)是經銷商，第 3 列(index 2)是案件名
-            if (rows[1][j] === d && rows[2][j] === c) {
+        // B 欄開始 (j=1)
+        for (let j = 1; j < allRows[0].length; j++) {
+            // 比對 經銷商(Row 2) 與 案件(Row 3)
+            if (allRows[1][j] === d && allRows[2][j] === c) {
                 found = true;
                 
-                // --- 徹底解決錯位核心：直接根據圖片指定列號 ---
-                // image_2e6097 顯示：
-                // 列 17 (index 16) 是排定日期
-                // 列 18 (index 17) 是負責工程師
-                // 列 19 (index 18) 是工程師電話
-                const pDate = rows[16] ? rows[16][j] : ""; 
-                const pEng  = rows[17] ? rows[17][j] : "";  
-                const pTel  = rows[18] ? rows[18][j] : "";  
+                // 強制抓取固定列號，避免因為中間行數變動產生錯位
+                // 根據圖片：17列=日期, 18列=工程師, 19列=電話
+                const pDate = allRows[16] ? allRows[16][j] : ""; 
+                const pEng  = allRows[17] ? allRows[17][j] : "";  
+                const pTel  = allRows[18] ? allRows[18][j] : "";  
                 
-                const statusStr = pDate ? "已排程" : "已收到申請";
-                const dateVal = pDate || "尚未排定";
-                const engVal = pEng || "指派中";
-                const telVal = pTel || "--";
-                const sClass = pDate ? "status-ok" : "status-wait";
+                const isScheduled = pDate && pDate !== "";
+                const statusStr = isScheduled ? "已排程" : "已收件待安排";
+                const sClass = isScheduled ? "status-ok" : "status-wait";
 
                 html += `<tr>
-                    <td>${rows[2][j]}</td>
+                    <td>${allRows[2][j]}</td>
                     <td><span class="status-tag ${sClass}">${statusStr}</span></td>
-                    <td>${dateVal}</td>
-                    <td>${engVal}</td>
-                    <td>${telVal}</td>
+                    <td>${pDate || "待聯絡"}</td>
+                    <td>${pEng || "指派中"}</td>
+                    <td>${pTel || "--"}</td>
                 </tr>`;
             }
         }
-        res.innerHTML = found ? html + "</table>" : "<p style='color:red;'>查無資料，請確認輸入是否正確。</p>";
-    } catch (e) { res.innerHTML = "❌ 連線異常，請確認試算表發佈設定。"; }
+        res.innerHTML = found ? html + "</table>" : "<p style='color:red;'>查無此案件，請檢查字體大小或空白。</p>";
+    } catch (e) { res.innerHTML = "系統連線異常"; }
 }
 
 document.getElementById('orderForm').addEventListener('submit', function(e) {
@@ -155,15 +150,18 @@ document.getElementById('orderForm').addEventListener('submit', function(e) {
     btn.disabled = true;
     btn.innerText = '提交中...';
     
-    fetch(gasUrl + "?" + new URLSearchParams(new FormData(this)).toString(), { method: 'GET', mode: 'no-cors' })
+    // 將表單數據轉為 URL 參數送出
+    const params = new URLSearchParams(new FormData(this));
+    
+    fetch(gasUrl + "?" + params.toString(), { method: 'GET', mode: 'no-cors' })
     .then(() => {
-        alert("🎉 提交成功！");
+        alert("🎉 申請已送出！請至查詢頁籤確認進度。");
         this.reset();
         btn.disabled = false;
         btn.innerText = '提交申請';
     })
     .catch(() => {
-        alert("⚠️ 提交失敗");
+        alert("提交異常");
         btn.disabled = false;
     });
 });
