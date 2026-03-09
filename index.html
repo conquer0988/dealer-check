@@ -23,12 +23,9 @@
         table { border-collapse: collapse; margin-top: 20px; width: 100%; font-size: 14px; }
         th, td { border: 1px solid #ccc; padding: 12px 8px; text-align: left; }
         th { background-color: #2D5D46; color: white; } 
-        /* 狀態顏色加強 */
-        .status-等待派工 { color: green; font-weight: bold; }
-        .status-排程中 { color: orange; font-weight: bold; }
-        .status-施工中 { color: blue; font-weight: bold; }
-        .status-完工 { color: gray; font-weight: bold; }
-        .status-不會派工 { color: red; font-weight: bold; }
+        .status-tag { padding: 4px 8px; border-radius: 4px; font-weight: bold; }
+        .status-received { background-color: #e6fcf5; color: #099268; } /* 已收單-綠色 */
+        .status-scheduled { background-color: #e7f5ff; color: #1971c2; } /* 已排程-藍色 */
         .required-mark { color: red; }
     </style>
 </head>
@@ -116,15 +113,19 @@
 
     <section id="search-section" class="content-section">
         <h2>案件進度查詢</h2>
-        <label>請輸入經銷商名稱：</label><br>
-        <input type="text" id="queryInput" placeholder="請輸入填單時的名稱">
-        <button onclick="queryData()" style="width: auto; margin-top: 10px;">查詢</button>
+        <p style="color: #666; font-size: 14px;">※ 輸入填單時的經銷商名稱即可查詢所有相關案件。</p>
+        <div style="display: flex; gap: 10px;">
+            <input type="text" id="queryInput" placeholder="輸入經銷商名稱">
+            <button onclick="queryData()" style="width: 120px;">查詢</button>
+        </div>
         <div id="results"></div>
     </section>
 </div>
 
 <script>
-const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSjbJC6VSPPicOPdwTHbcF3ETS5BSJnC_-HIvBNounFVLXik9NxzChJGqackA8HEWcfnkBMjUhWIUmQ/pub?output=csv";
+// 請確保此處 CSV 網址已正確發佈
+const sheetUrl = "https://docs.google.com/spreadsheets/d/e/ PACX-1vSjbJC6VSPPicOPdwTHbcF3ETS5BSJnC_-HIvBNounFVLXik9NxzChJGqackA8HEWcfnkBMjUhWIUmQ/pub?output=csv";
+// 請確保此處 GAS 網址為最新部署版本
 const gasUrl = "https://script.google.com/macros/s/AKfycbydkRtSF_FeidEHkgUCStISZv-u07k0SmsaMq6-7twmP714lglPTh7AqUWKdwKvb5czNg/exec";
 
 function switchTab(tab) {
@@ -139,61 +140,73 @@ function switchTab(tab) {
     }
 }
 
-// 修正後的查詢邏輯 (針對橫式試算表)
+// 案件名稱去識別化：例如「大金空調」變「大**調」
+function maskName(name) {
+    if (!name) return "";
+    if (name.length <= 2) return name[0] + "*";
+    return name[0] + "***" + name[name.length - 1];
+}
+
 async function queryData() {
     const query = document.getElementById('queryInput').value.trim();
     const resultsDiv = document.getElementById('results');
-    if(!query) { alert("請輸入名稱"); return; }
-    resultsDiv.innerHTML = "查詢中...";
+    if(!query) { alert("請輸入經銷商名稱"); return; }
+    resultsDiv.innerHTML = "<p>正在調閱資料庫，請稍候...</p>";
     
     try {
-        // 加入時間戳避免瀏覽器抓到舊的 CSV 快取
         const response = await fetch(sheetUrl + "&t=" + new Date().getTime());
         const csvData = await response.text();
-        
-        // 解析 CSV 為二維陣列
         const rows = csvData.split("\n").map(row => row.split(","));
         
         let found = false;
         let html = `<table><tr>
-            <th>經銷商名稱</th>
             <th>案件名稱</th>
             <th>狀態</th>
-            <th>收單日期</th>
-            <th>排程日期</th>
+            <th>排定日期</th>
             <th>負責工程師</th>
             <th>工程師電話</th>
         </tr>`;
 
-        // 從第 2 列開始遍歷 (i=0 是標題列)
-        for (let i = 1; i < rows.length; i++) {
-            const record = rows[i];
+        // 試算表採直式發展，每一欄是一筆資料 (B欄開始)
+        // 標題行對應關係：
+        // Index 1 (第2列): 經銷商名稱
+        // Index 2 (第3列): 案件名稱
+        // Index 16 (第17列): 排定日期
+        // Index 17 (第18列): 負責工程師
+        // Index 18 (第19列): 工程師電話
+
+        const colCount = rows[0].length;
+        for (let col = 1; col < colCount; col++) {
+            const dealerInSheet = rows[1][col] ? rows[1][col].trim() : "";
             
-            // record[1] 是 B 欄 (經銷商名稱)
-            // 使用 includes 進行模糊搜尋，或用 === 進行精準搜尋
-            if (record[1] && record[1].trim().includes(query)) { 
+            if (dealerInSheet.includes(query)) {
                 found = true;
-                const status = record[3] ? record[3].trim() : "處理中"; 
+                const rawCaseName = rows[2][col] ? rows[2][col].trim() : "";
+                const scheduleDate = rows[16][col] ? rows[16][col].trim() : "";
+                const engineer = rows[17][col] ? rows[17][col].trim() : "";
+                const engPhone = rows[18][col] ? rows[18][col].trim() : "";
+
+                const statusText = scheduleDate ? "已排程" : "已收單";
+                const statusClass = scheduleDate ? "status-scheduled" : "status-received";
+
                 html += `<tr>
-                    <td>${record[1]}</td> 
-                    <td>${record[2]}</td> 
-                    <td class="status-${status}">${status}</td> 
-                    <td>${record[4] || ""}</td> 
-                    <td>${record[5] || ""}</td> 
-                    <td>${record[6] || ""}</td> 
-                    <td>${record[7] || ""}</td> 
+                    <td>${maskName(rawCaseName)}</td>
+                    <td><span class="status-tag ${statusClass}">${statusText}</span></td>
+                    <td>${scheduleDate || "--"}</td>
+                    <td>${engineer || "指派中"}</td>
+                    <td>${engPhone || "--"}</td>
                 </tr>`;
             }
         }
         
-        resultsDiv.innerHTML = found ? html + "</table>" : "查無相關資料";
+        resultsDiv.innerHTML = found ? html + "</table>" : "<p style='color:red;'>查無此經銷商的相關資料。</p>";
     } catch (e) {
         console.error(e);
-        resultsDiv.innerHTML = "讀取資料失敗，請確認試算表已發佈為 CSV 格式。";
+        resultsDiv.innerHTML = "<p>資料讀取異常，請檢查試算表發佈設定。</p>";
     }
 }
 
-// 提交表單邏輯 (維持原樣)
+// 提交表單邏輯
 const form = document.getElementById('orderForm');
 form.addEventListener('submit', e => {
     e.preventDefault();
@@ -207,14 +220,13 @@ form.addEventListener('submit', e => {
 
     fetch(finalUrl, { method: 'GET', mode: 'no-cors' })
     .then(() => {
-        alert("資料已成功送出！專人將於五天內與您聯繫。");
+        alert("申請已成功送出！");
         form.reset();
         btn.disabled = false;
         btn.innerText = '提交申請';
     })
     .catch(err => {
-        alert("提交失敗，請檢查網路或 GAS 部署權限。");
-        console.error(err);
+        alert("提交失敗，請檢查連線。");
         btn.disabled = false;
         btn.innerText = '提交申請';
     });
