@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>經銷商服務系統-精確對位版</title>
+    <title>經銷商服務系統-精確對位終止版</title>
     <style>
         body { font-family: "Microsoft JhengHei", Arial, sans-serif; padding: 20px; background-color: #f4f7f6; color: #333; }
         .container { max-width: 950px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
@@ -61,14 +61,15 @@
     </section>
 
     <section id="search-section" class="content-section">
-        <div class="form-group"><label>請輸入經銷商名稱</label><input type="text" id="qD" placeholder="範例：和泰大金"></div>
-        <div class="form-group"><label>請輸入案件名稱</label><input type="text" id="qC" placeholder="範例：大金空調A"></div>
+        <div class="form-group"><label>請輸入經銷商名稱</label><input type="text" id="qD" placeholder="例如：和泰大金"></div>
+        <div class="form-group"><label>請輸入案件名稱</label><input type="text" id="qC" placeholder="例如：大金空調A"></div>
         <button onclick="queryData()">確認進度查詢</button>
-        <div id="results"></div>
+        <div id="results" style="margin-top: 20px;"></div>
     </section>
 </div>
 
 <script>
+// URL 設定
 const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSjbJC6VSPPicOPdwTHbcF3ETS5BSJnC_-HIvBNounFVLXik9NxzChJGqackA8HEWcfnkBMjUhWIUmQ/pub?gid=656272806&single=true&output=csv";
 const gasUrl = "https://script.google.com/macros/s/AKfycbydkRtSF_FeidEHkgUCStISZv-u07k0SmsaMq6-7twmP714lglPTh7AqUWKdwKvb5czNg/exec";
 
@@ -89,53 +90,61 @@ async function queryData() {
     const res = document.getElementById('results');
     if(!dName || !cName) return alert("請輸入完整名稱");
     
-    res.innerHTML = "🔍 資料檢索中...";
+    res.innerHTML = "🔍 資料查詢中...";
     try {
         const response = await fetch(sheetUrl + "&t=" + Date.now());
         const raw = await response.text();
-        // 增加解析嚴謹度，過濾掉空的 Row
-        const rows = raw.split(/\r?\n/).filter(line => line.length > 0).map(r => r.split(",").map(cell => cell.trim().replace(/^"|"$/g, '')));
+        
+        // 解析 CSV 並過濾空行
+        const rows = raw.split(/\r?\n/).filter(r => r.trim() !== "").map(r => r.split(",").map(cell => cell.trim().replace(/^"|"$/g, '')));
         
         let found = false;
-        let html = `<table><tr><th>案件名稱</th><th>狀態</th><th>排定日期</th><th>負責工程師</th><th>工程師電話</th></tr>`;
+        let html = `<table><tr><th>案件名稱</th><th>狀態</th><th>排定日期</th><th>負責工程師</th><th>聯絡電話</th></tr>`;
 
-        // 搜尋每一欄資料 (橫向從 B 欄 j=1 開始)
+        // 橫向搜索 (從 B 欄 j=1 開始)
         for (let j = 1; j < rows[0].length; j++) {
-            // 比對第 2 列經銷商與第 3 列案件 (對應您的截圖 2228db.png)
+            // 比對第 2 列 (Index 1) 經銷商 & 第 3 列 (Index 2) 案件
             if (rows[1][j] === dName && rows[2][j] === cName) {
                 found = true;
                 
-                // --- 直接根據您的指示與截圖進行「絕對位移量」抓取 ---
-                // Row 17 (Index 16): 排定日期
-                // Row 18 (Index 17): 負責工程師
-                // Row 19 (Index 18): 工程師電話
-                
+                // --- 絕對位移鎖定 ---
+                // Google Sheets Row 17 = Array Index 16
+                // Google Sheets Row 18 = Array Index 17
+                // Google Sheets Row 19 = Array Index 18
                 const pDate = rows[16] ? rows[16][j] : ""; 
                 const pEng  = rows[17] ? rows[17][j] : ""; 
                 const pTel  = rows[18] ? rows[18][j] : ""; 
-                
-                const isScheduled = pDate && pDate !== "" && pDate !== "undefined";
-                const statusStr = isScheduled ? "已排程" : "分派中";
-                const sClass = isScheduled ? "status-ok" : "status-wait";
+
+                // 偵錯用：如果還是抓錯，請按 F12 看控制台輸出
+                console.log(`找到案件於第 ${j+1} 欄`);
+                console.log("日期列內容:", rows[16][j]); 
+
+                const isDateSet = (pDate && pDate !== "" && pDate !== "undefined");
+                const statusStr = isDateSet ? "已排程" : "收件分派中";
+                const sClass = isDateSet ? "status-ok" : "status-wait";
 
                 html += `<tr>
                     <td>${rows[2][j]}</td>
                     <td><span class="status-tag ${sClass}">${statusStr}</span></td>
-                    <td>${(isScheduled) ? pDate : "待排程"}</td>
+                    <td>${isDateSet ? pDate : "待排程"}</td>
                     <td>${(pEng && pEng !== "undefined") ? pEng : "指派中"}</td>
                     <td>${(pTel && pTel !== "undefined") ? pTel : "--"}</td>
                 </tr>`;
             }
         }
-        res.innerHTML = found ? html + "</table>" : "<p style='color:red;'>查無此案件。</p>";
-    } catch (e) { res.innerHTML = "連線失敗。"; }
+        res.innerHTML = found ? html + "</table>" : "<p style='color:red;'>查無資料，請確認輸入名稱是否正確。</p>";
+    } catch (e) { 
+        console.error(e);
+        res.innerHTML = "❌ 連線失敗，請檢查網路。"; 
+    }
 }
 
+// 提交功能：完全保持現狀，不改動
 document.getElementById('orderForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const btn = document.getElementById('submitBtn');
     btn.disabled = true;
-    btn.innerText = '資料提交中...';
+    btn.innerText = '提交中...';
     
     const params = new URLSearchParams(new FormData(this)).toString();
     fetch(gasUrl + "?" + params, { method: 'GET', mode: 'no-cors' })
@@ -146,7 +155,7 @@ document.getElementById('orderForm').addEventListener('submit', function(e) {
         btn.innerText = '提交申請';
     })
     .catch(() => {
-        alert("傳輸發生錯誤");
+        alert("提交異常");
         btn.disabled = false;
         btn.innerText = '提交申請';
     });
