@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>經銷商服務系統-全功能修正版</title>
+    <title>經銷商服務系統-最終對齊版</title>
     <style>
         body { font-family: "Microsoft JhengHei", sans-serif; padding: 15px; background-color: #f4f7f6; }
         .container { max-width: 900px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
@@ -21,8 +21,8 @@
         th, td { border: 1px solid #eee; padding: 12px 8px; text-align: left; }
         th { background-color: #2D5D46; color: white; }
         .status-tag { padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 12px; }
-        .status-wait { background-color: #fff9db; color: #f08c00; } /* 待安排 */
-        .status-ok { background-color: #e7f5ff; color: #1971c2; }   /* 已排程 */
+        .status-wait { background-color: #fff9db; color: #f08c00; }
+        .status-ok { background-color: #e7f5ff; color: #1971c2; }
     </style>
 </head>
 <body>
@@ -36,34 +36,34 @@
     <section id="submit-section" class="content-section active">
         <form id="orderForm">
             <div class="grid-row">
-                <div class="form-group"><label>經銷商名稱 *</label><input type="text" name="dealerName" required></div>
-                <div class="form-group"><label>案件名稱 *</label><input type="text" name="caseName" required></div>
+                <div class="form-group"><label>經銷商名稱 *</label><input type="text" name="經銷商名稱" required></div>
+                <div class="form-group"><label>案件名稱 *</label><input type="text" name="案件名稱" required></div>
             </div>
-            <div class="form-group"><label>案件地址 *</label><input type="text" name="caseAddress" required></div>
+            <div class="form-group"><label>案件地址 *</label><input type="text" name="案件地址" required></div>
             
             <h4 style="margin: 10px 0; color: #2196F3; border-left: 4px solid #2196F3; padding-left: 8px;">經銷商聯絡資訊</h4>
             <div class="grid-row">
-                <div class="form-group"><label>姓名 *</label><input type="text" name="dContactName" required></div>
-                <div class="form-group"><label>電話 *</label><input type="tel" name="dPhone" required></div>
+                <div class="form-group"><label>聯絡人姓名 *</label><input type="text" name="經銷商聯絡人姓名" required></div>
+                <div class="form-group"><label>聯絡人電話 *</label><input type="tel" name="經銷商聯絡人電話" required></div>
             </div>
             <div class="grid-row">
-                <div class="form-group"><label>電子信箱</label><input type="email" name="dEmail"></div>
-                <div class="form-group"><label>LINE</label><input type="text" name="dLine"></div>
+                <div class="form-group"><label>電子信箱</label><input type="email" name="經銷商聯絡人電子信箱"></div>
+                <div class="form-group"><label>LINE</label><input type="text" name="經銷商聯絡人LINE"></div>
             </div>
 
-            <h4 style="margin: 10px 0; color: #E91E63; border-left: 4px solid #E91E63; padding-left: 8px;">現場負責聯絡人 (非業主)</h4>
+            <h4 style="margin: 10px 0; color: #E91E63; border-left: 4px solid #E91E63; padding-left: 8px;">現場負責聯絡人</h4>
             <div class="grid-row">
-                <div class="form-group"><label>姓名 *</label><input type="text" name="sContactName" required></div>
-                <div class="form-group"><label>電話 *</label><input type="tel" name="sPhone" required></div>
+                <div class="form-group"><label>負責人姓名 *</label><input type="text" name="現場負責聯絡人姓名" required></div>
+                <div class="form-group"><label>負責人電話 *</label><input type="tel" name="現場負責人電話" required></div>
             </div>
             <div class="grid-row">
-                <div class="form-group"><label>電子信箱</label><input type="email" name="sEmail"></div>
-                <div class="form-group"><label>LINE</label><input type="text" name="sLine"></div>
+                <div class="form-group"><label>電子信箱</label><input type="email" name="現場負責人電子信箱"></div>
+                <div class="form-group"><label>LINE</label><input type="text" name="現場負責人LINE"></div>
             </div>
 
             <div class="form-group">
                 <label>支援工作內容 *</label>
-                <select name="workType" required>
+                <select name="支援工作內容" required>
                     <option value="">-- 請選擇 --</option>
                     <option value="VRV 試車">VRV 試車</option>
                     <option value="VRVQ汰換後檢查">VRVQ汰換後檢查</option>
@@ -72,14 +72,14 @@
                     <option value="其他">其他</option>
                 </select>
             </div>
-            <div class="form-group"><label>內容詳述 *</label><textarea name="description" rows="3" required></textarea></div>
+            <div class="form-group"><label>內容詳述 *</label><textarea name="內容詳述" rows="3" required></textarea></div>
             <button type="submit" id="submitBtn">提交申請</button>
         </form>
     </section>
 
     <section id="search-section" class="content-section">
-        <div class="form-group"><label>請輸入經銷商名稱</label><input type="text" id="qD" placeholder="範例：和泰大金"></div>
-        <div class="form-group"><label>請輸入案件名稱</label><input type="text" id="qC" placeholder="範例：大金空調"></div>
+        <div class="form-group"><label>經銷商名稱</label><input type="text" id="qD" placeholder="如：和泰大金"></div>
+        <div class="form-group"><label>案件名稱</label><input type="text" id="qC" placeholder="如：大金空調A"></div>
         <button onclick="queryData()">開始查詢</button>
         <div id="results"></div>
     </section>
@@ -99,61 +99,57 @@ async function queryData() {
     const d = document.getElementById('qD').value.trim();
     const c = document.getElementById('qC').value.trim();
     const res = document.getElementById('results');
-    if(!d || !c) return alert("請輸入完整名稱以利比對");
+    if(!d || !c) return alert("請輸入完整資料");
     
-    res.innerHTML = "<p style='text-align:center;'>🔍 查詢中...</p>";
+    res.innerHTML = "🔍 查詢中...";
     try {
         const response = await fetch(sheetUrl + "&t=" + Date.now());
         const rows = (await response.text()).split("\n").map(r => r.split(","));
-        let html = `<table><tr><th>案件名稱</th><th>狀態</th><th>排定日期</th><th>負責工程師</th></tr>`;
+        let html = `<table><tr><th>案件名稱</th><th>狀態</th><th>排定日期</th><th>負責工程師</th><th>工程師電話</th></tr>`;
         let found = false;
 
-        // 從試算表第 2 欄 (index 1) 開始搜尋
         for (let j = 1; j < rows[0].length; j++) {
-            const sDealer = rows[1][j] ? rows[1][j].trim() : "";
-            const sCase = rows[2][j] ? rows[2][j].trim() : "";
-            
-            if (sDealer.includes(d) && sCase.includes(c)) {
+            if (rows[1][j].trim().includes(d) && rows[2][j].trim().includes(c)) {
                 found = true;
-                const pDate = rows[16][j] ? rows[16][j].trim() : ""; // 第 17 列：排定日期
-                const pEng = rows[17][j] ? rows[17][j].trim() : "";  // 第 18 列：工程師
+                const pDate = rows[16] ? rows[16][j].trim() : ""; // 第 17 列：日期
+                const pEng = rows[17] ? rows[17][j].trim() : "";  // 第 18 列：工程師
+                const pTel = rows[18] ? rows[18][j].trim() : "";  // 第 19 列：電話
                 
-                // 邏輯 2：判斷是否已人工填寫日期
                 const statusStr = pDate ? "已排程" : "已收到申請待安排";
                 const dateStr = pDate || "待工程師聯絡";
                 const engStr = pEng || "指派中";
-                const statusClass = pDate ? "status-ok" : "status-wait";
+                const telStr = pTel || "--";
+                const sClass = pDate ? "status-ok" : "status-wait";
 
                 html += `<tr>
-                    <td>${sCase}</td>
-                    <td><span class="status-tag ${statusClass}">${statusStr}</span></td>
+                    <td>${rows[2][j]}</td>
+                    <td><span class="status-tag ${sClass}">${statusStr}</span></td>
                     <td>${dateStr}</td>
                     <td>${engStr}</td>
+                    <td>${telStr}</td>
                 </tr>`;
             }
         }
-        res.innerHTML = found ? html + "</table>" : "<p style='color:red; text-align:center;'>❌ 查無資料，請確認輸入名稱是否正確。</p>";
-    } catch (e) { res.innerHTML = "❌ 無法讀取資料，請稍後再試。"; }
+        res.innerHTML = found ? html + "</table>" : "查無相關資料。";
+    } catch (e) { res.innerHTML = "資料讀取異常，請檢查發佈設定。"; }
 }
 
 document.getElementById('orderForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const btn = document.getElementById('submitBtn');
     btn.disabled = true;
-    btn.innerText = '提交中，請稍候...';
+    btn.innerText = '提交中...';
     
-    // 將所有欄位名稱正確封裝送往 GAS
     fetch(gasUrl + "?" + new URLSearchParams(new FormData(this)).toString(), { method: 'GET', mode: 'no-cors' })
     .then(() => {
-        alert("🎉 申請成功！資料已同步至雲端試算表。");
+        alert("🎉 申請成功！");
         this.reset();
         btn.disabled = false;
         btn.innerText = '提交申請';
     })
     .catch(() => {
-        alert("⚠️ 提交異常，請確認網路連線。");
+        alert("⚠️ 提交失敗");
         btn.disabled = false;
-        btn.innerText = '提交申請';
     });
 });
 </script>
