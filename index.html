@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>經銷商服務系統-最終對齊版</title>
+    <title>經銷商服務系統-對齊修復版</title>
     <style>
         body { font-family: "Microsoft JhengHei", sans-serif; padding: 15px; background-color: #f4f7f6; }
         .container { max-width: 900px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
@@ -15,7 +15,6 @@
         .form-group { margin-bottom: 12px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; color: #555; }
         input, select, textarea { width: 100%; font-size: 15px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        .grid-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         button { font-size: 18px; padding: 15px; background-color: #2196F3; color: white; border: none; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 15px; }
         table { border-collapse: collapse; margin-top: 20px; width: 100%; font-size: 14px; }
         th, td { border: 1px solid #eee; padding: 12px 8px; text-align: left; }
@@ -35,32 +34,11 @@
 
     <section id="submit-section" class="content-section active">
         <form id="orderForm">
-            <div class="grid-row">
-                <div class="form-group"><label>經銷商名稱 *</label><input type="text" name="經銷商名稱" required></div>
-                <div class="form-group"><label>案件名稱 *</label><input type="text" name="案件名稱" required></div>
-            </div>
+            <div class="form-group"><label>經銷商名稱 *</label><input type="text" name="經銷商名稱" required></div>
+            <div class="form-group"><label>案件名稱 *</label><input type="text" name="案件名稱" required></div>
             <div class="form-group"><label>案件地址 *</label><input type="text" name="案件地址" required></div>
-            
-            <h4 style="margin: 10px 0; color: #2196F3; border-left: 4px solid #2196F3; padding-left: 8px;">經銷商聯絡資訊</h4>
-            <div class="grid-row">
-                <div class="form-group"><label>聯絡人姓名 *</label><input type="text" name="經銷商聯絡人姓名" required></div>
-                <div class="form-group"><label>聯絡人電話 *</label><input type="tel" name="經銷商聯絡人電話" required></div>
-            </div>
-            <div class="grid-row">
-                <div class="form-group"><label>電子信箱</label><input type="email" name="經銷商聯絡人電子信箱"></div>
-                <div class="form-group"><label>LINE</label><input type="text" name="經銷商聯絡人LINE"></div>
-            </div>
-
-            <h4 style="margin: 10px 0; color: #E91E63; border-left: 4px solid #E91E63; padding-left: 8px;">現場負責聯絡人</h4>
-            <div class="grid-row">
-                <div class="form-group"><label>負責人姓名 *</label><input type="text" name="現場負責聯絡人姓名" required></div>
-                <div class="form-group"><label>負責人電話 *</label><input type="tel" name="現場負責人電話" required></div>
-            </div>
-            <div class="grid-row">
-                <div class="form-group"><label>電子信箱</label><input type="email" name="現場負責人電子信箱"></div>
-                <div class="form-group"><label>LINE</label><input type="text" name="現場負責人LINE"></div>
-            </div>
-
+            <div class="form-group"><label>聯絡人姓名 *</label><input type="text" name="經銷商聯絡人姓名" required></div>
+            <div class="form-group"><label>聯絡人電話 *</label><input type="tel" name="經銷商聯絡人電話" required></div>
             <div class="form-group">
                 <label>支援工作內容 *</label>
                 <select name="支援工作內容" required>
@@ -69,7 +47,6 @@
                     <option value="VRVQ汰換後檢查">VRVQ汰換後檢查</option>
                     <option value="工事巡查">工事巡查</option>
                     <option value="教育訓練">教育訓練</option>
-                    <option value="其他">其他</option>
                 </select>
             </div>
             <div class="form-group"><label>內容詳述 *</label><textarea name="內容詳述" rows="3" required></textarea></div>
@@ -78,8 +55,8 @@
     </section>
 
     <section id="search-section" class="content-section">
-        <div class="form-group"><label>經銷商名稱</label><input type="text" id="qD" placeholder="如：和泰大金"></div>
-        <div class="form-group"><label>案件名稱</label><input type="text" id="qC" placeholder="如：大金空調A"></div>
+        <div class="form-group"><label>請輸入經銷商名稱</label><input type="text" id="qD" placeholder="如：和泰大金"></div>
+        <div class="form-group"><label>請輸入案件名稱</label><input type="text" id="qC" placeholder="如：大金空調A"></div>
         <button onclick="queryData()">開始查詢</button>
         <div id="results"></div>
     </section>
@@ -99,25 +76,34 @@ async function queryData() {
     const d = document.getElementById('qD').value.trim();
     const c = document.getElementById('qC').value.trim();
     const res = document.getElementById('results');
-    if(!d || !c) return alert("請輸入完整資料");
+    if(!d || !c) return alert("請輸入完整名稱");
     
-    res.innerHTML = "🔍 查詢中...";
+    res.innerHTML = "🔍 正在從雲端抓取最新資料...";
     try {
         const response = await fetch(sheetUrl + "&t=" + Date.now());
-        const rows = (await response.text()).split("\n").map(r => r.split(","));
+        const data = await response.text();
+        // 解決 CSV 換行與逗號分割問題
+        const rows = data.split("\n").map(r => r.split(",").map(cell => cell.replace(/\r/g, "").trim()));
+        
         let html = `<table><tr><th>案件名稱</th><th>狀態</th><th>排定日期</th><th>負責工程師</th><th>工程師電話</th></tr>`;
         let found = false;
 
+        // 遍歷所有欄位 (j=1 是 B 欄)
         for (let j = 1; j < rows[0].length; j++) {
-            if (rows[1][j].trim().includes(d) && rows[2][j].trim().includes(c)) {
+            // 判斷條件：第 2 列(經銷商) 與 第 3 列(案件名)
+            if (rows[1][j] === d && rows[2][j] === c) {
                 found = true;
-                const pDate = rows[16] ? rows[16][j].trim() : ""; // 第 17 列：日期
-                const pEng = rows[17] ? rows[17][j].trim() : "";  // 第 18 列：工程師
-                const pTel = rows[18] ? rows[18][j].trim() : "";  // 第 19 列：電話
+                // ！！！精確索引修正 ！！！
+                // rows[16] = 第 17 列 (排定日期)
+                // rows[17] = 第 18 列 (負責工程師)
+                // rows[18] = 第 19 列 (工程師電話)
+                const pDate = rows[16] ? rows[16][j] : ""; 
+                const pEng  = rows[17] ? rows[17][j] : "";  
+                const pTel  = rows[18] ? rows[18][j] : "";  
                 
-                const statusStr = pDate ? "已排程" : "已收到申請待安排";
-                const dateStr = pDate || "待工程師聯絡";
-                const engStr = pEng || "指派中";
+                const statusStr = pDate ? "已排程" : "已收件待安排";
+                const dateStr = pDate || "待確認";
+                const engStr = pEng || "分派中";
                 const telStr = pTel || "--";
                 const sClass = pDate ? "status-ok" : "status-wait";
 
@@ -130,25 +116,25 @@ async function queryData() {
                 </tr>`;
             }
         }
-        res.innerHTML = found ? html + "</table>" : "查無相關資料。";
-    } catch (e) { res.innerHTML = "資料讀取異常，請檢查發佈設定。"; }
+        res.innerHTML = found ? html + "</table>" : "<p style='color:red;'>❌ 查無相符案件，請確認名稱是否與填單時一致。</p>";
+    } catch (e) { res.innerHTML = "❌ 系統連線異常，請確認試算表『發佈到網路』設定。"; }
 }
 
 document.getElementById('orderForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const btn = document.getElementById('submitBtn');
     btn.disabled = true;
-    btn.innerText = '提交中...';
+    btn.innerText = '正在上傳申請...';
     
     fetch(gasUrl + "?" + new URLSearchParams(new FormData(this)).toString(), { method: 'GET', mode: 'no-cors' })
     .then(() => {
-        alert("🎉 申請成功！");
+        alert("🎉 支援申請已送出！工程師將盡快與您聯繫。");
         this.reset();
         btn.disabled = false;
         btn.innerText = '提交申請';
     })
     .catch(() => {
-        alert("⚠️ 提交失敗");
+        alert("⚠️ 提交失敗，請檢查網路連線");
         btn.disabled = false;
     });
 });
