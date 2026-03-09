@@ -2,10 +2,9 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>經銷商服務系統-連動校正</title>
     <style>
-        body { font-family: "Microsoft JhengHei", sans-serif; padding: 15px; background-color: #f4f7f6; }
+        body { font-family: "Microsoft JhengHei", sans-serif; padding: 15px; background: #f4f7f6; }
         .container { max-width: 900px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         .tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid #eee; }
         .tab-btn { padding: 12px 20px; cursor: pointer; border: none; background: none; font-size: 16px; font-weight: bold; color: #888; }
@@ -13,16 +12,13 @@
         .content-section { display: none; }
         .content-section.active { display: block; }
         .form-group { margin-bottom: 12px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; color: #555; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
         input, select, textarea { width: 100%; font-size: 15px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
         .grid-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        button { font-size: 18px; padding: 15px; background-color: #2196F3; color: white; border: none; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 15px; }
+        button { font-size: 18px; padding: 15px; background-color: #2196F3; color: white; border: none; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; }
         table { border-collapse: collapse; margin-top: 20px; width: 100%; font-size: 14px; }
         th, td { border: 1px solid #eee; padding: 12px 8px; text-align: left; }
         th { background-color: #2D5D46; color: white; }
-        .status-tag { padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 12px; }
-        .status-ok { background-color: #e7f5ff; color: #1971c2; }
-        .status-wait { background-color: #fff9db; color: #f08c00; }
     </style>
 </head>
 <body>
@@ -42,25 +38,25 @@
             <div class="form-group"><label>案件地址 *</label><input type="text" name="案件地址" required></div>
             
             <div style="background:#f0f7ff; padding:15px; border-radius:8px; margin-bottom:15px;">
-                <p style="margin-top:0; font-weight:bold; color:#2196F3;">經銷商聯絡人資訊</p>
+                <p style="margin:0 0 10px 0; font-weight:bold; color:#2196F3;">經銷商聯絡人</p>
                 <div class="grid-row">
                     <div class="form-group"><label>姓名 *</label><input type="text" name="經銷商聯絡人姓名" required></div>
-                    <div class="form-group"><label>電話 *</label><input type="tel" name="經銷商聯絡人電話" required></div>
+                    <div class="form-group"><label>電話 *</label><input type="text" name="經銷商聯絡人電話" required></div>
                 </div>
                 <div class="grid-row">
-                    <div class="form-group"><label>電子信箱</label><input type="email" name="經銷商聯絡人電子信箱"></div>
+                    <div class="form-group"><label>電子信箱</label><input type="text" name="經銷商聯絡人電子信箱"></div>
                     <div class="form-group"><label>LINE ID</label><input type="text" name="經銷商聯絡人 LINE"></div>
                 </div>
             </div>
 
             <div style="background:#fff5f5; padding:15px; border-radius:8px; margin-bottom:15px;">
-                <p style="margin-top:0; font-weight:bold; color:#e91e63;">現場負責聯絡人</p>
+                <p style="margin:0 0 10px 0; font-weight:bold; color:#e91e63;">現場負責聯絡人</p>
                 <div class="grid-row">
                     <div class="form-group"><label>姓名 *</label><input type="text" name="現場負責聯絡人姓名" required></div>
-                    <div class="form-group"><label>電話 *</label><input type="tel" name="現場負責人電話" required></div>
+                    <div class="form-group"><label>電話 *</label><input type="text" name="現場負責人電話" required></div>
                 </div>
                 <div class="grid-row">
-                    <div class="form-group"><label>電子信箱</label><input type="email" name="現場負責人電子信箱"></div>
+                    <div class="form-group"><label>電子信箱</label><input type="text" name="現場負責人電子信箱"></div>
                     <div class="form-group"><label>LINE ID</label><input type="text" name="現場負責人 LINE"></div>
                 </div>
             </div>
@@ -68,7 +64,6 @@
             <div class="form-group">
                 <label>支援工作內容 *</label>
                 <select name="支援工作內容" required>
-                    <option value="">-- 請選擇 --</option>
                     <option value="VRV 試車">VRV 試車</option>
                     <option value="VRVQ汰換後檢查">VRVQ汰換後檢查</option>
                     <option value="工事巡查">工事巡查</option>
@@ -89,8 +84,9 @@
 </div>
 
 <script>
+// 請更換回您的 GAS 與 CSV URL
 const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSjbJC6VSPPicOPdwTHbcF3ETS5BSJnC_-HIvBNounFVLXik9NxzChJGqackA8HEWcfnkBMjUhWIUmQ/pub?gid=656272806&single=true&output=csv";
-const gasUrl = "https://script.google.com/macros/s/AKfycbydkRtSF_FeidEHkgUCStISZv-u07k0SmsaMq6-7twmP714lglPTh7AqUWKdwKvb5czNg/exec";
+const gasUrl = "您的GAS網址"; 
 
 function switchTab(t) {
     document.querySelectorAll('.tab-btn, .content-section').forEach(el => el.classList.remove('active'));
@@ -102,64 +98,50 @@ async function queryData() {
     const d = document.getElementById('qD').value.trim();
     const c = document.getElementById('qC').value.trim();
     const res = document.getElementById('results');
-    if(!d || !c) return alert("請輸入完整名稱");
+    if(!d || !c) return alert("請輸入名稱");
     
-    res.innerHTML = "🔍 資料搜尋中...";
+    res.innerHTML = "🔍 搜尋中...";
     try {
         const response = await fetch(sheetUrl + "&t=" + Date.now());
         const data = await response.text();
         const rows = data.split("\n").map(r => r.split(",").map(cell => cell.trim()));
         
-        let html = `<table><tr><th>案件名稱</th><th>狀態</th><th>排定日期</th><th>負責工程師</th><th>聯絡電話</th></tr>`;
         let found = false;
+        let html = `<table><tr><th>案件名稱</th><th>狀態</th><th>排定日期</th><th>負責工程師</th><th>聯絡電話</th></tr>`;
 
-        // B 欄開始遍歷 (j=1)
+        // 從 B 欄開始遍歷 (j=1)
         for (let j = 1; j < rows[0].length; j++) {
-            // 比對 經銷商(Index 1) 與 案件名(Index 2)
             if (rows[1][j] === d && rows[2][j] === c) {
                 found = true;
-                
-                // --- 徹底修復錯位問題 ---
-                // 根據 image_2e6097，人工填入區的資料位於：
-                // 排定日期：第 17 列 (程式 Index 為 16)
-                // 負責工程師：第 18 列 (程式 Index 為 17)
-                // 工程師電話：第 19 列 (程式 Index 為 18)
+                // 鎖定索引：第17列為 Index 16，第18列為 Index 17...
                 const pDate = rows[16] ? rows[16][j] : ""; 
                 const pEng  = rows[17] ? rows[17][j] : "";  
                 const pTel  = rows[18] ? rows[18][j] : "";  
                 
-                const isReady = pDate && pDate !== "";
-                const statusStr = isReady ? "已排程" : "已收件待安排";
-                const sClass = isReady ? "status-ok" : "status-wait";
-
                 html += `<tr>
                     <td>${rows[2][j]}</td>
-                    <td><span class="status-tag ${sClass}">${statusStr}</span></td>
+                    <td>${pDate ? "已排程" : "待處理"}</td>
                     <td>${pDate || "待確認"}</td>
                     <td>${pEng || "指派中"}</td>
                     <td>${pTel || "--"}</td>
                 </tr>`;
             }
         }
-        res.innerHTML = found ? html + "</table>" : "<p style='color:red;'>❌ 查無此案，請確保填單與查詢名稱一致。</p>";
-    } catch (e) { res.innerHTML = "❌ 系統異常"; }
+        res.innerHTML = found ? html + "</table>" : "<p style='color:red;'>查無此案</p>";
+    } catch (e) { res.innerHTML = "讀取失敗"; }
 }
 
 document.getElementById('orderForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const btn = document.getElementById('submitBtn');
+    btn.innerText = '提交中...';
     btn.disabled = true;
-    btn.innerText = '正在提交...';
     
-    fetch(gasUrl + "?" + new URLSearchParams(new FormData(this)).toString(), { method: 'GET', mode: 'no-cors' })
+    fetch(gasUrl + "?" + new URLSearchParams(new FormData(this)).toString(), { mode: 'no-cors' })
     .then(() => {
-        alert("🎉 支援申請已成功送出！");
+        alert("提交成功！");
         this.reset();
-        btn.disabled = false;
         btn.innerText = '提交申請';
-    })
-    .catch(() => {
-        alert("⚠️ 提交失敗");
         btn.disabled = false;
     });
 });
