@@ -2,68 +2,68 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>經銷商服務系統-校正版</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>經銷商服務系統</title>
     <style>
-        body { font-family: "Microsoft JhengHei", sans-serif; padding: 15px; background: #f4f7f6; }
-        .container { max-width: 900px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid #eee; }
-        .tab-btn { padding: 12px 20px; cursor: pointer; border: none; background: none; font-size: 16px; font-weight: bold; color: #888; }
+        body { font-family: "Microsoft JhengHei", Arial, sans-serif; padding: 20px; background-color: #f4f7f6; color: #333; }
+        .container { max-width: 950px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid #ddd; }
+        .tab-btn { padding: 10px 20px; cursor: pointer; border: none; background: none; font-size: 18px; font-weight: bold; color: #666; }
         .tab-btn.active { color: #2196F3; border-bottom: 3px solid #2196F3; }
         .content-section { display: none; }
         .content-section.active { display: block; }
-        .form-group { margin-bottom: 12px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
-        input, select, textarea { width: 100%; font-size: 15px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        .grid-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        button { font-size: 18px; padding: 15px; background-color: #2196F3; color: white; border: none; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { font-weight: bold; display: block; margin-bottom: 5px; }
+        input, select, textarea { width: 100%; font-size: 16px; margin: 5px 0; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        .notice-box { background-color: #fff9db; border-left: 5px solid #fcc419; padding: 15px; margin: 20px 0; font-size: 15px; line-height: 1.8; }
+        .notice-title { font-weight: bold; color: #e67700; display: block; margin-bottom: 8px; font-size: 17px; }
+        button { font-size: 16px; padding: 12px 20px; background-color: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer; width: 100%; font-weight: bold; }
+        button:hover { background-color: #1976D2; }
+        button:disabled { background-color: #ccc; }
         table { border-collapse: collapse; margin-top: 20px; width: 100%; font-size: 14px; }
-        th, td { border: 1px solid #eee; padding: 12px 8px; text-align: left; }
-        th { background-color: #2D5D46; color: white; }
+        th, td { border: 1px solid #ccc; padding: 12px 8px; text-align: left; }
+        th { background-color: #2D5D46; color: white; } 
+        .status-tag { padding: 4px 8px; border-radius: 4px; font-weight: bold; }
+        .status-wait { background-color: #fff9db; color: #f08c00; }
+        .status-ok { background-color: #e7f5ff; color: #1971c2; }
+        .required-mark { color: red; }
     </style>
 </head>
 <body>
-
+ 
 <div class="container">
     <div class="tabs">
         <div class="tab-btn active" onclick="switchTab('submit')">支援申請填單</div>
         <div class="tab-btn" onclick="switchTab('search')">案件進度查詢</div>
     </div>
-
+ 
     <section id="submit-section" class="content-section active">
+        <h2>支援工作申請表</h2>
         <form id="orderForm">
-            <div class="grid-row">
-                <div class="form-group"><label>經銷商名稱 *</label><input type="text" name="經銷商名稱" required></div>
-                <div class="form-group"><label>案件名稱 *</label><input type="text" name="案件名稱" required></div>
-            </div>
-            <div class="form-group"><label>案件地址 *</label><input type="text" name="案件地址" required></div>
+            <div class="form-group"><label>案件名稱 <span class="required-mark">*</span></label><input type="text" name="案件名稱" required></div>
+            <div class="form-group"><label>案件地址 <span class="required-mark">*</span></label><input type="text" name="案件地址" required></div>
+            <div class="form-group"><label>經銷商名稱 <span class="required-mark">*</span></label><input type="text" name="經銷商名稱" required></div>
             
             <div style="background:#f0f7ff; padding:15px; border-radius:8px; margin-bottom:15px;">
-                <p style="margin:0 0 10px 0; font-weight:bold; color:#2196F3;">經銷商聯絡人資訊</p>
-                <div class="grid-row">
-                    <div class="form-group"><label>姓名 *</label><input type="text" name="經銷商聯絡人姓名" required></div>
-                    <div class="form-group"><label>電話 *</label><input type="text" name="經銷商聯絡人電話" required></div>
-                </div>
-                <div class="grid-row">
-                    <div class="form-group"><label>電子信箱</label><input type="text" name="經銷商聯絡人電子信箱"></div>
-                    <div class="form-group"><label>LINE</label><input type="text" name="經銷商聯絡人 LINE"></div>
-                </div>
+                <p style="margin-top:0; font-weight:bold; color:#007bff;">經銷商聯絡人資訊</p>
+                <div class="form-group"><label>姓名 <span class="required-mark">*</span></label><input type="text" name="經銷商聯絡人姓名" required></div>
+                <div class="form-group"><label>電話 <span class="required-mark">*</span></label><input type="tel" name="經銷商聯絡人電話" required></div>
+                <div class="form-group"><label>電子信箱</label><input type="email" name="經銷商聯絡人電子信箱"></div>
+                <div class="form-group"><label>LINE ID</label><input type="text" name="經銷商聯絡人 LINE"></div>
             </div>
 
             <div style="background:#fff5f5; padding:15px; border-radius:8px; margin-bottom:15px;">
-                <p style="margin:0 0 10px 0; font-weight:bold; color:#e91e63;">現場負責聯絡人</p>
-                <div class="grid-row">
-                    <div class="form-group"><label>姓名 *</label><input type="text" name="現場負責聯絡人姓名" required></div>
-                    <div class="form-group"><label>電話 *</label><input type="text" name="現場負責人電話" required></div>
-                </div>
-                <div class="grid-row">
-                    <div class="form-group"><label>電子信箱</label><input type="text" name="現場負責人電子信箱"></div>
-                    <div class="form-group"><label>LINE</label><input type="text" name="現場負責人 LINE"></div>
-                </div>
+                <p style="margin-top:0; font-weight:bold; color:#dc3545;">現場負責聯絡人 (非業主)</p>
+                <div class="form-group"><label>姓名 <span class="required-mark">*</span></label><input type="text" name="現場負責聯絡人姓名" required></div>
+                <div class="form-group"><label>電話 <span class="required-mark">*</span></label><input type="tel" name="現場負責人電話" required></div>
+                <div class="form-group"><label>電子信箱</label><input type="email" name="現場負責人電子信箱"></div>
+                <div class="form-group"><label>LINE ID</label><input type="text" name="現場負責人 LINE"></div>
             </div>
 
             <div class="form-group">
-                <label>支援工作內容 *</label>
+                <label>支援工作內容 <span class="required-mark">*</span></label>
                 <select name="支援工作內容" required>
+                    <option value="">-- 請選擇 --</option>
                     <option value="VRV 試車">VRV 試車</option>
                     <option value="VRVQ汰換後檢查">VRVQ汰換後檢查</option>
                     <option value="工事巡查">工事巡查</option>
@@ -71,81 +71,115 @@
                     <option value="其他">其他</option>
                 </select>
             </div>
-            <div class="form-group"><label>內容詳述 *</label><textarea name="內容詳述" rows="3" required></textarea></div>
+            <div class="form-group"><label>內容詳述 <span class="required-mark">*</span></label><textarea name="內容詳述" required rows="4"></textarea></div>
+            
             <button type="submit" id="submitBtn">提交申請</button>
         </form>
     </section>
-
+ 
     <section id="search-section" class="content-section">
-        <div class="form-group"><label>經銷商名稱</label><input type="text" id="qD" placeholder="和泰大金"></div>
-        <div class="form-group"><label>案件名稱</label><input type="text" id="qC" placeholder="大金空調A"></div>
+        <h2>案件進度查詢</h2>
+        <div class="form-group">
+            <label>請輸入經銷商名稱：</label>
+            <input type="text" id="qD" placeholder="如：和泰大金">
+        </div>
+        <div class="form-group">
+            <label>請輸入案件名稱：</label>
+            <input type="text" id="qC" placeholder="如：大金空調A">
+        </div>
         <button onclick="queryData()">查詢進度</button>
         <div id="results"></div>
     </section>
 </div>
-
+ 
 <script>
-// 使用您的發佈網址
+// 請更換為您的 CSV 與 GAS 連結
 const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSjbJC6VSPPicOPdwTHbcF3ETS5BSJnC_-HIvBNounFVLXik9NxzChJGqackA8HEWcfnkBMjUhWIUmQ/pub?gid=656272806&single=true&output=csv";
-const gasUrl = "您的GAS網址"; 
-
-function switchTab(t) {
-    document.querySelectorAll('.tab-btn, .content-section').forEach(el => el.classList.remove('active'));
-    document.getElementById(t + '-section').classList.add('active');
-    event.currentTarget.classList.add('active');
+const gasUrl = "https://script.google.com/macros/s/AKfycbydkRtSF_FeidEHkgUCStISZv-u07k0SmsaMq6-7twmP714lglPTh7AqUWKdwKvb5czNg/exec";
+ 
+function switchTab(tab) {
+   document.querySelectorAll('.tab-btn, .content-section').forEach(el => el.classList.remove('active'));
+   if(tab === 'search') {
+       document.querySelectorAll('.tab-btn')[1].classList.add('active');
+       document.getElementById('search-section').classList.add('active');
+   } else {
+       document.querySelectorAll('.tab-btn')[0].classList.add('active');
+       document.getElementById('submit-section').classList.add('active');
+   }
 }
-
+ 
+// 校正為「橫向讀取」邏輯
 async function queryData() {
-    const d = document.getElementById('qD').value.trim();
-    const c = document.getElementById('qC').value.trim();
-    const res = document.getElementById('results');
-    if(!d || !c) return alert("請輸入完整名稱");
+   const dName = document.getElementById('qD').value.trim();
+   const cName = document.getElementById('qC').value.trim();
+   const resultsDiv = document.getElementById('results');
+   
+   if(!dName || !cName) { alert("請輸入完整名稱"); return; }
+   resultsDiv.innerHTML = "🔍 資料查詢中...";
     
-    res.innerHTML = "🔍 搜尋中...";
-    try {
-        const response = await fetch(sheetUrl + "&t=" + Date.now());
-        const raw = await response.text();
-        const rows = raw.split(/\r?\n/).map(r => r.split(",").map(cell => cell.trim()));
-        
-        let found = false;
-        let html = `<table><tr><th>案件名稱</th><th>狀態</th><th>排定日期</th><th>工程師</th><th>電話</th></tr>`;
-
-        // 從 B 欄 (j=1) 開始往右找 
-        for (let j = 1; j < rows[0].length; j++) {
-            // 比對第 2 列「經銷商名稱」與第 3 列「案件名稱」 
-            if (rows[1][j] === d && rows[2][j] === c) {
+   try {
+       const response = await fetch(sheetUrl + "&t=" + Date.now());
+       const csvData = await response.text();
+       const rows = csvData.split(/\r?\n/).map(row => row.split(",").map(cell => cell.trim()));
+       
+       let found = false;
+       let html = `<table><tr>
+           <th>案件名稱</th>
+           <th>進度狀態</th>
+           <th>排定日期</th>
+           <th>負責工程師</th>
+           <th>工程師電話</th>
+       </tr>`;
+ 
+       // 從 B 欄 (j=1) 開始橫向掃描
+       for (let j = 1; j < rows[0].length; j++) {
+           // 比對 Row 2 (經銷商) 與 Row 3 (案件名)
+           if (rows[1][j] === dName && rows[2][j] === cName) {
                 found = true;
-                // 強制讀取：17列=Index 16, 18列=Index 17, 19列=Index 18 
+                // 強制抓取第 17, 18, 19 列 (Index 16, 17, 18)
                 const pDate = rows[16] ? rows[16][j] : ""; 
                 const pEng  = rows[17] ? rows[17][j] : "";  
                 const pTel  = rows[18] ? rows[18][j] : "";  
                 
-                html += `<tr>
-                    <td>${rows[2][j]}</td>
-                    <td>${pDate ? "已排程" : "待處理"}</td>
-                    <td>${pDate || "待確認"}</td>
-                    <td>${pEng || "指派中"}</td>
-                    <td>${pTel || "--"}</td>
-                </tr>`;
-            }
-        }
-        res.innerHTML = found ? html + "</table>" : "<p style='color:red;'>查無資料，請確認名稱是否正確。</p>";
-    } catch (e) { res.innerHTML = "讀取異常"; }
-}
+                const isScheduled = pDate && pDate !== "";
+                const statusStr = isScheduled ? "已排程" : "已收件待安排";
+                const sClass = isScheduled ? "status-ok" : "status-wait";
 
+                html += `<tr>
+                    <td>${rows[2][j]}</td> 
+                    <td><span class="status-tag ${sClass}">${statusStr}</span></td> 
+                    <td>${pDate || "待聯絡"}</td> 
+                    <td>${pEng || "指派中"}</td> 
+                    <td>${pTel || "--"}</td> 
+                </tr>`;
+           }
+       }
+       resultsDiv.innerHTML = found ? html + "</table>" : "<p style='color:red;'>查無資料，請確認名稱與空格是否正確。</p>";
+    } catch (e) {
+       resultsDiv.innerHTML = "讀取資料失敗，請檢查網路。";
+    }
+}
+ 
+// 提交表單邏輯
 document.getElementById('orderForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const btn = document.getElementById('submitBtn');
-    btn.disabled = true;
-    btn.innerText = '提交中...';
-    
-    fetch(gasUrl + "?" + new URLSearchParams(new FormData(this)).toString(), { mode: 'no-cors' })
-    .then(() => {
-        alert("🎉 提交成功！");
-        this.reset();
-        btn.disabled = false;
-        btn.innerText = '提交申請';
-    });
+   e.preventDefault();
+   const btn = document.getElementById('submitBtn');
+   btn.disabled = true;
+   btn.innerText = '正在提交...';
+ 
+   const params = new URLSearchParams(new FormData(this)).toString();
+   fetch(gasUrl + "?" + params, { method: 'GET', mode: 'no-cors' })
+   .then(() => {
+       alert("🎉 資料已成功送出！");
+       this.reset();
+       btn.disabled = false;
+       btn.innerText = '提交申請';
+   })
+   .catch(err => {
+       alert("提交失敗");
+       btn.disabled = false;
+       btn.innerText = '提交申請';
+   });
 });
 </script>
 </body>
