@@ -3,25 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>經銷商服務系統</title>
+    <title>經銷商支援服務系統</title>
     <style>
-        body { font-family: "Microsoft JhengHei", Arial, sans-serif; padding: 20px; background-color: #f4f7f6; }
-        .container { max-width: 950px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid #ddd; }
-        .tab-btn { padding: 10px 20px; cursor: pointer; border: none; background: none; font-size: 18px; font-weight: bold; color: #666; }
+        body { font-family: "Microsoft JhengHei", Arial, sans-serif; padding: 20px; background-color: #f4f7f6; color: #333; }
+        .container { max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .tabs { display: flex; margin-bottom: 25px; border-bottom: 2px solid #eee; }
+        .tab-btn { padding: 12px 24px; cursor: pointer; border: none; background: none; font-size: 18px; font-weight: bold; color: #888; transition: 0.3s; }
         .tab-btn.active { color: #2196F3; border-bottom: 3px solid #2196F3; }
         .content-section { display: none; }
         .content-section.active { display: block; }
         .form-group { margin-bottom: 15px; }
-        input, select, textarea { width: 100%; font-size: 16px; margin: 5px 0; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        .notice-box { background-color: #fff9db; border-left: 5px solid #fcc419; padding: 15px; margin: 20px 0; font-size: 14px; }
-        button { font-size: 16px; padding: 12px 20px; background-color: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer; width: 100%; font-weight: bold; }
-        table { border-collapse: collapse; margin-top: 20px; width: 100%; font-size: 14px; }
-        th, td { border: 1px solid #ccc; padding: 12px 8px; text-align: left; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
+        input, select, textarea { width: 100%; font-size: 16px; padding: 12px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        textarea { resize: vertical; }
+        .notice-box { background-color: #fff9db; border-left: 5px solid #fcc419; padding: 15px; margin: 20px 0; font-size: 14px; line-height: 1.6; }
+        button { font-size: 18px; padding: 15px; background-color: #2196F3; color: white; border: none; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; transition: 0.3s; }
+        button:hover { background-color: #1976D2; }
+        button:disabled { background-color: #ccc; cursor: not-allowed; }
+        table { border-collapse: collapse; margin-top: 20px; width: 100%; background: #fff; }
+        th, td { border: 1px solid #eee; padding: 15px 10px; text-align: left; }
         th { background-color: #2D5D46; color: white; }
-        .status-tag { padding: 4px 8px; border-radius: 4px; font-weight: bold; }
+        .status-tag { padding: 5px 10px; border-radius: 4px; font-weight: bold; font-size: 13px; }
         .status-received { background-color: #e6fcf5; color: #099268; } 
-        .status-scheduled { background-color: #e7f5ff; color: #1971c2; } 
+        .status-scheduled { background-color: #e7f5ff; color: #1971c2; }
+        .loading { text-align: center; color: #666; font-style: italic; }
     </style>
 </head>
 <body>
@@ -33,41 +38,54 @@
     </div>
 
     <section id="submit-section" class="content-section active">
-        <h2>支援工作申請表</h2>
+        <h2 style="margin-top:0;">支援工作申請表</h2>
         <form id="orderForm">
-            <input type="text" name="caseName" placeholder="案件名稱 *" required>
-            <input type="text" name="caseAddress" placeholder="案件地址 *" required>
-            <input type="text" name="dealerName" placeholder="經銷商(寶號) *" required>
-            <input type="text" name="dealerContactName" placeholder="聯絡人姓名 *" required>
-            <input type="tel" name="dealerPhone" placeholder="聯絡電話 *" required>
-            <select name="workType" required>
-                <option value="">-- 請選擇服務項目 --</option>
-                <option value="VRV 試車">VRV 試車</option>
-                <option value="VRVQ汰換前檢查">VRVQ汰換前檢查</option>
-                <option value="VRVQ汰換後檢查">VRVQ汰換後檢查</option>
-                <option value="工事巡查">工事巡查</option>
-                <option value="教育訓練">教育訓練</option>
-                <option value="其他">其他</option>
-            </select>
-            <textarea name="description" placeholder="內容詳述 *" required rows="4"></textarea>
-            <div class="notice-box">⚠️ 五天內專人聯繫。請現場負責人全程會同。</div>
+            <div class="form-group"><input type="text" name="dealerName" placeholder="經銷商(寶號) *" required></div>
+            <div class="form-group"><input type="text" name="caseName" placeholder="案件名稱 *" required></div>
+            <div class="form-group"><input type="text" name="caseAddress" placeholder="案件地址 *" required></div>
+            <div class="form-group"><input type="text" name="dealerContactName" placeholder="經銷商聯絡人 *" required></div>
+            <div class="form-group"><input type="tel" name="dealerPhone" placeholder="聯絡電話 *" required></div>
+            <div class="form-group">
+                <select name="workType" required>
+                    <option value="">-- 請選擇服務項目 --</option>
+                    <option value="VRV 試車">VRV 試車</option>
+                    <option value="VRVQ汰換前檢查">VRVQ汰換前檢查</option>
+                    <option value="VRVQ汰換後檢查">VRVQ汰換後檢查</option>
+                    <option value="工事巡查">工事巡查</option>
+                    <option value="教育訓練">教育訓練</option>
+                    <option value="其他">其他</option>
+                </select>
+            </div>
+            <div class="form-group"><textarea name="description" placeholder="內容詳述 *" required rows="4"></textarea></div>
+            
+            <div class="notice-box">
+                <strong>⚠️ 填單注意事項：</strong><br>
+                一、填單後，五天內會由專人聯繫。<br>
+                二、應檢附資料：1. 設備明細表 2. 圖面 (電子檔)。<br>
+                三、煩請經銷商現場負責人全程會同。
+            </div>
             <button type="submit" id="submitBtn">提交申請</button>
         </form>
     </section>
 
     <section id="search-section" class="content-section">
-        <h2>案件進度查詢</h2>
+        <h2 style="margin-top:0;">案件進度查詢</h2>
+        <p style="font-size: 14px; color: #666;">※ 輸入填單時的經銷商名稱即可查詢所有相關案件。</p>
         <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-            <input type="text" id="queryInput" placeholder="請輸入經銷商名稱">
-            <button onclick="queryData()" style="width: 120px;">查詢</button>
+            <input type="text" id="queryInput" placeholder="請輸入經銷商名稱 (如：和泰大金)">
+            <button onclick="queryData()" style="width: 120px; padding: 10px;">查詢</button>
         </div>
         <div id="results"></div>
     </section>
 </div>
 
 <script>
-const sheetUrl = "您的CSV連結"; // 依照第二步發佈的連結替換
-const gasUrl = "您的GAS連結"; // 依照第一步部署的連結替換
+// 1. 您的「經銷商填單」分頁 CSV 連結
+const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSjbJC6VSPPicOPdwTHbcF3ETS5BSJnC_-HIvBNounFVLXik9NxzChJGqackA8HEWcfnkBMjUhWIUmQ/pub?gid=656272806&single=true&output=csv";
+
+// 2. 您的 Google Apps Script 部署連結
+// 提醒：若提交失敗，請確認此連結為 GAS 最新「建立部署作業」產生的所有人 (Anyone) 連結
+const gasUrl = "https://script.google.com/macros/s/AKfycbydkRtSF_FeidEHkgUCStISZv-u07k0SmsaMq6-7twmP714lglPTh7AqUWKdwKvb5czNg/exec";
 
 function switchTab(tab) {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -85,55 +103,76 @@ function maskName(name) {
     if (!name) return "";
     const str = name.trim();
     if (str.length <= 2) return str[0] + "*";
-    return str[0] + "***" + str[str.length - 1]; // 案件名稱隱碼
+    return str[0] + "***" + str[str.length - 1];
 }
 
 async function queryData() {
     const query = document.getElementById('queryInput').value.trim();
-    if(!query) return;
-    document.getElementById('results').innerHTML = "查詢中...";
+    if(!query) { alert("請輸入搜尋內容"); return; }
+    
+    const resultsDiv = document.getElementById('results');
+    resultsDiv.innerHTML = '<p class="loading">正在連線資料庫，請稍候...</p>';
     
     try {
+        // 抓取 CSV 並防止快取
         const response = await fetch(sheetUrl + "&t=" + new Date().getTime());
         const csvData = await response.text();
         const rows = csvData.split("\n").filter(r => r.trim() !== "").map(r => r.split(","));
         
         let found = false;
-        let html = `<table><tr><th>案件名稱</th><th>狀態</th><th>排定日期</th><th>負責工程師</th><th>電話</th></tr>`;
+        let html = `<table><tr><th>案件名稱</th><th>狀態</th><th>排定日期</th><th>工程師</th></tr>`;
 
         // 從 B 欄 (index 1) 開始搜尋第 2 列 (index 1) 的經銷商名稱
         for (let col = 1; col < rows[0].length; col++) {
-            const dealer = rows[1] && rows[1][col] ? rows[1][col].trim() : "";
-            if (dealer.includes(query)) {
+            const dealerInSheet = rows[1] ? rows[1][col].trim() : "";
+            
+            if (dealerInSheet !== "" && dealerInSheet.includes(query)) {
                 found = true;
-                const caseName = rows[2] ? rows[2][col] : "";
-                const date = rows[16] ? rows[16][col] : ""; // 第 17 列
-                const eng = rows[17] ? rows[17][col] : ""; // 第 18 列
-                const tel = rows[18] ? rows[18][col] : ""; // 第 19 列
+                const caseName = rows[2] ? rows[2][col].trim() : "未命名案件";
+                const scheduleDate = rows[16] ? rows[16][col].trim() : ""; // 第 17 列
+                const engineer = rows[17] ? rows[17][col].trim() : "";     // 第 18 列
 
                 html += `<tr>
                     <td>${maskName(caseName)}</td>
-                    <td><span class="status-tag ${date ? 'status-scheduled' : 'status-received'}">${date ? '已排程' : '已收單'}</span></td>
-                    <td>${date || "--"}</td>
-                    <td>${eng || "指派中"}</td>
-                    <td>${tel || "--"}</td>
+                    <td><span class="status-tag ${scheduleDate ? 'status-scheduled' : 'status-received'}">${scheduleDate ? '已排程' : '已收單'}</span></td>
+                    <td>${scheduleDate || "--"}</td>
+                    <td>${engineer || "指派中"}</td>
                 </tr>`;
             }
         }
-        document.getElementById('results').innerHTML = found ? html + "</table>" : "查無相關資料。";
+        
+        resultsDiv.innerHTML = found ? html + "</table>" : "<p style='color:red; text-align:center;'>查無符合的案件，請確認經銷商名稱輸入正確。</p>";
     } catch (e) {
-        document.getElementById('results').innerHTML = "讀取異常，請檢查試算表發佈設定。";
+        console.error(e);
+        resultsDiv.innerHTML = "<p style='color:red;'>資料讀取失敗！請確認試算表已正確發佈為 CSV 格式。</p>";
     }
 }
 
-document.getElementById('orderForm').addEventListener('submit', e => {
+// 提交表單邏輯
+document.getElementById('orderForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const btn = document.getElementById('submitBtn');
     btn.disabled = true;
-    btn.innerText = '正在提交...';
-    fetch(gasUrl + "?" + new URLSearchParams(new FormData(e.target)).toString(), { method: 'GET', mode: 'no-cors' })
-    .then(() => { alert("申請成功！"); e.target.reset(); btn.disabled = false; btn.innerText = '提交申請'; });
+    btn.innerText = '正在安全地提交資料...';
+    
+    const formData = new FormData(this);
+    const queryString = new URLSearchParams(formData).toString();
+    
+    fetch(gasUrl + "?" + queryString, { method: 'GET', mode: 'no-cors' })
+    .then(() => {
+        alert("🎉 申請成功！我們將盡快聯繫您。");
+        this.reset();
+        btn.disabled = false;
+        btn.innerText = '提交申請';
+    })
+    .catch(err => {
+        console.error(err);
+        alert("❌ 提交失敗，請檢查網路連線或 GAS 部署權限設定。");
+        btn.disabled = false;
+        btn.innerText = '提交申請';
+    });
 });
 </script>
+
 </body>
 </html>
