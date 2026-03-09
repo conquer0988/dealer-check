@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>經銷商服務系統</title>
+    <title>經銷商服務系統-連動校正版</title>
     <style>
         body { font-family: "Microsoft JhengHei", Arial, sans-serif; padding: 20px; background-color: #f4f7f6; color: #333; }
-        .container { max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .container { max-width: 950px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         .tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid #ddd; }
         .tab-btn { padding: 12px 20px; cursor: pointer; border: none; background: none; font-size: 18px; font-weight: bold; color: #666; }
         .tab-btn.active { color: #2196F3; border-bottom: 4px solid #2196F3; }
@@ -15,9 +15,7 @@
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; }
         input, select, textarea { width: 100%; font-size: 16px; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
-        .sub-title { font-size: 16px; font-weight: bold; color: #2196F3; margin: 20px 0 10px; border-left: 4px solid #2196F3; padding-left: 10px; }
         button { font-size: 18px; padding: 15px; background-color: #2196F3; color: white; border: none; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; }
-        button:hover { background-color: #1976D2; }
         table { border-collapse: collapse; width: 100%; margin-top: 20px; }
         th, td { border: 1px solid #eee; padding: 12px; text-align: left; }
         th { background-color: #2D5D46; color: white; }
@@ -39,20 +37,14 @@
             <div class="form-group"><label>經銷商名稱 *</label><input type="text" name="dealerName" required></div>
             <div class="form-group"><label>案件名稱 *</label><input type="text" name="caseName" required></div>
             <div class="form-group"><label>案件地址 *</label><input type="text" name="caseAddress" required></div>
-            
-            <div class="sub-title">經銷商聯絡資訊</div>
             <div class="form-group"><label>聯絡人姓名 *</label><input type="text" name="dealerContactName" required></div>
             <div class="form-group"><label>聯絡人電話 *</label><input type="tel" name="dealerPhone" required></div>
             <div class="form-group"><label>電子信箱</label><input type="email" name="dealerEmail"></div>
             <div class="form-group"><label>LINE ID</label><input type="text" name="dealerLine"></div>
-
-            <div class="sub-title">現場負責聯絡人 (非業主)</div>
-            <div class="form-group"><label>負責人姓名 *</label><input type="text" name="siteContactName" required></div>
-            <div class="form-group"><label>負責人電話 *</label><input type="tel" name="sitePhone" required></div>
-            <div class="form-group"><label>負責人電子信箱</label><input type="email" name="siteEmail"></div>
-            <div class="form-group"><label>負責人 LINE</label><input type="text" name="siteLine"></div>
-
-            <div class="sub-title">需求詳情</div>
+            <div class="form-group"><label>現場負責姓名 *</label><input type="text" name="siteContactName" required></div>
+            <div class="form-group"><label>現場負責電話 *</label><input type="tel" name="sitePhone" required></div>
+            <div class="form-group"><label>現場負責信箱</label><input type="email" name="siteEmail"></div>
+            <div class="form-group"><label>現場負責 LINE</label><input type="text" name="siteLine"></div>
             <div class="form-group">
                 <label>支援工作內容 *</label>
                 <select name="workType" required>
@@ -64,7 +56,6 @@
                 </select>
             </div>
             <div class="form-group"><label>內容詳述 *</label><textarea name="description" rows="3" required></textarea></div>
-            
             <button type="submit" id="submitBtn">提交申請</button>
         </form>
     </section>
@@ -78,7 +69,6 @@
 </div>
 
 <script>
-// 使用你的發佈連結
 const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSjbJC6VSPPicOPdwTHbcF3ETS5BSJnC_-HIvBNounFVLXik9NxzChJGqackA8HEWcfnkBMjUhWIUmQ/pub?gid=656272806&single=true&output=csv";
 const gasUrl = "https://script.google.com/macros/s/AKfycbydkRtSF_FeidEHkgUCStISZv-u07k0SmsaMq6-7twmP714lglPTh7AqUWKdwKvb5czNg/exec";
 
@@ -108,48 +98,50 @@ async function queryData() {
         let found = false;
         let html = `<table><tr><th>案件名稱</th><th>狀態</th><th>排定日期</th><th>負責工程師</th><th>聯絡電話</th></tr>`;
 
-        // 橫向遍歷 B 欄以後的資料
+        // 橫向搜索每一欄
         for (let j = 1; j < rows[0].length; j++) {
             // 比對第 2 列 (經銷商) 與 第 3 列 (案件名)
             if (rows[1][j] === dName && rows[2][j] === cName) {
                 found = true;
-                // 根據試算表抓取第 17, 18, 19 列
-                const pDate = rows[16] ? rows[16][j] : ""; 
-                const pEng  = rows[17] ? rows[17][j] : "";  
-                const pTel  = rows[18] ? rows[18][j] : "";  
                 
-                const status = pDate ? "已排程" : "待處理";
+                // --- 精確校正列號 ---
+                // 陣列 Index 從 0 開始，所以第 17 列是 Index 16
+                const pDate = rows[16] ? rows[16][j] : ""; // 第 17 列: 排定日期
+                const pEng  = rows[17] ? rows[17][j] : ""; // 第 18 列: 負責工程師
+                const pTel  = rows[18] ? rows[18][j] : ""; // 第 19 列: 工程師電話
+                
+                const statusStr = pDate ? "已排程" : "待處理";
                 const sClass = pDate ? "status-ok" : "status-wait";
 
                 html += `<tr>
                     <td>${rows[2][j]}</td>
-                    <td><span class="status-tag ${sClass}">${status}</span></td>
+                    <td><span class="status-tag ${sClass}">${statusStr}</span></td>
                     <td>${pDate || "待確認"}</td>
-                    <td>${pEng || "分派中"}</td>
+                    <td>${pEng || "指派中"}</td>
                     <td>${pTel || "--"}</td>
                 </tr>`;
             }
         }
         res.innerHTML = found ? html + "</table>" : "<p style='color:red;'>查無資料，請確認名稱是否正確。</p>";
-    } catch (e) { res.innerHTML = "連線異常"; }
+    } catch (e) { res.innerHTML = "查詢失敗，請稍後再試。"; }
 }
 
 document.getElementById('orderForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const btn = document.getElementById('submitBtn');
     btn.disabled = true;
-    btn.innerText = '提交中...';
+    btn.innerText = '正在提交...';
     
     const params = new URLSearchParams(new FormData(this)).toString();
     fetch(gasUrl + "?" + params, { method: 'GET', mode: 'no-cors' })
     .then(() => {
-        alert("🎉 提交成功！");
+        alert("🎉 支援申請已成功送出！");
         this.reset();
         btn.disabled = false;
         btn.innerText = '提交申請';
     })
     .catch(() => {
-        alert("提交異常");
+        alert("提交失敗，請檢查網路。");
         btn.disabled = false;
         btn.innerText = '提交申請';
     });
