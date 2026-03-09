@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>經銷商服務系統-校正完成版</title>
+    <title>經銷商服務系統-最終修正版</title>
     <style>
         body { font-family: "Microsoft JhengHei", Arial, sans-serif; padding: 20px; background-color: #f4f7f6; color: #333; }
         .container { max-width: 950px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
@@ -61,15 +61,14 @@
     </section>
 
     <section id="search-section" class="content-section">
-        <div class="form-group"><label>請輸入經銷商名稱</label><input type="text" id="qD" placeholder="範例：和泰大金"></div>
-        <div class="form-group"><label>請輸入案件名稱</label><input type="text" id="qC" placeholder="範例：大金空調A"></div>
+        <div class="form-group"><label>請輸入經銷商名稱</label><input type="text" id="qD" placeholder="例如：和泰大金"></div>
+        <div class="form-group"><label>請輸入案件名稱</label><input type="text" id="qC" placeholder="例如：大金空調A"></div>
         <button onclick="queryData()">確認進度查詢</button>
         <div id="results"></div>
     </section>
 </div>
 
 <script>
-// 使用你的發佈連結
 const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSjbJC6VSPPicOPdwTHbcF3ETS5BSJnC_-HIvBNounFVLXik9NxzChJGqackA8HEWcfnkBMjUhWIUmQ/pub?gid=656272806&single=true&output=csv";
 const gasUrl = "https://script.google.com/macros/s/AKfycbydkRtSF_FeidEHkgUCStISZv-u07k0SmsaMq6-7twmP714lglPTh7AqUWKdwKvb5czNg/exec";
 
@@ -90,63 +89,62 @@ async function queryData() {
     const res = document.getElementById('results');
     if(!dName || !cName) return alert("請輸入完整名稱");
     
-    res.innerHTML = "🔍 資料檢索中...";
+    res.innerHTML = "🔍 搜尋中...";
     try {
         const response = await fetch(sheetUrl + "&t=" + Date.now());
         const raw = await response.text();
-        // 依照 CSV 格式拆分行與列
+        // 將 CSV 轉換為二維陣列
         const rows = raw.split(/\r?\n/).map(r => r.split(",").map(cell => cell.trim().replace(/^"|"$/g, '')));
         
         let found = false;
-        let html = `<table><tr><th>案件名稱</th><th>狀態</th><th>排定日期</th><th>負責工程師</th><th>聯絡電話</th></tr>`;
+        let html = `<table><tr><th>案件名稱</th><th>狀態</th><th>排定日期</th><th>負責工程師</th><th>工程師電話</th></tr>`;
 
-        // 橫向搜索每一欄 (從 B 欄開始，也就是 j=1)
+        // 橫向搜索每一欄 (B 欄即 j=1, C 欄即 j=2)
         for (let j = 1; j < rows[0].length; j++) {
-            // 比對第 2 列經銷商 (rows[1]) 與 第 3 列案件 (rows[2])
+            // 比對第 2 列 (經銷商) 與 第 3 列 (案件名稱)
             if (rows[1][j] === dName && rows[2][j] === cName) {
                 found = true;
                 
-                // --- 重要！精確鎖定位置 ---
-                // rows[16] = 試算表第 17 列 (排定日期)
-                // rows[17] = 試算表第 18 列 (負責工程師)
-                // rows[18] = 試算表第 19 列 (工程師電話)
-                const pDate = rows[16] ? rows[16][j] : ""; 
-                const pEng  = rows[17] ? rows[17][j] : ""; 
-                const pTel  = rows[18] ? rows[18][j] : ""; 
+                // --- 絕對校正：直接抓取對應欄的第 17, 18, 19 列 ---
+                // rows[16] 是第 17 列「排定日期」
+                // rows[17] 是第 18 列「負責工程師」
+                // rows[18] 是第 19 列「工程師電話」
+                const pDate = rows[16] ? rows[16][j] : "";
+                const pEng  = rows[17] ? rows[17][j] : "";
+                const pTel  = rows[18] ? rows[18][j] : "";
                 
-                const statusStr = pDate ? "已排程" : "待處理";
-                const sClass = pDate ? "status-ok" : "status-wait";
+                const statusStr = (pDate && pDate !== "undefined") ? "已排程" : "分派中";
+                const sClass = (pDate && pDate !== "undefined") ? "status-ok" : "status-wait";
 
                 html += `<tr>
                     <td>${rows[2][j]}</td>
                     <td><span class="status-tag ${sClass}">${statusStr}</span></td>
-                    <td>${pDate || "待確認"}</td>
-                    <td>${pEng || "指派中"}</td>
-                    <td>${pTel || "--"}</td>
+                    <td>${(pDate && pDate !== "undefined") ? pDate : "待排定"}</td>
+                    <td>${(pEng && pEng !== "undefined") ? pEng : "分派中"}</td>
+                    <td>${(pTel && pTel !== "undefined") ? pTel : "--"}</td>
                 </tr>`;
             }
         }
-        res.innerHTML = found ? html + "</table>" : "<p style='color:red;'>查無資料，請確認名稱是否輸入正確。</p>";
+        res.innerHTML = found ? html + "</table>" : "<p style='color:red;'>查無此案件，請檢查輸入內容是否完全正確。</p>";
     } catch (e) { res.innerHTML = "連線失敗"; }
 }
 
-// 填單功能：完全保持現狀
 document.getElementById('orderForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const btn = document.getElementById('submitBtn');
     btn.disabled = true;
-    btn.innerText = '正在提交...';
+    btn.innerText = '提交中...';
     
     const params = new URLSearchParams(new FormData(this)).toString();
     fetch(gasUrl + "?" + params, { method: 'GET', mode: 'no-cors' })
     .then(() => {
-        alert("🎉 支援申請已成功送出！");
+        alert("🎉 提交成功！");
         this.reset();
         btn.disabled = false;
         btn.innerText = '提交申請';
     })
     .catch(() => {
-        alert("提交失敗");
+        alert("提交異常");
         btn.disabled = false;
         btn.innerText = '提交申請';
     });
