@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>經銷商服務系統-精確對位終止版</title>
+    <title>經銷商服務系統</title>
     <style>
         body { font-family: "Microsoft JhengHei", Arial, sans-serif; padding: 20px; background-color: #f4f7f6; color: #333; }
         .container { max-width: 950px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
@@ -15,7 +15,8 @@
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; }
         input, select, textarea { width: 100%; font-size: 16px; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
-        button { font-size: 18px; padding: 15px; background-color: #2196F3; color: white; border: none; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; }
+        button { font-size: 18px; padding: 15px; background-color: #2196F3; color: white; border: none; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 10px; }
+        button:hover { background-color: #1976D2; }
         table { border-collapse: collapse; width: 100%; margin-top: 20px; }
         th, td { border: 1px solid #eee; padding: 12px; text-align: left; }
         th { background-color: #2D5D46; color: white; }
@@ -64,12 +65,11 @@
         <div class="form-group"><label>請輸入經銷商名稱</label><input type="text" id="qD" placeholder="例如：和泰大金"></div>
         <div class="form-group"><label>請輸入案件名稱</label><input type="text" id="qC" placeholder="例如：大金空調A"></div>
         <button onclick="queryData()">確認進度查詢</button>
-        <div id="results" style="margin-top: 20px;"></div>
+        <div id="results"></div>
     </section>
 </div>
 
 <script>
-// URL 設定
 const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSjbJC6VSPPicOPdwTHbcF3ETS5BSJnC_-HIvBNounFVLXik9NxzChJGqackA8HEWcfnkBMjUhWIUmQ/pub?gid=656272806&single=true&output=csv";
 const gasUrl = "https://script.google.com/macros/s/AKfycbydkRtSF_FeidEHkgUCStISZv-u07k0SmsaMq6-7twmP714lglPTh7AqUWKdwKvb5czNg/exec";
 
@@ -96,30 +96,26 @@ async function queryData() {
         const raw = await response.text();
         
         // 解析 CSV 並過濾空行
-        const rows = raw.split(/\r?\n/).filter(r => r.trim() !== "").map(r => r.split(",").map(cell => cell.trim().replace(/^"|"$/g, '')));
+        const rows = raw.split(/\r?\n/).map(r => r.split(",").map(cell => cell.trim().replace(/^"|"$/g, '')));
         
         let found = false;
         let html = `<table><tr><th>案件名稱</th><th>狀態</th><th>排定日期</th><th>負責工程師</th><th>聯絡電話</th></tr>`;
 
         // 橫向搜索 (從 B 欄 j=1 開始)
         for (let j = 1; j < rows[0].length; j++) {
-            // 比對第 2 列 (Index 1) 經銷商 & 第 3 列 (Index 2) 案件
-            if (rows[1][j] === dName && rows[2][j] === cName) {
+            // 比對第 2 列 (Row 2 = index 1) 經銷商名稱 & 第 3 列 (Row 3 = index 2) 案件名稱
+            if (rows[1] && rows[1][j] === dName && rows[2] && rows[2][j] === cName) {
                 found = true;
                 
-                // --- 絕對位移鎖定 ---
-                // Google Sheets Row 17 = Array Index 16
-                // Google Sheets Row 18 = Array Index 17
-                // Google Sheets Row 19 = Array Index 18
-                const pDate = rows[16] ? rows[16][j] : ""; 
-                const pEng  = rows[17] ? rows[17][j] : ""; 
-                const pTel  = rows[18] ? rows[18][j] : ""; 
+                // --- 精確對位：修正位移 (+3 列) ---
+                // 試算表 Row 17 (排定日期) = rows[16 + 3] = rows[19]
+                // 試算表 Row 18 (負責工程師) = rows[17 + 3] = rows[20]
+                // 試算表 Row 19 (工程師電話) = rows[18 + 3] = rows[21]
+                const pDate = rows[19] ? rows[19][j] : ""; 
+                const pEng  = rows[20] ? rows[20][j] : ""; 
+                const pTel  = rows[21] ? rows[21][j] : ""; 
 
-                // 偵錯用：如果還是抓錯，請按 F12 看控制台輸出
-                console.log(`找到案件於第 ${j+1} 欄`);
-                console.log("日期列內容:", rows[16][j]); 
-
-                const isDateSet = (pDate && pDate !== "" && pDate !== "undefined");
+                const isDateSet = (pDate && pDate !== "" && pDate !== "0" && pDate !== "undefined");
                 const statusStr = isDateSet ? "已排程" : "收件分派中";
                 const sClass = isDateSet ? "status-ok" : "status-wait";
 
@@ -127,19 +123,19 @@ async function queryData() {
                     <td>${rows[2][j]}</td>
                     <td><span class="status-tag ${sClass}">${statusStr}</span></td>
                     <td>${isDateSet ? pDate : "待排程"}</td>
-                    <td>${(pEng && pEng !== "undefined") ? pEng : "指派中"}</td>
-                    <td>${(pTel && pTel !== "undefined") ? pTel : "--"}</td>
+                    <td>${(pEng && pEng !== "" && pEng !== "undefined") ? pEng : "指派中"}</td>
+                    <td>${(pTel && pTel !== "" && pTel !== "undefined") ? pTel : "--"}</td>
                 </tr>`;
             }
         }
-        res.innerHTML = found ? html + "</table>" : "<p style='color:red;'>查無資料，請確認輸入名稱是否正確。</p>";
+        res.innerHTML = found ? html + "</table>" : "<p style='color:red; margin-top:20px;'>查無資料，請檢查名稱是否輸入正確。</p>";
     } catch (e) { 
         console.error(e);
-        res.innerHTML = "❌ 連線失敗，請檢查網路。"; 
+        res.innerHTML = "❌ 讀取失敗，請確認網路連線。"; 
     }
 }
 
-// 提交功能：完全保持現狀，不改動
+// 提交功能 (維持原本運作方式)
 document.getElementById('orderForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const btn = document.getElementById('submitBtn');
@@ -155,7 +151,7 @@ document.getElementById('orderForm').addEventListener('submit', function(e) {
         btn.innerText = '提交申請';
     })
     .catch(() => {
-        alert("提交異常");
+        alert("提交異常，請重新嘗試");
         btn.disabled = false;
         btn.innerText = '提交申請';
     });
