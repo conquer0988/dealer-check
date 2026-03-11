@@ -145,7 +145,7 @@
 
         <form id="orderForm">
             <div class="form-section"><h3>案件資訊</h3></div>
-            <div class="form-group"><label>案件名稱 *</label><input type="text" name="caseName" placeholder="例如：AI總部大樓" required></div>
+            <div class="form-group"><label>案件名稱 *</label><input type="text" name="caseName" placeholder="請輸入案件名稱" required></div>
             <div class="form-group"><label>案件地址 *</label><input type="text" name="caseAddress" required></div>
             <div class="form-group">
                 <label>支援工作內容 *</label>
@@ -163,7 +163,7 @@
             <div class="form-group"><label>內容詳述 *</label><textarea name="description" rows="3" required></textarea></div>
 
             <div class="form-section"><h3>經銷商資訊</h3></div>
-            <div class="form-group"><label>經銷商名稱 *</label><input type="text" name="dealerName" placeholder="例如：和泰大金" required></div>
+            <div class="form-group"><label>經銷商名稱 *</label><input type="text" name="dealerName" placeholder="請輸入經銷商名稱" required></div>
             <div class="form-group"><label>聯絡人姓名 *</label><input type="text" name="dealerContactName" required></div>
             <div class="form-group"><label>聯絡人電話 *</label><input type="tel" name="dealerPhone" required></div>
             <div class="form-group"><label>電子信箱</label><input type="email" name="dealerEmail"></div>
@@ -182,11 +182,12 @@
     <section id="search-section" class="content-section">
         <div class="sync-notice">
             <strong>💡 溫馨提醒：</strong><br>
-            新提交案件請於 <strong>3-5 分鐘</strong> 後再查詢結果。
+            1. 新提交案件請於 <strong>3-5 分鐘</strong> 後再行查詢。<br>
+            2. 查詢時，<strong>「經銷商名稱」</strong>與<strong>「案件名稱」</strong>須與申請填單時內容完全一致，方可讀取資料。
         </div>
 
-        <div class="form-group"><label>經銷商名稱</label><input type="text" id="qD" placeholder="例如：和泰大金"></div>
-        <div class="form-group"><label>案件名稱</label><input type="text" id="qC" placeholder="例如：AI總部大樓"></div>
+        <div class="form-group"><label>經銷商名稱</label><input type="text" id="qD" placeholder="請輸入經銷商名稱"></div>
+        <div class="form-group"><label>案件名稱</label><input type="text" id="qC" placeholder="請輸入案件名稱"></div>
         <button onclick="queryData()">開始進度查詢</button>
         <div id="results"></div>
     </section>
