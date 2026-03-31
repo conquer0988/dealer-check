@@ -69,10 +69,6 @@
         th { background-color: var(--secondary-color); color: white; padding: 12px; text-align: left; }
         td { padding: 12px; border-bottom: 1px solid #f1f3f4; background-color: white; }
         
-        .status-tag { padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 13px; }
-        .status-ok { background-color: #e6fffa; color: #2c7a7b; }
-        .status-wait { background-color: #fffaf0; color: #9c4221; }
-        
         /* 問卷專屬樣式 */
         #integrated-survey { 
             background: #fdfdfd; padding: 25px; border: 2px solid #eee; border-radius: 12px; margin-top: 30px;
@@ -187,6 +183,7 @@
                 <div class="form-group"><label>案件名稱</label><input type="text" name="caseName" required></div>
                 <div class="form-group"><label>排定日期</label><input type="date" name="pDate" required></div>
                 <div class="form-group"><label>負責工程師</label><input type="text" name="pEng" required></div>
+                <div class="form-group"><label>工程師電話</label><input type="tel" name="pTel" required></div>
                 <button type="submit" class="admin-btn" id="updateBtn">確認更新排程</button>
             </form>
 
@@ -198,6 +195,7 @@
 </div>
 
 <script>
+// 注意：以下 URL 保持您原本發佈的位址
 const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSjbJC6VSPPicOPdwTHbcF3ETS5BSJnC_-HIvBNounFVLXik9NxzChJGqackA8HEWcfnkBMjUhWIUmQ/pub?gid=656272806&single=true&output=csv";
 const gasUrl = "https://script.google.com/macros/s/AKfycbydkRtSF_FeidEHkgUCStISZv-u07k0SmsaMq6-7twmP714lglPTh7AqUWKdwKvb5czNg/exec";
 
@@ -240,24 +238,31 @@ async function queryData() {
         let found = false;
         let html = `<table><tr><th>項目</th><th>內容</th></tr>`;
 
+        // 搜尋邏輯：第2列是經銷商[1]，第3列是案件名稱[2]
         for (let j = 1; j < rows[0].length; j++) {
             if (rows[1] && rows[1][j] === dName && rows[2] && rows[2][j] === cName) {
                 found = true;
-                const eng = rows[20] ? rows[20][j] : "指派中";
+                const pDate = rows[16] ? rows[16][j] : ""; // 第17列：排定日期
+                const eng = rows[17] ? rows[17][j] : "指派中"; // 第18列：工程師
+                const status = pDate ? '已排程' : '分派中';
+                
                 html += `<tr><td>案件名稱</td><td>${rows[2][j]}</td></tr>
-                         <tr><td>進度</td><td>${rows[19][j] ? '已排程' : '分派中'}</td></tr>
-                         <tr><td>工程師</td><td>${eng}</td></tr>`;
+                         <tr><td>服務日期</td><td>${pDate || '待排定'}</td></tr>
+                         <tr><td>目前狀態</td><td>${status}</td></tr>
+                         <tr><td>負責工程師</td><td>${eng}</td></tr>`;
                 
                 // 自動帶入問卷隱藏欄位
                 document.getElementById('sv_dealer').value = dName;
                 document.getElementById('sv_case').value = cName;
                 document.getElementById('sv_eng').value = eng;
-                surveyBox.style.display = "block";
+
+                // 只有「已排程」且有工程師時才顯示問卷
+                if(pDate) { surveyBox.style.display = "block"; }
                 break;
             }
         }
-        res.innerHTML = found ? html + "</table>" : "查無資料";
-    } catch (e) { res.innerHTML = "連線異常"; }
+        res.innerHTML = found ? html + "</table>" : "查無資料，請確認名稱是否正確";
+    } catch (e) { res.innerHTML = "連線異常，請稍後再試"; }
 }
 
 // 提交回饋
@@ -275,26 +280,36 @@ document.getElementById('surveyForm').addEventListener('submit', function(e) {
     });
 });
 
-// 主管查詢回饋資料 (假設您在 Google Sheet 另開一頁 gid=XXXX 儲存回饋)
+// 主管查詢問卷回饋 (已填入 GID 2027669544)
 async function fetchSurveyData() {
     const list = document.getElementById('surveyList');
     list.innerHTML = "正在讀取回饋...";
-    // 注意：這裡您需要將 gid 換成您儲存問卷回饋的那一頁 gid
-    const surveySheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSjbJC6VSPPicOPdwTHbcF3ETS5BSJnC_-HIvBNounFVLXik9NxzChJGqackA8HEWcfnkBMjUhWIUmQ/pub?gid=您的問卷GID&output=csv";
+    const surveySheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSjbJC6VSPPicOPdwTHbcF3ETS5BSJnC_-HIvBNounFVLXik9NxzChJGqackA8HEWcfnkBMjUhWIUmQ/pub?gid=2027669544&output=csv";
     
     try {
         const response = await fetch(surveySheetUrl + "&t=" + Date.now());
         const raw = await response.text();
-        const rows = raw.split(/\r?\n/).map(r => r.split(","));
+        const rows = raw.split(/\r?\n/).map(r => r.split(",").map(cell => cell.trim().replace(/^"|"$/g, '')));
         
-        let html = "<table><tr><th>工程師</th><th>經銷商</th><th>評分(技/準/合/教/總)</th><th>最大收穫</th><th>建議</th></tr>";
+        let html = "<table><tr><th>日期</th><th>工程師</th><th>經銷商</th><th>評分(技/準/合/教/總)</th><th>最大收穫/建議</th></tr>";
+        // 對應試算表標題：A時間, B經銷商, C案件, D工程師, E~I評分, J收穫, K建議
         for(let i=1; i<rows.length; i++){
-            if(rows[i][0]){
-                html += `<tr><td>${rows[i][3]}</td><td>${rows[i][1]}</td><td>${rows[i][4]}/${rows[i][5]}/${rows[i][6]}/${rows[i][7]}/${rows[i][8]}</td><td>${rows[i][9]}</td><td>${rows[i][10]}</td></tr>`;
+            if(rows[i][1]){ // 如果經銷商欄位有資料
+                const dateStr = rows[i][0].split(' ')[0]; // 只取日期
+                const scores = `${rows[i][4]}/${rows[i][5]}/${rows[i][6]}/${rows[i][7]}/${rows[i][8]}`;
+                const comment = `收穫：${rows[i][9]}<br>建議：${rows[i][10]}`;
+                
+                html += `<tr>
+                    <td>${dateStr}</td>
+                    <td>${rows[i][3]}</td>
+                    <td>${rows[i][1]}</td>
+                    <td>${scores}</td>
+                    <td>${comment}</td>
+                </tr>`;
             }
         }
-        list.innerHTML = html + "</table>";
-    } catch (e) { list.innerHTML = "讀取失敗，請確認問卷 GID 是否設定正確。"; }
+        list.innerHTML = rows.length > 1 ? html + "</table>" : "目前尚無回饋資料";
+    } catch (e) { list.innerHTML = "讀取失敗，請確認網路連線或 GID 設定。"; }
 }
 
 // 提交申請
