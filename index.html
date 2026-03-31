@@ -19,14 +19,16 @@
         .container { max-width: 900px; margin: 0 auto; background: var(--card-bg); padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
         .header { text-align: center; margin-bottom: 25px; border-bottom: 3px solid var(--primary-color); padding-bottom: 15px; }
         
+        /* 分頁按鈕 */
         .tabs { display: flex; gap: 10px; margin-bottom: 25px; }
-        .tab-btn { flex: 1; padding: 12px; border: none; background: #e8f0fe; cursor: pointer; border-radius: 8px; font-weight: bold; color: var(--primary-color); }
+        .tab-btn { flex: 1; padding: 12px; border: none; background: #e8f0fe; cursor: pointer; border-radius: 8px; font-weight: bold; color: var(--primary-color); transition: 0.3s; }
         .tab-btn.active { background: var(--primary-color); color: white; }
 
+        /* 區塊切換控制 */
         .content-section { display: none; }
-        .content-section.active { display: block; }
+        .content-section.active { display: block; animation: fadeIn 0.4s ease; }
 
-        /* 表單樣式 */
+        /* 表單區域 */
         .form-section { background: #f1f3f4; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
         .form-section h3 { margin-top: 0; color: var(--secondary-color); border-left: 5px solid var(--secondary-color); padding-left: 10px; }
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
@@ -38,18 +40,20 @@
         .main-btn { width: 100%; padding: 15px; background: var(--primary-color); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
         .main-btn:hover { opacity: 0.9; }
 
-        /* 查詢與問卷 */
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        /* 查詢結果表格 */
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; }
         th, td { border: 1px solid #ddd; padding: 12px; text-align: center; }
         th { background: #f8f9fa; }
         .status-tag { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
         .status-ok { background: #ceead6; color: #0d652d; }
         .status-wait { background: #feefc3; color: #b05a00; }
 
+        /* 問卷區塊 */
         .survey-box { margin-top: 25px; padding: 20px; border: 2px dashed #e67e22; border-radius: 12px; background: #fffbf0; display: none; }
         .score-row { display: flex; justify-content: space-between; margin-bottom: 10px; flex-wrap: wrap; }
         .score-item { flex: 1; min-width: 80px; margin: 5px; }
 
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } .form-group.full { grid-column: span 1; } }
     </style>
 </head>
@@ -61,9 +65,9 @@
     </div>
 
     <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('submit')">📋 支援申請</button>
-        <button class="tab-btn" onclick="switchTab('search')">🔍 進度查詢</button>
-        <button class="tab-btn" onclick="switchTab('admin')">🔒 管理專區</button>
+        <button class="tab-btn active" id="btn-submit" onclick="switchTab('submit')">📋 支援申請</button>
+        <button class="tab-btn" id="btn-search" onclick="switchTab('search')">🔍 進度查詢</button>
+        <button class="tab-btn" id="btn-admin" onclick="switchTab('admin')">🔒 管理專區</button>
     </div>
 
     <div id="submit-section" class="content-section active">
@@ -71,9 +75,9 @@
             <div class="form-section">
                 <h3>一、 案件基本資訊</h3>
                 <div class="form-grid">
-                    <div class="form-group"><label>經銷商名稱 *</label><input type="text" name="dealerName" required placeholder="請填寫完整公司名"></div>
-                    <div class="form-group"><label>案件名稱 *</label><input type="text" name="caseName" required placeholder="例：林先生別墅/王大同辦公室"></div>
-                    <div class="form-group full"><label>案件地址 *</label><input type="text" name="caseAddress" required placeholder="請輸入詳細地址"></div>
+                    <div class="form-group"><label>經銷商名稱 *</label><input type="text" name="dealerName" required></div>
+                    <div class="form-group"><label>案件名稱 *</label><input type="text" name="caseName" required></div>
+                    <div class="form-group full"><label>案件地址 *</label><input type="text" name="caseAddress" required></div>
                 </div>
             </div>
 
@@ -95,19 +99,19 @@
             </div>
 
             <div class="form-section">
-                <h3>三、 支援需求詳述</h3>
+                <h3>三、 支援需求與描述</h3>
                 <div class="form-group">
                     <label>支援項目 *</label>
                     <select name="workType" required>
-                        <option value="試運轉">試運轉 (新機安裝完成)</option>
-                        <option value="故障排除">故障排除 (報修維修)</option>
-                        <option value="技術指導">技術指導 (現場規畫討論)</option>
-                        <option value="教育培訓">教育培訓 (產品操作說明)</option>
+                        <option value="試運轉">試運轉</option>
+                        <option value="故障排除">故障排除</option>
+                        <option value="技術指導">技術指導</option>
+                        <option value="教育培訓">教育培訓</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label>內容詳述 *</label>
-                    <textarea name="description" rows="4" required placeholder="請詳細說明現場狀況或需要協助的具體問題..."></textarea>
+                    <textarea name="description" rows="4" required placeholder="請詳細說明現場狀況..."></textarea>
                 </div>
             </div>
             <button type="submit" class="main-btn" id="submitBtn">提交申請</button>
@@ -116,14 +120,14 @@
 
     <div id="search-section" class="content-section">
         <div class="form-section" style="background:#e8f0fe;">
-            <div class="form-group"><label>經銷商名稱</label><input type="text" id="qD" placeholder="例：大金電器行"></div>
-            <div class="form-group"><label>案件名稱</label><input type="text" id="qC" placeholder="例：林先生別墅"></div>
-            <button onclick="queryData()" class="main-btn" style="background:#1967d2;">查詢進度</button>
+            <div class="form-group"><label>經銷商名稱</label><input type="text" id="qD"></div>
+            <div class="form-group"><label>案件名稱</label><input type="text" id="qC"></div>
+            <button onclick="queryData()" class="main-btn" style="background:#1967d2;">查詢案件進度</button>
         </div>
         <div id="results"></div>
 
         <div id="integrated-survey" class="survey-box">
-            <h3 style="color:#e67e22; margin-top:0;">🌟 滿意度回饋調查</h3>
+            <h3 style="color:#e67e22; margin-top:0;">🌟 服務滿意度回饋</h3>
             <form id="surveyForm">
                 <input type="hidden" name="mode" value="survey">
                 <input type="hidden" name="sv_dealer" id="sv_dealer">
@@ -134,12 +138,12 @@
                     <div class="score-item"><label>技術專業</label><select name="scoreTech"><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select></div>
                     <div class="score-item"><label>準時抵達</label><select name="scoreTime"><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select></div>
                     <div class="score-item"><label>配合態度</label><select name="scoreCoord"><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select></div>
-                    <div class="score-item"><label>教育訓練</label><select name="scoreEdu"><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select></div>
+                    <div class="score-item"><label>教育內容</label><select name="scoreEdu"><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select></div>
                     <div class="score-item"><label>總體評分</label><select name="scoreOverall"><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select></div>
                 </div>
-                <div class="form-group"><label>本次服務收穫最多的是？</label><textarea name="bestPart" rows="2"></textarea></div>
-                <div class="form-group"><label>改進建議或表揚</label><textarea name="feedbackMsg" rows="2"></textarea></div>
-                <button type="submit" class="main-btn" style="background:#e67e22;">送出回饋問卷</button>
+                <div class="form-group"><label>收穫最多的是？</label><textarea name="bestPart" rows="2"></textarea></div>
+                <div class="form-group"><label>改進建議</label><textarea name="feedbackMsg" rows="2"></textarea></div>
+                <button type="submit" class="main-btn" style="background:#e67e22;">提交回饋問卷</button>
             </form>
         </div>
     </div>
@@ -148,58 +152,66 @@
         <div id="admin-login" class="form-section" style="text-align:center;">
             <label>請輸入權限密碼</label>
             <input type="password" id="adminPwd" style="max-width:300px; text-align:center; margin-bottom:15px;">
-            <button onclick="checkAdmin()" class="main-btn" style="max-width:300px; background:var(--admin-color);">登入管理專區</button>
+            <button onclick="checkAdmin()" class="main-btn" style="max-width:300px; background:var(--admin-color);">驗證登入</button>
         </div>
 
         <div id="admin-form" style="display:none;">
             <h3>🛠 工程師案件排程</h3>
             <form id="scheduleForm">
                 <input type="hidden" name="mode" value="update">
-                <div class="form-group"><label>經銷商名稱</label><input type="text" name="dealerName" required></div>
-                <div class="form-group"><label>案件名稱</label><input type="text" name="caseName" required></div>
-                <div class="form-group"><label>排定日期</label><input type="date" name="pDate" required></div>
-                <div class="form-group"><label>負責工程師</label><input type="text" name="pEng" required></div>
-                <div class="form-group"><label>工程師電話</label><input type="text" name="pTel"></div>
-                <button type="submit" class="main-btn" id="updateBtn">更新排程資料</button>
+                <div class="form-grid">
+                    <div class="form-group"><label>經銷商名稱</label><input type="text" name="dealerName" required></div>
+                    <div class="form-group"><label>案件名稱</label><input type="text" name="caseName" required></div>
+                    <div class="form-group"><label>排定日期</label><input type="date" name="pDate" required></div>
+                    <div class="form-group"><label>負責工程師</label><input type="text" name="pEng" required></div>
+                    <div class="form-group full"><label>電話</label><input type="text" name="pTel"></div>
+                </div>
+                <button type="submit" class="main-btn" id="updateBtn">確認更新排程</button>
             </form>
         </div>
 
         <div id="manager-content" style="display:none;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <h3 style="color:var(--manager-color);">📈 服務品質監控看板</h3>
-                <button onclick="fetchSurveyData()" style="padding:8px; border-radius:5px; background:var(--manager-color); color:white; border:none; cursor:pointer;">🔄 載入回饋</button>
+                <button onclick="fetchSurveyData()" style="padding:8px 15px; border-radius:5px; background:var(--manager-color); color:white; border:none; cursor:pointer; font-weight:bold;">🔄 更新數據</button>
             </div>
-            <div id="surveyList" style="font-size:13px; overflow-x:auto;">
-                <p style="text-align:center; padding:20px;">點擊上方按鈕讀取數據...</p>
+            <div id="surveyList" style="overflow-x:auto;">
+                <p style="text-align:center; padding:20px; color:#666;">點擊按鈕載入最新資料...</p>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-// --- 核心變數設定 ---
+// 設定區
 const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSjbJC6VSPPicOPdwTHbcF3ETS5BSJnC_-HIvBNounFVLXik9NxzChJGqackA8HEWcfnkBMjUhWIUmQ/pub?gid=656272806&single=true&output=csv";
 const gasUrl = "https://script.google.com/macros/s/AKfycbydkRtSF_FeidEHkgUCStISZv-u07k0SmsaMq6-7twmP714lglPTh7AqUWKdwKvb5czNg/exec";
 const surveySheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSjbJC6VSPPicOPdwTHbcF3ETS5BSJnC_-HIvBNounFVLXik9NxzChJGqackA8HEWcfnkBMjUhWIUmQ/pub?gid=2027669544&output=csv";
 
-function switchTab(t) {
-    document.querySelectorAll('.tab-btn, .content-section').forEach(el => el.classList.remove('active'));
-    document.getElementById(t + '-section').classList.add('active');
-    document.querySelectorAll('.tab-btn')[['submit','search','admin'].indexOf(t)].classList.add('active');
+// 分頁切換 (修復連不到問題)
+function switchTab(tabId) {
+    // 移除所有 active
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+    
+    // 加入 active
+    document.getElementById('btn-' + tabId).classList.add('active');
+    document.getElementById(tabId + '-section').classList.add('active');
 }
 
+// 密碼驗證
 function checkAdmin() {
     var pwd = document.getElementById('adminPwd').value;
     if(pwd === "daikin705") {
-        document.getElementById('admin-login').style.display = \"none\";
-        document.getElementById('admin-form').style.display = \"block\";
+        document.getElementById('admin-login').style.display = "none";
+        document.getElementById('admin-form').style.display = "block";
     } else if(pwd === "我的小心肝") {
-        document.getElementById('admin-login').style.display = \"none\";
-        document.getElementById('manager-content').style.display = \"block\";
-    } else { alert("密碼錯誤！"); }
+        document.getElementById('admin-login').style.display = "none";
+        document.getElementById('manager-content').style.display = "block";
+    } else { alert("密碼不正確！"); }
 }
 
-// 案件查詢 (完全沿用「已完成.html」穩定的搜尋邏輯)
+// 案件查詢 (橫向讀取邏輯)
 async function queryData() {
     const dName = document.getElementById('qD').value.trim();
     const cName = document.getElementById('qC').value.trim();
@@ -208,77 +220,75 @@ async function queryData() {
 
     if(!dName || !cName) return alert("請輸入完整名稱");
     res.innerHTML = "<p style='text-align:center;'>🔍 正在同步雲端資料庫...</p>";
-    surveyBox.style.display = \"none\";
+    surveyBox.style.display = "none";
 
     try {
         const response = await fetch(`${sheetUrl}&t=${Date.now()}`);
         const raw = await response.text();
-        const rows = raw.split(/\\r?\\n/).map(r => r.split(",").map(cell => cell.trim().replace(/^\"|\"$/g, '')));
+        const rows = raw.split(/\r?\n/).map(r => r.split(",").map(cell => cell.trim().replace(/^"|"$/g, '')));
         
         let found = false;
-        let html = `<table><tr><th>案件名稱</th><th>狀態</th><th>排定日期</th><th>負責人</th></tr>`;
+        let html = `<table><tr><th>案件名稱</th><th>狀態</th><th>排定日期</th><th>負責工程師</th></tr>`;
 
-        // 橫向掃描邏輯
         for (let i = 1; i < rows.length; i++) {
             if (rows[i][1] === dName && rows[i][2] === cName) {
                 found = true;
                 const pDate = rows[i][16] || ""; 
                 const pEng  = rows[i][17] || ""; 
-                const statusHtml = pDate ? '<span class=\"status-tag status-ok\">已排程</span>' : '<span class=\"status-tag status-wait\">分派中</span>';
+                const statusHtml = pDate ? '<span class="status-tag status-ok">已排程</span>' : '<span class="status-tag status-wait">分派中</span>';
                 
                 html += `<tr><td>${rows[i][2]}</td><td>${statusHtml}</td><td>${pDate || '待確認'}</td><td>${pEng || '指派中'}</td></tr>`;
                 
-                // 帶入問卷隱藏欄位
                 document.getElementById('sv_dealer').value = dName;
                 document.getElementById('sv_case').value = cName;
                 document.getElementById('sv_eng').value = pEng || "未指派";
-                surveyBox.style.display = \"block\";
+                surveyBox.style.display = "block";
             }
         }
-        res.innerHTML = found ? html + \"</table>\" : \"<p style='color:red; text-align:center;'>查無資料，請確認經銷商與案件名稱正確。</p>\";
-    } catch (e) { res.innerHTML = \"<p>連線異常。</p>\"; }
+        res.innerHTML = found ? html + "</table>" : "<p style='color:red; text-align:center;'>查無案件，請檢查名稱是否正確。</p>";
+    } catch (e) { res.innerHTML = "<p>資料庫連線失敗。</p>"; }
 }
 
-// 主管專區資料載入
+// 主管載入滿意度
 async function fetchSurveyData() {
     const list = document.getElementById('surveyList');
     list.innerHTML = "讀取中...";
     try {
-        const response = await fetch(surveySheetUrl + \"&t=\" + Date.now());
+        const response = await fetch(surveySheetUrl + "&t=" + Date.now());
         const raw = await response.text();
-        const rows = raw.split(/\\r?\\n/).map(r => r.split(\",\").map(cell => cell.trim().replace(/^\"|\"$/g, '')));
+        const rows = raw.split(/\r?\n/).map(r => r.split(",").map(cell => cell.trim().replace(/^"|"$/g, '')));
         
-        let html = \"<table><tr><th>日期</th><th>工程師</th><th>經銷商</th><th>評分</th><th>建議</th></tr>\";
+        let html = "<table><tr><th>日期</th><th>工程師</th><th>經銷商</th><th>評分</th><th>回饋</th></tr>";
         for(let i=1; i<rows.length; i++){
             if(rows[i][1]){
                 html += `<tr><td>${rows[i][0].split(' ')[0]}</td><td>${rows[i][3]}</td><td>${rows[i][1]}</td><td>${rows[i][8]}分</td><td>${rows[i][10] || '-'}</td></tr>`;
             }
         }
-        list.innerHTML = html + \"</table>\";
-    } catch (e) { list.innerHTML = \"載入失敗\"; }
+        list.innerHTML = html + "</table>";
+    } catch (e) { list.innerHTML = "讀取失敗，請確認網路。"; }
 }
 
-// 表單事件處理 (提交時加上 loading 提示)
+// 表單提交
 document.getElementById('orderForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const btn = document.getElementById('submitBtn');
     btn.disabled = true; btn.innerText = '正在傳送...';
-    fetch(gasUrl + \"?\" + new URLSearchParams(new FormData(this)).toString(), { method: 'GET', mode: 'no-cors' })
-    .then(() => { alert(\"🎉 申請成功！將儘速為您安排。\"); this.reset(); btn.disabled = false; btn.innerText = '提交申請'; });
+    fetch(gasUrl + "?" + new URLSearchParams(new FormData(this)).toString(), { method: 'GET', mode: 'no-cors' })
+    .then(() => { alert("🎉 支援申請已成功送出！"); this.reset(); btn.disabled = false; btn.innerText = '提交申請'; });
 });
 
 document.getElementById('scheduleForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const btn = document.getElementById('updateBtn');
     btn.disabled = true;
-    fetch(gasUrl + \"?\" + new URLSearchParams(new FormData(this)).toString(), { method: 'GET', mode: 'no-cors' })
-    .then(() => { alert(\"✅ 排程更新完成！\"); this.reset(); btn.disabled = false; });
+    fetch(gasUrl + "?" + new URLSearchParams(new FormData(this)).toString(), { method: 'GET', mode: 'no-cors' })
+    .then(() => { alert("✅ 排程更新完成！"); this.reset(); btn.disabled = false; });
 });
 
 document.getElementById('surveyForm').addEventListener('submit', function(e) {
     e.preventDefault();
-    fetch(gasUrl + \"?\" + new URLSearchParams(new FormData(this)).toString(), { method: 'GET', mode: 'no-cors' })
-    .then(() => { alert(\"💖 感謝回饋！您的意見是我們進步的動力。\"); document.getElementById('integrated-survey').style.display = \"none\"; });
+    fetch(gasUrl + "?" + new URLSearchParams(new FormData(this)).toString(), { method: 'GET', mode: 'no-cors' })
+    .then(() => { alert("💖 感謝您的寶貴回饋！"); document.getElementById('integrated-survey').style.display = "none"; });
 });
 </script>
 
