@@ -97,7 +97,13 @@
         .status-ok { background-color: #e6fffa; color: #2c7a7b; }
         .status-wait { background-color: #fffaf0; color: #9c4221; }
         .sync-notice { background-color: #fff8e1; border-left: 5px solid var(--accent-color); padding: 15px; border-radius: 8px; margin-bottom: 25px; color: #856404; }
-    </style>
+  /* --- 滿意度調查專屬樣式 --- */
+        #integrated-survey { 
+            background: #fdfdfd; padding: 25px; border: 2px dashed #2D5D46; border-radius: 12px; margin-top: 30px; 
+        }
+        .score-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+        .survey-btn { background: linear-gradient(135deg, #2D5D46 0%, #1a3a2b 100%); color: white; }
+  </style>
 </head>
 <body>
 
@@ -381,26 +387,69 @@ async function queryData() {
     const dName = document.getElementById('qD').value.trim();
     const cName = document.getElementById('qC').value.trim();
     const res = document.getElementById('results');
+    const surveyBox = document.getElementById('integrated-survey'); // 取得問卷區塊
+    
     if(!dName || !cName) return alert("請輸入完整名稱");
     res.innerHTML = "<p style='text-align:center; padding:20px; color:#666;'>🔍 正在安全連線雲端資料庫...</p>";
+    surveyBox.style.display = "none"; // 每次查詢前先隱藏問卷
+
     try {
         const response = await fetch(`${sheetUrl}&t=${Date.now()}`);
         const raw = await response.text();
         const rows = raw.split(/\r?\n/).map(r => r.split(",").map(cell => cell.trim().replace(/^"|"$/g, '')));
+        
         let found = false;
         let html = `<table><tr><th>案件名稱</th><th>狀態</th><th>排定日期</th><th>負責工程師</th><th>聯絡電話</th></tr>`;
+        
         for (let j = 1; j < rows[0].length; j++) {
             if (rows[1] && rows[1][j] === dName && rows[2] && rows[2][j] === cName) {
                 found = true;
-                const pDate = rows[19][j]; const pEng = rows[20][j]; const pTel = rows[21][j];
+                const pDate = rows[19][j]; 
+                const pEng = rows[20][j]; 
+                const pTel = rows[21][j];
                 const isSet = (pDate && pDate !== "" && pDate !== "0" && pDate !== "undefined");
+                
                 html += `<tr><td>${rows[2][j]}</td><td><span class="status-tag ${isSet ? 'status-ok':'status-wait'}">${isSet ? '已排程':'分派中'}</span></td><td>${isSet ? pDate:'待確認'}</td><td>${pEng || '指派中'}</td><td>${pTel || '--'}</td></tr>`;
+                
+                // --- 滿意度調查連動核心 ---
+                if (isSet) {
+                    // 1. 自動帶入隱藏欄位值
+                    document.getElementById('sv_dealer').value = dName;
+                    document.getElementById('sv_case').value = cName;
+                    document.getElementById('sv_eng').value = pEng || "未指派";
+                    
+                    // 2. 顯示問卷區塊
+                    surveyBox.style.display = "block";
+                }
             }
         }
         res.innerHTML = found ? html + "</table>" : "<p style='color:#d93025; text-align:center; margin-top:20px;'>查無資料，請確認名稱是否正確。</p>";
     } catch (e) { res.innerHTML = "連線異常"; }
 }
 
+// 滿意度調查表單提交 (新增部分)
+document.getElementById('surveyForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('surveyBtn');
+    btn.disabled = true;
+    btn.innerText = '傳送回饋中...';
+    
+    fetch(gasUrl + "?" + new URLSearchParams(new FormData(this)).toString(), { method: 'GET', mode: 'no-cors' })
+    .then(() => {
+        alert("🎉 感謝您的回饋與心得！");
+        this.reset();
+        document.getElementById('integrated-survey').style.display = "none";
+        btn.disabled = false;
+        btn.innerText = '送出評價回饋';
+    })
+    .catch(() => {
+        alert("傳送失敗，請稍後再試");
+        btn.disabled = false;
+        btn.innerText = '送出評價回饋';
+    });
+});
+
+// 原有的提交申請邏輯
 document.getElementById('orderForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const btn = document.getElementById('submitBtn'); btn.disabled = true; btn.innerText = '正在傳送申請...';
@@ -408,6 +457,7 @@ document.getElementById('orderForm').addEventListener('submit', function(e) {
     .then(() => { alert("🎉 支援申請已成功送出！"); this.reset(); btn.disabled = false; btn.innerText = '提交申請'; });
 });
 
+// 原有的更新排程邏輯
 document.getElementById('scheduleForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const btn = document.getElementById('updateBtn'); btn.disabled = true; btn.innerText = '正在寫入資料...';
