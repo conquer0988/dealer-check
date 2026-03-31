@@ -191,40 +191,38 @@ async function queryData() {
     const dName = document.getElementById('qD').value.trim();
     const cName = document.getElementById('qC').value.trim();
     const res = document.getElementById('results');
-    const surveyBox = document.getElementById('integrated-survey');
-
     if(!dName || !cName) return alert("請輸入完整名稱");
-    res.innerHTML = "🔍 搜尋中...";
-    surveyBox.style.display = "none";
-
+    
+    res.innerHTML = "<p style='text-align:center; padding:20px; color:#666;'>🔍 正在安全連線雲端資料庫...</p>";
     try {
         const response = await fetch(`${sheetUrl}&t=${Date.now()}`);
-        const text = await response.text();
-        // 解決地址中有逗號的分割問題
-        const rows = text.split(/\r?\n/).map(line => line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/));
-
+        const raw = await response.text();
+        const rows = raw.split(/\r?\n/).map(r => r.split(",").map(cell => cell.trim().replace(/^"|"$/g, '')));
+        
         let found = false;
-        let html = `<table><tr><th>案件名稱</th><th>狀態</th><th>日期</th><th>工程師</th></tr>`;
+        let html = `<table><tr><th>案件名稱</th><th>狀態</th><th>排定日期</th><th>負責工程師</th><th>聯絡電話</th></tr>`;
 
-        for (let i = 1; i < rows.length; i++) {
-            let row = rows[i].map(c => c.replace(/^"|"$/g, '').trim());
-            // row[1] 是經銷商，row[2] 是案件名稱
-            if (row[1] === dName && row[2] === cName) {
+        for (let j = 1; j < rows[0].length; j++) {
+            if (rows[1] && rows[1][j] === dName && rows[2] && rows[2][j] === cName) {
                 found = true;
-                const pDate = row[16] || ""; 
-                const pEng  = row[17] || ""; 
-                const statusStr = pDate ? '<span class="status-tag status-ok">已排程</span>' : '<span class="status-tag status-wait">分派中</span>';
+                // 維持您原本正常的讀取邏輯
+                const pDate = rows[19] ? rows[19][j] : ""; 
+                const pEng  = rows[20] ? rows[20][j] : ""; 
+                const pTel  = rows[21] ? rows[21][j] : ""; 
+
+                const isDateSet = (pDate && pDate !== "" && pDate !== "0" && pDate !== "undefined");
                 
-                html += `<tr><td>${row[2]}</td><td>${statusStr}</td><td>${pDate || '待定'}</td><td>${pEng || '指派中'}</td></tr>`;
-                
-                document.getElementById('sv_dealer').value = dName;
-                document.getElementById('sv_case').value = cName;
-                document.getElementById('sv_eng').value = pEng || "未指派";
-                surveyBox.style.display = "block";
+                html += `<tr>
+                    <td>${rows[2][j]}</td>
+                    <td><span class="status-tag ${isDateSet ? 'status-ok' : 'status-wait'}">${isDateSet ? '已排程' : '分派中'}</span></td>
+                    <td>${isDateSet ? pDate : "待確認"}</td>
+                    <td>${(pEng && pEng !== "undefined") ? pEng : "指派中"}</td>
+                    <td>${(pTel && pTel !== "undefined") ? pTel : "--"}</td>
+                </tr>`;
             }
         }
-        res.innerHTML = found ? html + "</table>" : "<p style='color:red; text-align:center;'>查無資料，請確認名稱是否完全一致。</p>";
-    } catch (e) { res.innerHTML = "連線失敗"; }
+        res.innerHTML = found ? html + "</table>" : "<p style='color:#d93025; text-align:center; margin-top:20px;'>查無資料，請確認名稱是否正確。</p>";
+    } catch (e) { res.innerHTML = "<p style='text-align:center;'>連線異常。</p>"; }
 }
 
 // 表單提交處理
