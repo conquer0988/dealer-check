@@ -13,7 +13,8 @@
             --text-color: #202124;
             --accent-color: #fbbc04;
             --error-color: #d93025;
-            --admin-color: #673AB7; /* 新增管理員色系 */
+            --admin-color: #673AB7; 
+            --manager-color: #E91E63; 
         }
 
         body { 
@@ -25,7 +26,7 @@
         }
 
         .container { 
-            max-width: 900px; 
+            max-width: 950px; 
             margin: 0 auto; 
             background: var(--card-bg); 
             padding: 40px; 
@@ -33,31 +34,6 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
         }
 
-        /* 說明區塊 */
-        .instruction-card {
-            background-color: #ffffff;
-            border: 1px solid #e0e0e0;
-            border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 30px;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
-        }
-        .instruction-title {
-            color: var(--secondary-color);
-            font-size: 22px;
-            font-weight: bold;
-            margin-bottom: 15px;
-            border-bottom: 2px solid var(--secondary-color);
-            padding-bottom: 8px;
-            display: inline-block;
-        }
-        .instruction-item { margin-bottom: 15px; }
-        .instruction-item strong { color: var(--primary-color); display: block; font-size: 16px; margin-bottom: 4px; }
-        .instruction-item p, .instruction-item li { margin: 0; font-size: 15px; color: #5f6368; }
-        .instruction-item ul { padding-left: 20px; margin-top: 5px; }
-        .warning-text { color: var(--error-color); font-weight: bold; font-size: 14px; margin-top: 10px; }
-
-        /* 頁籤設計 */
         .tabs { display: flex; margin-bottom: 30px; border-bottom: 2px solid #e0e0e0; gap: 10px; }
         .tab-btn { 
             padding: 12px 24px; cursor: pointer; border: none; background: none; 
@@ -66,7 +42,6 @@
         .tab-btn.active { 
             color: var(--primary-color); border-bottom: 4px solid var(--primary-color); background-color: rgba(26, 115, 232, 0.1);
         }
-        /* 管理員專屬標籤樣式 */
         .tab-btn.admin-tab.active { 
             color: var(--admin-color); border-bottom-color: var(--admin-color); background-color: rgba(103, 58, 183, 0.1);
         }
@@ -76,26 +51,34 @@
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 表單區塊 */
+        .instruction-card { background-color: #ffffff; border: 1px solid #e0e0e0; border-radius: 12px; padding: 25px; margin-bottom: 30px; }
+        .instruction-title { color: var(--secondary-color); font-size: 22px; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid var(--secondary-color); padding-bottom: 8px; display: inline-block; }
+        .instruction-item { margin-bottom: 15px; }
+        .instruction-item strong { color: var(--primary-color); display: block; font-size: 16px; margin-bottom: 4px; }
+        .instruction-item p, .instruction-item li { margin: 0; font-size: 15px; color: #5f6368; }
+        .instruction-item ul { padding-left: 20px; margin-top: 5px; }
+        .warning-text { color: var(--error-color); font-weight: bold; font-size: 14px; margin-top: 10px; }
+        .sync-notice { background-color: #fff8e1; border-left: 5px solid var(--accent-color); padding: 15px; border-radius: 8px; margin-bottom: 25px; color: #856404; }
+
         .form-section { background: #f1f3f4; padding: 10px 15px; border-radius: 8px; margin: 30px 0 20px 0; }
         .form-section h3 { margin: 0; color: var(--secondary-color); font-size: 18px; }
         .form-group { margin-bottom: 20px; }
         label { display: block; margin-bottom: 8px; font-weight: 600; color: #3c4043; }
         input, select, textarea { width: 100%; font-size: 16px; padding: 12px; border: 1px solid #dadce0; border-radius: 8px; box-sizing: border-box; }
-        button { 
-            font-size: 18px; padding: 16px; background: linear-gradient(135deg, #1A73E8 0%, #1557b0 100%); 
-            color: white; border: none; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 20px; 
-        }
+        button { font-size: 18px; padding: 16px; background: linear-gradient(135deg, #1A73E8 0%, #1557b0 100%); color: white; border: none; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 20px; }
         .admin-btn { background: linear-gradient(135deg, #673AB7 0%, #512DA8 100%); }
-
-        /* 表格樣式 */
-        table { border-collapse: separate; border-spacing: 0; width: 100%; margin-top: 25px; border-radius: 12px; overflow: hidden; border: 1px solid #e0e0e0; }
-        th { background-color: var(--secondary-color); color: white; padding: 15px; text-align: left; }
-        td { padding: 15px; border-bottom: 1px solid #f1f3f4; background-color: white; }
+        .manager-btn { background: linear-gradient(135deg, #E91E63 0%, #C2185B 100%); }
+        
+        table { border-collapse: separate; border-spacing: 0; width: 100%; margin-top: 25px; border-radius: 12px; overflow: hidden; border: 1px solid #e0e0e0; font-size: 14px; }
+        th { background-color: var(--secondary-color); color: white; padding: 12px; text-align: left; }
+        td { padding: 12px; border-bottom: 1px solid #f1f3f4; background-color: white; vertical-align: top; }
         .status-tag { padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 13px; }
         .status-ok { background-color: #e6fffa; color: #2c7a7b; }
         .status-wait { background-color: #fffaf0; color: #9c4221; }
-        .sync-notice { background-color: #fff8e1; border-left: 5px solid var(--accent-color); padding: 15px; border-radius: 8px; margin-bottom: 25px; color: #856404; }
+
+        #integrated-survey { background: #fdfdfd; padding: 25px; border: 2px solid #eee; border-radius: 12px; margin-top: 30px; border-top: 4px solid var(--primary-color); }
+        .survey-btn { background: linear-gradient(135deg, #2D5D46 0%, #1a3a2b 100%); margin-top: 10px; width: 100%; }
+        .score-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 20px; }
     </style>
 </head>
 <body>
@@ -104,64 +87,47 @@
     <div class="tabs">
         <div class="tab-btn active" onclick="switchTab('submit')">支援申請填單</div>
         <div class="tab-btn" onclick="switchTab('search')">案件進度查詢</div>
-        <div class="tab-btn admin-tab" onclick="switchTab('admin')">🔒 工程師專區</div>
+        <div class="tab-btn admin-tab" onclick="switchTab('admin')">🔒 工程師/主管專區</div>
     </div>
 
     <section id="submit-section" class="content-section active">
-        
         <div class="instruction-card">
             <div class="instruction-title">案件支援申請說明</div>
-            
             <div class="instruction-item">
                 <strong>1. 申請方式</strong>
                 <p>請填寫下方線上申請表單完成申請登記，並可利用「案件進度查詢」網頁查詢是否完成登記。</p>
             </div>
-
             <div class="instruction-item">
                 <strong>2. 申請流程</strong>
                 <p>表單送出後，將於 3 個工作天內由專人聯繫確認相關資料。</p>
             </div>
-
             <div class="instruction-item">
                 <strong>3. 資料提供方式</strong>
-                <p>案件相關資料可寄至：<a href="mailto:orion0412@hotaidev.com.tw">orion0412@hotaidev.com.tw</a>，或於專人聯繫後再提供。</p>
-                <p><strong>應檢附資料：</strong></p>
-                <ul>
-                    <li>設備明細表</li>
-                    <li>系統圖面（電子檔）</li>
-                    <li><a href="https://drive.google.com/file/d/1fyiEjwuoOtYqpzB8j2ntkzab4CTxCrhM/view?usp=sharing" target="_blank" style="color: #d93025; font-weight: bold; text-decoration: underline;">試車前檢查表 (點此下載)</a>（試車申請案件需檢附）</li>
-                </ul>
+                <p>案件相關資料可寄至：<a href="mailto:orion0412@hotaidev.com.tw">orion0412@hotaidev.com.tw</a></p>
+                <p><strong>應檢附資料：</strong>系統圖面、設備明細表、<a href="https://drive.google.com/file/d/1fyiEjwuoOtYqpzB8j2ntkzab4CTxCrhM/view?usp=sharing" target="_blank">試車前檢查表</a>。</p>
             </div>
-
             <div class="instruction-item">
                 <strong>4. 派工安排</strong>
                 <p>資料確認齊全後，始安排試車派工。</p>
                 <p class="warning-text">※ 申請資料未齊全者，將暫緩派工安排。</p>
             </div>
-
             <div class="instruction-item">
-                <strong>5. 現場配合事項</strong>
-                <p>試車當日請由經銷商現場負責人全程會同。</p>
-            </div>
-
-            <div class="instruction-item">
-                <strong>6. 聯絡專線</strong>
+                <strong>5. 聯絡專線</strong>
                 <p>📞 02-2514-8887 #705</p>
             </div>
         </div>
 
         <form id="orderForm">
             <div class="form-section"><h3>案件資訊</h3></div>
-            <div class="form-group"><label>案件名稱 *</label><input type="text" name="caseName" placeholder="請輸入案件名稱" required></div>
+            <div class="form-group"><label>案件名稱 *</label><input type="text" name="caseName" required></div>
             <div class="form-group"><label>案件地址 *</label><input type="text" name="caseAddress" required></div>
             <div class="form-group">
                 <label>支援工作內容 *</label>
                 <select name="workType" required>
-                    <option value="">請選擇支援項目</option>
+                    <option value="">請選擇</option>
                     <option value="VRV試車">VRV試車</option>
                     <option value="VRV Q 汰換前檢查">VRV Q 汰換前檢查</option>
                     <option value="VRV Q 汰換後檢查">VRV Q 汰換後檢查</option>
-                    <option value="VRV 案件技術輔導(已有案件，但沒有VRV經驗)">VRV 案件技術輔導(已有案件，但沒有VRV經驗)</option>
                     <option value="教育訓練">教育訓練</option>
                     <option value="工程品質巡檢">工程品質巡檢</option>
                     <option value="其他">其他</option>
@@ -170,18 +136,9 @@
             <div class="form-group"><label>內容詳述 *</label><textarea name="description" rows="3" required></textarea></div>
 
             <div class="form-section"><h3>經銷商資訊</h3></div>
-            <div class="form-group"><label>經銷商名稱 *</label><input type="text" name="dealerName" placeholder="請輸入經銷商名稱" required></div>
+            <div class="form-group"><label>經銷商名稱 *</label><input type="text" name="dealerName" required></div>
             <div class="form-group"><label>聯絡人姓名 *</label><input type="text" name="dealerContactName" required></div>
             <div class="form-group"><label>聯絡人電話 *</label><input type="tel" name="dealerPhone" required></div>
-            <div class="form-group"><label>電子信箱</label><input type="email" name="dealerEmail"></div>
-            <div class="form-group"><label>LINE ID</label><input type="text" name="dealerLine"></div>
-
-            <div class="form-section"><h3>現場負責人（非業主）</h3></div>
-            <div class="form-group"><label>現場負責姓名 *</label><input type="text" name="siteContactName" required></div>
-            <div class="form-group"><label>現場負責電話 *</label><input type="tel" name="sitePhone" required></div>
-            <div class="form-group"><label>現場負責信箱</label><input type="email" name="siteEmail"></div>
-            <div class="form-group"><label>現場負責 LINE</label><input type="text" name="siteLine"></div>
-
             <button type="submit" id="submitBtn">提交申請</button>
         </form>
     </section>
@@ -190,43 +147,67 @@
         <div class="sync-notice">
             <strong>💡 溫馨提醒：</strong><br>
             1. 新提交案件請於 <strong>3-5 分鐘</strong> 後再行查詢。<br>
-            2. 查詢時，<strong>「經銷商名稱」</strong>與<strong>「案件名稱」</strong>須與申請填單時內容完全一致，方可讀取資料。
+            2. 查詢時，<strong>「經銷商名稱」</strong>與<strong>「案件名稱」</strong>須與申請填單時內容完全一致。
         </div>
 
-        <div class="form-group"><label>經銷商名稱</label><input type="text" id="qD" placeholder="請輸入經銷商名稱"></div>
-        <div class="form-group"><label>案件名稱</label><input type="text" id="qC" placeholder="請輸入案件名稱"></div>
+        <div class="form-group"><label>經銷商名稱</label><input type="text" id="qD" placeholder="輸入當初填單的經銷商名稱"></div>
+        <div class="form-group"><label>案件名稱</label><input type="text" id="qC" placeholder="輸入當初填單的案件名稱"></div>
         <button onclick="queryData()">開始進度查詢</button>
         <div id="results"></div>
+
+        <div id="integrated-survey" style="display:none;">
+            <div class="form-section"><h3>🌟 服務回饋調查</h3></div>
+            <form id="surveyForm">
+                <input type="hidden" name="mode" value="survey">
+                <input type="hidden" name="sv_dealer" id="sv_dealer">
+                <input type="hidden" name="sv_case" id="sv_case">
+                <input type="hidden" name="sv_eng" id="sv_eng">
+
+                <div class="score-grid">
+                    <div class="form-group"><label>技術專業</label><select name="scoreTech"><option value="5">5分</option><option value="4">4分</option><option value="3">3分</option><option value="2">2分</option><option value="1">1分</option></select></div>
+                    <div class="form-group"><label>總體滿意</label><select name="scoreOverall"><option value="5">5分</option><option value="4">4分</option><option value="3">3分</option><option value="2">2分</option><option value="1">1分</option></select></div>
+                </div>
+                <div class="form-group"><label>具體建議</label><textarea name="feedbackMsg" rows="2"></textarea></div>
+                <button type="submit" id="surveyBtn" class="survey-btn">送出評價回饋</button>
+            </form>
+        </div>
     </section>
 
     <section id="admin-section" class="content-section">
         <div id="admin-login">
-            <div class="form-section"><h3>管理員驗證</h3></div>
-            <div class="form-group">
-                <label>請輸入管理密碼</label>
-                <input type="password" id="adminPwd" placeholder="密碼">
-            </div>
-            <button class="admin-btn" onclick="checkAdmin()">登入專區</button>
+            <div class="form-section"><h3>身份驗證</h3></div>
+            <div class="form-group"><label>請輸入您的專屬密碼</label><input type="password" id="adminPwd"></div>
+            <button class="admin-btn" onclick="checkAdmin()">驗證登入</button>
         </div>
+
         <div id="admin-form" style="display:none;">
-            <div class="form-section"><h3>更新案件排程</h3></div>
+            <div class="form-section"><h3>🔒 工程師專區 - 更新案件排程</h3></div>
             <form id="scheduleForm">
                 <input type="hidden" name="mode" value="update">
-                <div class="form-group"><label>經銷商名稱 * (須完全一致)</label><input type="text" name="dealerName" required></div>
-                <div class="form-group"><label>案件名稱 * (須完全一致)</label><input type="text" name="caseName" required></div>
+                <div class="form-group"><label>經銷商名稱 *</label><input type="text" name="dealerName" required></div>
+                <div class="form-group"><label>案件名稱 *</label><input type="text" name="caseName" required></div>
                 <div class="form-group"><label>排定日期 *</label><input type="date" name="pDate" required></div>
                 <div class="form-group"><label>負責工程師 *</label><input type="text" name="pEng" required></div>
                 <div class="form-group"><label>工程師電話 *</label><input type="tel" name="pTel" required></div>
                 <button type="submit" class="admin-btn" id="updateBtn">確認更新排程</button>
             </form>
         </div>
+
+        <div id="manager-content" style="display:none;">
+            <div class="form-section"><h3>🌟 主管專區 - 經銷商服務回饋看板</h3></div>
+            <button class="manager-btn" onclick="fetchSurveyData()">🔄 載入最新回饋資料</button>
+            <div id="surveyList" style="margin-top:20px; overflow-x:auto;"></div>
+        </div>
     </section>
 </div>
 
 <script>
+// 1. 基本設定
 const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSjbJC6VSPPicOPdwTHbcF3ETS5BSJnC_-HIvBNounFVLXik9NxzChJGqackA8HEWcfnkBMjUhWIUmQ/pub?gid=656272806&single=true&output=csv";
 const gasUrl = "https://script.google.com/macros/s/AKfycbydkRtSF_FeidEHkgUCStISZv-u07k0SmsaMq6-7twmP714lglPTh7AqUWKdwKvb5czNg/exec";
+const surveySheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSjbJC6VSPPicOPdwTHbcF3ETS5BSJnC_-HIvBNounFVLXik9NxzChJGqackA8HEWcfnkBMjUhWIUmQ/pub?gid=2027669544&output=csv";
 
+// 2. 頁籤切換
 function switchTab(t) {
     document.querySelectorAll('.tab-btn, .content-section').forEach(el => el.classList.remove('active'));
     if(t === 'search') {
@@ -241,92 +222,113 @@ function switchTab(t) {
     }
 }
 
+// 3. 密碼驗證 (完全依照「已完成.html」邏輯)
 function checkAdmin() {
-    if(document.getElementById('adminPwd').value === "daikin705") {
+    var pwd = document.getElementById('adminPwd').value;
+    if(pwd === "daikin705") {
         document.getElementById('admin-login').style.display = "none";
         document.getElementById('admin-form').style.display = "block";
-    } else { alert("密碼錯誤"); }
+    } else if(pwd === "我的小心肝") {
+        document.getElementById('admin-login').style.display = "none";
+        document.getElementById('manager-content').style.display = "block";
+    } else {
+        alert("密碼錯誤！");
+    }
 }
 
+// 4. 案件查詢 (完全依照「已完成.html」邏輯)
 async function queryData() {
     const dName = document.getElementById('qD').value.trim();
     const cName = document.getElementById('qC').value.trim();
     const res = document.getElementById('results');
-    if(!dName || !cName) return alert("請輸入完整名稱");
-    
-    res.innerHTML = "<p style='text-align:center; padding:20px; color:#666;'>🔍 正在安全連線雲端資料庫...</p>";
+    const surveyBox = document.getElementById('integrated-survey');
+
+    if(!dName || !cName) return alert("請輸入經銷商與案件名稱");
+    res.innerHTML = "<p style='text-align:center; margin-top:20px;'>🔍 正在連線雲端資料庫...</p>";
+    surveyBox.style.display = "none";
+
     try {
         const response = await fetch(`${sheetUrl}&t=${Date.now()}`);
         const raw = await response.text();
+        // 依照舊版解析 CSV
         const rows = raw.split(/\r?\n/).map(r => r.split(",").map(cell => cell.trim().replace(/^"|"$/g, '')));
         
         let found = false;
-        let html = `<table><tr><th>案件名稱</th><th>狀態</th><th>排定日期</th><th>負責工程師</th><th>聯絡電話</th></tr>`;
+        let html = `<table><tr><th>案件名稱</th><th>狀態</th><th>排定日期</th><th>工程師</th></tr>`;
 
-        for (let j = 1; j < rows[0].length; j++) {
-            if (rows[1] && rows[1][j] === dName && rows[2] && rows[2][j] === cName) {
+        // 依照舊版迴圈邏輯：i=1 開始逐行找
+        for (let i = 1; i < rows.length; i++) {
+            if (rows[i][1] === dName && rows[i][2] === cName) {
                 found = true;
-                // 維持您原本正常的讀取邏輯
-                const pDate = rows[19] ? rows[19][j] : ""; 
-                const pEng  = rows[20] ? rows[20][j] : ""; 
-                const pTel  = rows[21] ? rows[21][j] : ""; 
-
-                const isDateSet = (pDate && pDate !== "" && pDate !== "0" && pDate !== "undefined");
+                const pDate = rows[i][16] || ""; 
+                const pEng  = rows[i][17] || ""; 
+                const statusTag = pDate ? '<span class="status-tag status-ok">已排程</span>' : '<span class="status-tag status-wait">分派中</span>';
                 
                 html += `<tr>
-                    <td>${rows[2][j]}</td>
-                    <td><span class="status-tag ${isDateSet ? 'status-ok' : 'status-wait'}">${isDateSet ? '已排程' : '分派中'}</span></td>
-                    <td>${isDateSet ? pDate : "待確認"}</td>
-                    <td>${(pEng && pEng !== "undefined") ? pEng : "指派中"}</td>
-                    <td>${(pTel && pTel !== "undefined") ? pTel : "--"}</td>
+                    <td>${rows[i][2]}</td>
+                    <td>${statusTag}</td>
+                    <td>${pDate || '待確認'}</td>
+                    <td>${pEng || '指派中'}</td>
                 </tr>`;
+                
+                // 預填評價表單隱藏欄位
+                document.getElementById('sv_dealer').value = dName;
+                document.getElementById('sv_case').value = cName;
+                document.getElementById('sv_eng').value = pEng || "未指派";
+                surveyBox.style.display = "block";
             }
         }
         res.innerHTML = found ? html + "</table>" : "<p style='color:#d93025; text-align:center; margin-top:20px;'>查無資料，請確認名稱是否正確。</p>";
-    } catch (e) { res.innerHTML = "<p style='text-align:center;'>連線異常。</p>"; }
+    } catch (e) {
+        res.innerHTML = "<p style='text-align:center;'>連線異常，請確認網路或發佈設定。</p>";
+    }
 }
 
-// 提交申請
+// 5. 主管專區載入回饋
+async function fetchSurveyData() {
+    const list = document.getElementById('surveyList');
+    list.innerHTML = "讀取中...";
+    try {
+        const response = await fetch(surveySheetUrl + "&t=" + Date.now());
+        const raw = await response.text();
+        const rows = raw.split(/\r?\n/).map(r => r.split(",").map(cell => cell.trim().replace(/^"|"$/g, '')));
+        
+        let html = "<table><tr><th>日期</th><th>工程師</th><th>經銷商</th><th>評分(技/準/合/教/總)</th><th>建議</th></tr>";
+        for(let i=1; i<rows.length; i++){
+            if(rows[i][1]){
+                html += `<tr>
+                    <td>${rows[i][0].split(' ')[0]}</td>
+                    <td>${rows[i][3]}</td>
+                    <td>${rows[i][1]}</td>
+                    <td>${rows[i][4]}/${rows[i][5]}/${rows[i][6]}/${rows[i][7]}/${rows[i][8]}</td>
+                    <td>${rows[i][10] || '-'}</td>
+                </tr>`;
+            }
+        }
+        list.innerHTML = html + "</table>";
+    } catch (e) { list.innerHTML = "讀取失敗"; }
+}
+
+// 6. 事件監聽
 document.getElementById('orderForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const btn = document.getElementById('submitBtn');
-    btn.disabled = true;
-    btn.innerText = '正在傳送申請...';
-    
+    btn.disabled = true; btn.innerText = '正在傳送申請...';
     fetch(gasUrl + "?" + new URLSearchParams(new FormData(this)).toString(), { method: 'GET', mode: 'no-cors' })
-    .then(() => {
-        alert("🎉 支援申請已成功送出！");
-        this.reset();
-        btn.disabled = false;
-        btn.innerText = '提交申請';
-    })
-    .catch(() => {
-        alert("連線失敗");
-        btn.disabled = false;
-        btn.innerText = '提交申請';
-    });
+    .then(() => { alert("🎉 支援申請已成功送出！"); this.reset(); btn.disabled = false; btn.innerText = '提交申請'; });
 });
 
-// 更新排程 (工程師用)
 document.getElementById('scheduleForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const btn = document.getElementById('updateBtn');
-    btn.disabled = true;
-    btn.innerText = '正在寫入資料...';
-    
+    btn.disabled = true; btn.innerText = '正在寫入資料...';
     fetch(gasUrl + "?" + new URLSearchParams(new FormData(this)).toString(), { method: 'GET', mode: 'no-cors' })
-    .then(() => {
-        alert("✅ 排程已成功更新！");
-        this.reset();
-        btn.disabled = false;
-        btn.innerText = '確認更新排程';
-    })
-    .catch(() => {
-        alert("連線失敗");
-        btn.disabled = false;
-        btn.innerText = '確認更新排程';
-    });
+    .then(() => { alert("✅ 排程更新完成！"); this.reset(); btn.disabled = false; btn.innerText = '確認更新排程'; });
+});
+
+document.getElementById('surveyForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    fetch(gasUrl + "?" + new URLSearchParams(new FormData(this)).toString(), { method: 'GET', mode: 'no-cors' })
+    .then(() => { alert("💖 感謝您的回饋！"); this.reset(); document.getElementById('integrated-survey').style.display = "none"; });
 });
 </script>
-</body>
-</html>
