@@ -63,7 +63,49 @@
         <button class="tab-btn" id="btn-admin" onclick="switchTab('admin')">🔒 管理專區</button>
     </div>
 
-    <div id="submit-section" class="content-section active">
+    <section id="submit-section" class="content-section active">
+        
+        <div class="instruction-card">
+            <div class="instruction-title">案件支援申請說明</div>
+            
+            <div class="instruction-item">
+                <strong>1. 申請方式</strong>
+                <p>請填寫下方線上申請表單完成申請登記，並可利用「案件進度查詢」網頁查詢是否完成登記。</p>
+            </div>
+
+            <div class="instruction-item">
+                <strong>2. 申請流程</strong>
+                <p>表單送出後，將於 3 個工作天內由專人聯繫確認相關資料。</p>
+            </div>
+
+            <div class="instruction-item">
+                <strong>3. 資料提供方式</strong>
+                <p>案件相關資料可寄至：<a href="mailto:orion0412@hotaidev.com.tw">orion0412@hotaidev.com.tw</a>，或於專人聯繫後再提供。</p>
+                <p><strong>應檢附資料：</strong></p>
+                <ul>
+                    <li>設備明細表</li>
+                    <li>系統圖面（電子檔）</li>
+                    <li><a href="https://drive.google.com/file/d/1fyiEjwuoOtYqpzB8j2ntkzab4CTxCrhM/view?usp=sharing" target="_blank" style="color: #d93025; font-weight: bold; text-decoration: underline;">試車前檢查表 (點此下載)</a>（試車申請案件需檢附）</li>
+                </ul>
+            </div>
+
+            <div class="instruction-item">
+                <strong>4. 派工安排</strong>
+                <p>資料確認齊全後，始安排試車派工。</p>
+                <p class="warning-text">※ 申請資料未齊全者，將暫緩派工安排。</p>
+            </div>
+
+            <div class="instruction-item">
+                <strong>5. 現場配合事項</strong>
+                <p>試車當日請由經銷商現場負責人全程會同。</p>
+            </div>
+
+            <div class="instruction-item">
+                <strong>6. 聯絡專線</strong>
+                <p>📞 02-2514-8887 #705</p>
+            </div>
+        </div>
+
         <form id="orderForm">
             <div class="form-section">
                 <h3>一、 案件基本資訊</h3>
@@ -84,7 +126,7 @@
                 </div>
                 <hr style="border: 0.5px solid #ddd; margin: 15px 0;">
                 <div class="form-grid">
-                    <div class="form-group"><label>現場聯絡人 *</label><input type="text" name="siteContactName" required></div>
+                    <div class="form-group"><label>現場聯絡人（非業主） *</label><input type="text" name="siteContactName" required></div>
                     <div class="form-group"><label>現場電話 *</label><input type="text" name="sitePhone" required></div>
                     <div class="form-group"><label>現場 Email</label><input type="email" name="siteEmail"></div>
                     <div class="form-group"><label>現場 LINE ID</label><input type="text" name="siteLine"></div>
@@ -113,16 +155,73 @@
             </div>
             <button type="submit" class="main-btn" id="submitBtn">提交申請</button>
         </form>
-    </div>
+     </section>
 
-    <div id="search-section" class="content-section">
-        <div class="form-section" style="background:#e8f0fe;">
-            <div class="form-group"><label>經銷商名稱</label><input type="text" id="qD"></div>
-            <div class="form-group"><label>案件名稱</label><input type="text" id="qC"></div>
-            <button onclick="queryData()" class="main-btn" style="background:#1967d2;">查詢案件</button>
+    <section id="search-section" class="content-section">
+        <div class="sync-notice">
+            <strong>💡 溫馨提醒：</strong><br>
+            1. 新提交案件請於 <strong>3-5 分鐘</strong> 後再行查詢。<br>
+            2. 查詢時，<strong>「經銷商名稱」</strong>與<strong>「案件名稱」</strong>須與申請填單時內容完全一致，方可讀取資料。
         </div>
+        <div class="form-group"><label>經銷商名稱</label><input type="text" id="qD" placeholder="輸入經銷商全名"></div>
+        <div class="form-group"><label>案件名稱</label><input type="text" id="qC" placeholder="輸入案件全名"></div>
+        <button onclick="queryData()">開始進度查詢</button>
+        
         <div id="results"></div>
 
+        <div id="integrated-survey" style="display:none;">
+            <div class="form-section"><h3>🌟 服務回饋調查 (五大維度)</h3></div>
+            <form id="surveyForm">
+                <input type="hidden" name="mode" value="survey">
+                <input type="hidden" name="sv_dealer" id="sv_dealer">
+                <input type="hidden" name="sv_case" id="sv_case">
+                <input type="hidden" name="sv_eng" id="sv_eng">
+
+                <div class="score-grid">
+                    <div class="form-group">
+                        <label>1. 技術專業度</label>
+                        <select name="scoreTech" required>
+                            <option value="5">5分 (極優)</option><option value="4">4分</option><option value="3">3分</option><option value="2">2分</option><option value="1">1分</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>2. 到達準時性</label>
+                        <select name="scoreTime" required>
+                            <option value="5">5分 (極優)</option><option value="4">4分</option><option value="3">3分</option><option value="2">2分</option><option value="1">1分</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>3. 現場配合度</label>
+                        <select name="scoreCoord" required>
+                            <option value="5">5分 (極優)</option><option value="4">4分</option><option value="3">3分</option><option value="2">2分</option><option value="1">1分</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>4. 教育成效</label>
+                        <select name="scoreEdu" required>
+                            <option value="5">5分 (極優)</option><option value="4">4分</option><option value="3">3分</option><option value="2">2分</option><option value="1">1分</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>5. 總體滿意度</label>
+                        <select name="scoreOverall" required>
+                            <option value="5">5分 (極優)</option><option value="4">4分</option><option value="3">3分</option><option value="2">2分</option><option value="1">1分</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>本次服務/教育中，您收穫最多的是哪個部分？</label>
+                    <textarea name="bestPart" rows="2" placeholder="請描述您的心得..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>其他具體建議或表揚</label>
+                    <textarea name="feedbackMsg" rows="2" placeholder="您的建議是我們進步的動力..."></textarea>
+                </div>
+                <button type="submit" id="surveyBtn" class="survey-btn">送出評價回饋</button>
+            </form>
+        </div>
+    </section>
         <div id="integrated-survey" class="survey-box">
             <h3 style="color:#e67e22; margin-top:0;">🌟 服務滿意度回饋</h3>
             <form id="surveyForm">
