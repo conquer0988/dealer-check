@@ -13,7 +13,8 @@
             --text-color: #202124;
             --accent-color: #fbbc04;
             --error-color: #d93025;
-            --admin-color: #673AB7;
+            --admin-color: #673AB7; /* 工程師用 */
+            --manager-color: #E91E63; /* 主管用色系 */
         }
 
         body { 
@@ -25,7 +26,7 @@
         }
 
         .container { 
-            max-width: 900px; 
+            max-width: 950px; /* 稍微加寬以容納報表 */
             margin: 0 auto; 
             background: var(--card-bg); 
             padding: 40px; 
@@ -33,7 +34,7 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
         }
 
-        /* 頁籤設計 */
+        /* 頁籤設計維持原樣 */
         .tabs { display: flex; margin-bottom: 30px; border-bottom: 2px solid #e0e0e0; gap: 10px; }
         .tab-btn { 
             padding: 12px 24px; cursor: pointer; border: none; background: none; 
@@ -51,29 +52,37 @@
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 表單區塊 */
+        /* 原有說明區塊與同步通知樣式保留 */
+        .instruction-card { background-color: #ffffff; border: 1px solid #e0e0e0; border-radius: 12px; padding: 25px; margin-bottom: 30px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
+        .instruction-title { color: var(--secondary-color); font-size: 22px; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid var(--secondary-color); padding-bottom: 8px; display: inline-block; }
+        .instruction-item { margin-bottom: 15px; }
+        .instruction-item strong { color: var(--primary-color); display: block; font-size: 16px; margin-bottom: 4px; }
+        .instruction-item p, .instruction-item li { margin: 0; font-size: 15px; color: #5f6368; }
+        .instruction-item ul { padding-left: 20px; margin-top: 5px; }
+        .warning-text { color: var(--error-color); font-weight: bold; font-size: 14px; margin-top: 10px; }
+        .sync-notice { background-color: #fff8e1; border-left: 5px solid var(--accent-color); padding: 15px; border-radius: 8px; margin-bottom: 25px; color: #856404; }
+
+        /* 表單與表格樣式維持 */
         .form-section { background: #f1f3f4; padding: 10px 15px; border-radius: 8px; margin: 30px 0 20px 0; }
         .form-section h3 { margin: 0; color: var(--secondary-color); font-size: 18px; }
         .form-group { margin-bottom: 20px; }
         label { display: block; margin-bottom: 8px; font-weight: 600; color: #3c4043; }
         input, select, textarea { width: 100%; font-size: 16px; padding: 12px; border: 1px solid #dadce0; border-radius: 8px; box-sizing: border-box; }
-        button { 
-            font-size: 18px; padding: 16px; background: linear-gradient(135deg, #1A73E8 0%, #1557b0 100%); 
-            color: white; border: none; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 20px; 
-        }
+        button { font-size: 18px; padding: 16px; background: linear-gradient(135deg, #1A73E8 0%, #1557b0 100%); color: white; border: none; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 20px; }
         .admin-btn { background: linear-gradient(135deg, #673AB7 0%, #512DA8 100%); }
-        .survey-btn { background: linear-gradient(135deg, #2D5D46 0%, #1a3a2b 100%); margin-top: 10px; }
-
-        /* 表格樣式 */
+        .manager-btn { background: linear-gradient(135deg, #E91E63 0%, #C2185B 100%); } /* 主管用 */
+        
         table { border-collapse: separate; border-spacing: 0; width: 100%; margin-top: 25px; border-radius: 12px; overflow: hidden; border: 1px solid #e0e0e0; font-size: 14px; }
         th { background-color: var(--secondary-color); color: white; padding: 12px; text-align: left; }
-        td { padding: 12px; border-bottom: 1px solid #f1f3f4; background-color: white; }
-        
-        /* 問卷專屬樣式 */
-        #integrated-survey { 
-            background: #fdfdfd; padding: 25px; border: 2px solid #eee; border-radius: 12px; margin-top: 30px;
-        }
-        .score-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+        td { padding: 12px; border-bottom: 1px solid #f1f3f4; background-color: white; vertical-align: top; }
+        .status-tag { padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 13px; }
+        .status-ok { background-color: #e6fffa; color: #2c7a7b; }
+        .status-wait { background-color: #fffaf0; color: #9c4221; }
+
+        /* 問卷區塊樣式整合 */
+        #integrated-survey { background: #fdfdfd; padding: 25px; border: 2px solid #eee; border-radius: 12px; margin-top: 30px; border-top: 4px solid var(--primary-color); }
+        .survey-btn { background: linear-gradient(135deg, #2D5D46 0%, #1a3a2b 100%); margin-top: 10px; width: 100%; }
+        .score-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 20px; }
     </style>
 </head>
 <body>
@@ -82,17 +91,21 @@
     <div class="tabs">
         <div class="tab-btn active" onclick="switchTab('submit')">支援申請填單</div>
         <div class="tab-btn" onclick="switchTab('search')">案件進度查詢</div>
-        <div class="tab-btn admin-tab" onclick="switchTab('admin')">🔒 工程師專區</div>
-    <div class="instruction-item">
+        <div class="tab-btn admin-tab" onclick="switchTab('admin')">🔒 工程師/主管專區</div>
+    </div>
+
+    <section id="submit-section" class="content-section active">
+        
+        <div class="instruction-card">
+            <div class="instruction-title">案件支援申請說明</div>
+            <div class="instruction-item">
                 <strong>1. 申請方式</strong>
                 <p>請填寫下方線上申請表單完成申請登記，並可利用「案件進度查詢」網頁查詢是否完成登記。</p>
             </div>
-
             <div class="instruction-item">
                 <strong>2. 申請流程</strong>
                 <p>表單送出後，將於 3 個工作天內由專人聯繫確認相關資料。</p>
             </div>
-
             <div class="instruction-item">
                 <strong>3. 資料提供方式</strong>
                 <p>案件相關資料可寄至：<a href="mailto:orion0412@hotaidev.com.tw">orion0412@hotaidev.com.tw</a>，或於專人聯繫後再提供。</p>
@@ -103,18 +116,15 @@
                     <li><a href="https://drive.google.com/file/d/1fyiEjwuoOtYqpzB8j2ntkzab4CTxCrhM/view?usp=sharing" target="_blank" style="color: #d93025; font-weight: bold; text-decoration: underline;">試車前檢查表 (點此下載)</a>（試車申請案件需檢附）</li>
                 </ul>
             </div>
-
             <div class="instruction-item">
                 <strong>4. 派工安排</strong>
                 <p>資料確認齊全後，始安排試車派工。</p>
                 <p class="warning-text">※ 申請資料未齊全者，將暫緩派工安排。</p>
             </div>
-
             <div class="instruction-item">
                 <strong>5. 現場配合事項</strong>
                 <p>試車當日請由經銷商現場負責人全程會同。</p>
             </div>
-
             <div class="instruction-item">
                 <strong>6. 聯絡專線</strong>
                 <p>📞 02-2514-8887 #705</p>
@@ -124,7 +134,7 @@
         <form id="orderForm">
             <div class="form-section"><h3>案件資訊</h3></div>
             <div class="form-group"><label>案件名稱 *</label><input type="text" name="caseName" placeholder="請輸入案件名稱" required></div>
-            <div class="form-group"><label>案件地址 *</label><input type="text" name="caseAddress" required></div>
+            <div class="form-group"><label>案件地址 *</label><input type="text" name="caseAddress" placeholder="例如：台北市XX區XX路XX號" required></div>
             <div class="form-group">
                 <label>支援工作內容 *</label>
                 <select name="workType" required>
@@ -132,26 +142,26 @@
                     <option value="VRV試車">VRV試車</option>
                     <option value="VRV Q 汰換前檢查">VRV Q 汰換前檢查</option>
                     <option value="VRV Q 汰換後檢查">VRV Q 汰換後檢查</option>
-                    <option value="VRV 案件技術輔導(已有案件，但沒有VRV經驗)">VRV 案件技術輔導(已有案件，但沒有VRV經驗)</option>
+                    <option value="VRV 案件技術輔導(已有案件，但沒有VRV經驗)">VRV 案件技術輔導</option>
                     <option value="教育訓練">教育訓練</option>
                     <option value="工程品質巡檢">工程品質巡檢</option>
                     <option value="其他">其他</option>
                 </select>
             </div>
-            <div class="form-group"><label>內容詳述 *</label><textarea name="description" rows="3" required></textarea></div>
+            <div class="form-group"><label>內容詳述 *</label><textarea name="description" rows="3" placeholder="請填寫具體支援需求，如：新機器調教、系統問題排除..." required></textarea></div>
 
             <div class="form-section"><h3>經銷商資訊</h3></div>
-            <div class="form-group"><label>經銷商名稱 *</label><input type="text" name="dealerName" placeholder="請輸入經銷商名稱" required></div>
+            <div class="form-group"><label>經銷商名稱 *</label><input type="text" name="dealerName" placeholder="請輸入經銷商全名" required></div>
             <div class="form-group"><label>聯絡人姓名 *</label><input type="text" name="dealerContactName" required></div>
             <div class="form-group"><label>聯絡人電話 *</label><input type="tel" name="dealerPhone" required></div>
-            <div class="form-group"><label>電子信箱</label><input type="email" name="dealerEmail"></div>
-            <div class="form-group"><label>LINE ID</label><input type="text" name="dealerLine"></div>
+            <div class="form-group"><label>電子信箱</label><input type="email" name="dealerEmail" placeholder="非必填"></div>
+            <div class="form-group"><label>LINE ID</label><input type="text" name="dealerLine" placeholder="非必填"></div>
 
             <div class="form-section"><h3>現場負責人（非業主）</h3></div>
             <div class="form-group"><label>現場負責姓名 *</label><input type="text" name="siteContactName" required></div>
             <div class="form-group"><label>現場負責電話 *</label><input type="tel" name="sitePhone" required></div>
-            <div class="form-group"><label>現場負責信箱</label><input type="email" name="siteEmail"></div>
-            <div class="form-group"><label>現場負責 LINE</label><input type="text" name="siteLine"></div>
+            <div class="form-group"><label>現場負責信箱</label><input type="email" name="siteEmail" placeholder="非必填"></div>
+            <div class="form-group"><label>現場負責 LINE</label><input type="text" name="siteLine" placeholder="非必填"></div>
 
             <button type="submit" id="submitBtn">提交申請</button>
         </form>
@@ -164,13 +174,14 @@
             2. 查詢時，<strong>「經銷商名稱」</strong>與<strong>「案件名稱」</strong>須與申請填單時內容完全一致，方可讀取資料。
         </div>
 
-        <div class="form-group"><label>經銷商名稱</label><input type="text" id="qD" placeholder="請輸入經銷商名稱"></div>
-        <div class="form-group"><label>案件名稱</label><input type="text" id="qC" placeholder="請輸入案件名稱"></div>
+        <div class="form-group"><label>經銷商名稱</label><input type="text" id="qD" placeholder="輸入當初填單的經銷商名稱全名"></div>
+        <div class="form-group"><label>案件名稱</label><input type="text" id="qC" placeholder="輸入當初填單的案件名稱全名"></div>
         <button onclick="queryData()">開始進度查詢</button>
         <div id="results"></div>
 
         <div id="integrated-survey" style="display:none;">
-            <div class="form-section"><h3>🌟 服務回饋調查 (五大維度)</h3></div>
+            <div class="form-section"><h3>🌟 服務回饋調查</h3></div>
+            <p style="color:#666; font-size:13px; margin-bottom:15px;">您的評價是我們提升服務品質的關鍵，歡迎提供您寶貴的心得。</p>
             <form id="surveyForm">
                 <input type="hidden" name="mode" value="survey">
                 <input type="hidden" name="sv_dealer" id="sv_dealer">
@@ -179,76 +190,74 @@
 
                 <div class="score-grid">
                     <div class="form-group">
-                        <label>1. 技術專業度</label>
-                        <select name="scoreTech" required>
-                            <option value="5">5分 (極優)</option><option value="4">4分</option><option value="3">3分</option><option value="2">2分</option><option value="1">1分</option>
-                        </select>
+                        <label>技術專業</label>
+                        <select name="scoreTech" required><option value="5">5分(極優)</option><option value="4">4分</option><option value="3">3分(普通)</option><option value="2">2分</option><option value="1">1分(不滿意)</option></select>
                     </div>
                     <div class="form-group">
-                        <label>2. 到達準時性</label>
-                        <select name="scoreTime" required>
-                            <option value="5">5分 (極優)</option><option value="4">4分</option><option value="3">3分</option><option value="2">2分</option><option value="1">1分</option>
-                        </select>
+                        <label>到達準時</label>
+                        <select name="scoreTime" required><option value="5">5分(極優)</option><option value="4">4分</option><option value="3">3分(普通)</option><option value="2">2分</option><option value="1">1分(不滿意)</option></select>
                     </div>
                     <div class="form-group">
-                        <label>3. 現場配合度</label>
-                        <select name="scoreCoord" required>
-                            <option value="5">5分 (極優)</option><option value="4">4分</option><option value="3">3分</option><option value="2">2分</option><option value="1">1分</option>
-                        </select>
+                        <label>現場配合</label>
+                        <select name="scoreCoord" required><option value="5">5分(極優)</option><option value="4">4分</option><option value="3">3分(普通)</option><option value="2">2分</option><option value="1">1分(不滿意)</option></select>
                     </div>
                     <div class="form-group">
-                        <label>4. 教育成效</label>
-                        <select name="scoreEdu" required>
-                            <option value="5">5分 (極優)</option><option value="4">4分</option><option value="3">3分</option><option value="2">2分</option><option value="1">1分</option>
-                        </select>
+                        <label>教育成效</label>
+                        <select name="scoreEdu" required><option value="5">5分(極優)</option><option value="4">4分</option><option value="3">3分(普通)</option><option value="2">2分</option><option value="1">1分(不滿意)</option></select>
                     </div>
                     <div class="form-group">
-                        <label>5. 總體滿意度</label>
-                        <select name="scoreOverall" required>
-                            <option value="5">5分 (極優)</option><option value="4">4分</option><option value="3">3分</option><option value="2">2分</option><option value="1">1分</option>
-                        </select>
+                        <label>總體滿意</label>
+                        <select name="scoreOverall" required><option value="5">5分(極優)</option><option value="4">4分</option><option value="3">3分(普通)</option><option value="2">2分</option><option value="1">1分(不滿意)</option></select>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label>本次服務/教育中，您收穫最多的是哪個部分？</label>
-                    <textarea name="bestPart" rows="2" placeholder="請描述您的心得..."></textarea>
+                    <label>本次支援/教育中，您收穫最多的是哪個部分？</label>
+                    <textarea name="bestPart" rows="2" placeholder="請輸入具體心得..."></textarea>
                 </div>
                 <div class="form-group">
-                    <label>其他具體建議或表揚</label>
-                    <textarea name="feedbackMsg" rows="2" placeholder="您的建議是我們進步的動力..."></textarea>
+                    <label>具體改進建議或表揚文字</label>
+                    <textarea name="feedbackMsg" rows="2" placeholder="您的建议..."></textarea>
                 </div>
                 <button type="submit" id="surveyBtn" class="survey-btn">送出評價回饋</button>
             </form>
         </div>
     </section>
 
-   <section id="admin-section" class="content-section">
+    <section id="admin-section" class="content-section">
         <div id="admin-login">
-            <div class="form-section"><h3>管理員驗證</h3></div>
+            <div class="form-section"><h3>身份驗證</h3></div>
             <div class="form-group">
-                <label>請輸入管理密碼</label>
-                <input type="password" id="adminPwd" placeholder="密碼">
+                <label>請輸入您的專屬密碼</label>
+                <input type="password" id="adminPwd" placeholder="請輸入密碼以進入對應專區">
             </div>
-            <button class="admin-btn" onclick="checkAdmin()">登入專區</button>
+            <button class="admin-btn" onclick="checkAdmin()">驗證登入</button>
         </div>
-        <div id="admin-content" style="display:none;">
-            <div class="form-section"><h3>更新案件排程</h3></div>
+
+        <div id="admin-form" style="display:none;">
+            <div class="form-section"><h3>🔒 工程師專區 - 更新案件排程</h3></div>
+            <p style="font-size:13px; color:#5f6368; margin-bottom:15px;">請輸入與申請填單時內容完全一致的名稱，方可成功更新。</p>
             <form id="scheduleForm">
                 <input type="hidden" name="mode" value="update">
-                <div class="form-group"><label>經銷商名稱 * (須完全一致)</label><input type="text" name="dealerName" required></div>
-                <div class="form-group"><label>案件名稱 * (須完全一致)</label><input type="text" name="caseName" required></div>
+                <div class="form-group"><label>經銷商名稱 * (須完全一致)</label><input type="text" name="dealerName" required placeholder="對應第2列"></div>
+                <div class="form-group"><label>案件名稱 * (須完全一致)</label><input type="text" name="caseName" required placeholder="對應第3列"></div>
                 <div class="form-group"><label>排定日期 *</label><input type="date" name="pDate" required></div>
                 <div class="form-group"><label>負責工程師 *</label><input type="text" name="pEng" required></div>
                 <div class="form-group"><label>工程師電話 *</label><input type="tel" name="pTel" required></div>
-                <button type="submit" class="admin-btn" id="updateBtn">確認更新排程</button>
+                <button type="submit" class="admin-btn" id="updateBtn">確認更新排程 (至17-19列)</button>
             </form>
+        </div>
+
+        <div id="manager-content" style="display:none;">
+            <div class="form-section" style="border-left: 5px solid var(--manager-color);"><h3>🌟 主管專區 - 經銷商服務回饋看板</h3></div>
+            <p style="font-size:13px; color:#5f6368; margin-bottom:15px;">主管（conquer/orion）專屬。數據抓取自您的「滿意度回饋」GID分頁。</p>
+            <button class="manager-btn" onclick="fetchSurveyData()">🔄 載入最新回饋資料</button>
+            <div id="surveyList" style="margin-top:20px; overflow-x:auto;"></div>
         </div>
     </section>
 </div>
 
 <script>
-// 注意：以下 URL 保持您原本發佈的位址
 const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSjbJC6VSPPicOPdwTHbcF3ETS5BSJnC_-HIvBNounFVLXik9NxzChJGqackA8HEWcfnkBMjUhWIUmQ/pub?gid=656272806&single=true&output=csv";
 const gasUrl = "https://script.google.com/macros/s/AKfycbydkRtSF_FeidEHkgUCStISZv-u07k0SmsaMq6-7twmP714lglPTh7AqUWKdwKvb5czNg/exec";
 
@@ -266,10 +275,26 @@ function switchTab(t) {
     }
 }
 
+// 核心密碼驗證邏輯與介面切換
 function checkAdmin() {
-    if(document.getElementById('adminPwd').value === "daikin705") {
-        document.getElementById('admin-login').style.display = "none";
-        document.getElementById('admin-content').style.display = "block";
+    const pwd = document.getElementById('adminPwd').value;
+    const loginBox = document.getElementById('admin-login');
+    const adminForm = document.getElementById('admin-form');
+    const managerContent = document.getElementById('manager-content');
+
+    // 預設全隱藏
+    adminForm.style.display = "none";
+    managerContent.style.display = "none";
+
+    // ✅ 驗證邏輯
+    if(pwd === "daikin705") {
+        // 登入工程師
+        loginBox.style.display = "none";
+        adminForm.style.display = "block";
+    } else if(pwd === "我的小心肝") {
+        // 登入主管
+        loginBox.style.display = "none";
+        managerContent.style.display = "block";
     } else { alert("密碼錯誤"); }
 }
 
@@ -278,10 +303,11 @@ async function queryData() {
     const cName = document.getElementById('qC').value.trim();
     const res = document.getElementById('results');
     const surveyBox = document.getElementById('integrated-survey');
-    
+
     if(!dName || !cName) return alert("請輸入完整名稱");
-    res.innerHTML = "🔍 搜尋中...";
-    surveyBox.style.display = "none";
+    
+    res.innerHTML = "<p style='text-align:center; padding:20px; color:#666;'>🔍 正在安全連線雲端資料庫...</p>";
+    surveyBox.style.display = "none"; // 查詢前先隱藏問卷
 
     try {
         const response = await fetch(`${sheetUrl}&t=${Date.now()}`);
@@ -289,54 +315,65 @@ async function queryData() {
         const rows = raw.split(/\r?\n/).map(r => r.split(",").map(cell => cell.trim().replace(/^"|"$/g, '')));
         
         let found = false;
-        let html = `<table><tr><th>項目</th><th>內容</th></tr>`;
+        let html = `<table><tr><th>案件名稱</th><th>狀態</th><th>排定日期</th><th>負責工程師</th><th>聯絡電話</th></tr>`;
 
-        // 搜尋邏輯：第2列是經銷商[1]，第3列是案件名稱[2]
+        // 此處對齊您試算表的橫向讀取邏輯 (rows[1]=經銷商, rows[2]=案件)
         for (let j = 1; j < rows[0].length; j++) {
             if (rows[1] && rows[1][j] === dName && rows[2] && rows[2][j] === cName) {
                 found = true;
-                const pDate = rows[16] ? rows[16][j] : ""; // 第17列：排定日期
-                const eng = rows[17] ? rows[17][j] : "指派中"; // 第18列：工程師
-                const status = pDate ? '已排程' : '分派中';
+                const pDate = rows[19] ? rows[19][j] : ""; // 對應17列日期
+                const pEng  = rows[20] ? rows[20][j] : ""; // 對應18列工程師
+                const pTel  = rows[21] ? rows[21][j] : ""; // 對應19列電話
+
+                const isDateSet = (pDate && pDate !== "" && pDate !== "0" && pDate !== "undefined");
                 
-                html += `<tr><td>案件名稱</td><td>${rows[2][j]}</td></tr>
-                         <tr><td>服務日期</td><td>${pDate || '待排定'}</td></tr>
-                         <tr><td>目前狀態</td><td>${status}</td></tr>
-                         <tr><td>負責工程師</td><td>${eng}</td></tr>`;
-                
-                // 自動帶入問卷隱藏欄位
+                html += `<tr>
+                    <td>${rows[2][j]}</td>
+                    <td><span class="status-tag ${isDateSet ? 'status-ok' : 'status-wait'}">${isDateSet ? '已排程' : '分派中'}</span></td>
+                    <td>${isDateSet ? pDate : "待確認"}</td>
+                    <td>${(pEng && pEng !== "undefined") ? pEng : "指派中"}</td>
+                    <td>${(pTel && pTel !== "undefined") ? pTel : "--"}</td>
+                </tr>`;
+
+                // ✅ 整合：自動預填問卷背景資訊
                 document.getElementById('sv_dealer').value = dName;
                 document.getElementById('sv_case').value = cName;
-                document.getElementById('sv_eng').value = eng;
-
-                // 只有「已排程」且有工程師時才顯示問卷
-                if(pDate) { surveyBox.style.display = "block"; }
+                document.getElementById('sv_eng').value = (pEng && pEng !== "undefined") ? pEng : "未指派";
+                
+                // 問卷出現時機：不限完工，查到案件就出現
+                surveyBox.style.display = "block";
                 break;
             }
         }
-        res.innerHTML = found ? html + "</table>" : "查無資料，請確認名稱是否正確";
-    } catch (e) { res.innerHTML = "連線異常，請稍後再試"; }
+        res.innerHTML = found ? html + "</table>" : "<p style='color:#d93025; text-align:center; margin-top:20px;'>查無資料，請確認名稱是否正確。</p>";
+    } catch (e) { res.innerHTML = "<p style='text-align:center;'>連線異常。</p>"; }
 }
 
-// 提交回饋
+// 🌟 全新問卷提交邏輯 (mode=survey)
 document.getElementById('surveyForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const btn = document.getElementById('surveyBtn');
-    btn.disabled = true; btn.innerText = '傳送回饋中...';
+    btn.disabled = true; btn.innerText = '正在傳送回饋...';
     
     fetch(gasUrl + "?" + new URLSearchParams(new FormData(this)).toString(), { method: 'GET', mode: 'no-cors' })
     .then(() => {
-        alert("🎉 感謝您的回饋與心得！");
+        alert("🎉 感謝您的回饋！我們已將心得寫入資料庫。");
         this.reset();
         document.getElementById('integrated-survey').style.display = "none";
         btn.disabled = false; btn.innerText = '送出評價回饋';
+    })
+    .catch(() => {
+        alert("傳送失敗");
+        btn.disabled = false;
+        btn.innerText = '送出評價回饋';
     });
 });
 
-// 主管查詢問卷回饋 (已填入 GID 2027669544)
+// 🌟 全新主管回饋看板資料讀取 logic (已預填 GID 2027669544)
 async function fetchSurveyData() {
     const list = document.getElementById('surveyList');
     list.innerHTML = "正在讀取回饋...";
+    // 此 gid 應為您另外開的「滿意度回饋」分頁的 gid
     const surveySheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSjbJC6VSPPicOPdwTHbcF3ETS5BSJnC_-HIvBNounFVLXik9NxzChJGqackA8HEWcfnkBMjUhWIUmQ/pub?gid=2027669544&output=csv";
     
     try {
@@ -344,13 +381,13 @@ async function fetchSurveyData() {
         const raw = await response.text();
         const rows = raw.split(/\r?\n/).map(r => r.split(",").map(cell => cell.trim().replace(/^"|"$/g, '')));
         
-        let html = "<table><tr><th>日期</th><th>工程師</th><th>經銷商</th><th>評分(技/準/合/教/總)</th><th>最大收穫/建議</th></tr>";
-        // 對應試算表標題：A時間, B經銷商, C案件, D工程師, E~I評分, J收穫, K建議
+        let html = "<table><tr><th>日期</th><th>工程師</th><th>經銷商</th><th>評分(技/準/合/教/總)</th><th>回饋與建議</th></tr>";
+        // 對應橫向標題：A時間[0], B經銷商[1], C案件[2], D工程師[3], E~I評分[4-8], J收穫[9], K建議[10]
         for(let i=1; i<rows.length; i++){
-            if(rows[i][1]){ // 如果經銷商欄位有資料
+            if(rows[i][1]){ // 如果經銷商欄位存在
                 const dateStr = rows[i][0].split(' ')[0]; // 只取日期
                 const scores = `${rows[i][4]}/${rows[i][5]}/${rows[i][6]}/${rows[i][7]}/${rows[i][8]}`;
-                const comment = `收穫：${rows[i][9]}<br>建議：${rows[i][10]}`;
+                const comment = `收穫最多：${rows[i][9]}<br>具體建議：${rows[i][10]}`;
                 
                 html += `<tr>
                     <td>${dateStr}</td>
@@ -361,33 +398,43 @@ async function fetchSurveyData() {
                 </tr>`;
             }
         }
-        list.innerHTML = rows.length > 1 ? html + "</table>" : "目前尚無回饋資料";
-    } catch (e) { list.innerHTML = "讀取失敗，請確認網路連線或 GID 設定。"; }
+        list.innerHTML = rows.length > 1 ? html + "</table>" : "目前尚無回饋資料。";
+    } catch (e) { list.innerHTML = "讀取失敗，請確認 gid 是否設定正確。"; }
 }
 
-// 提交申請
+// 提交申請 (維持原有 mode=null 的處理方式)
 document.getElementById('orderForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const btn = document.getElementById('submitBtn');
-    btn.disabled = true;
+    btn.disabled = true; btn.innerText = '正在傳送申請...';
+    
     fetch(gasUrl + "?" + new URLSearchParams(new FormData(this)).toString(), { method: 'GET', mode: 'no-cors' })
     .then(() => {
-        alert("🎉 申請成功！");
+        alert("🎉 支援申請已成功送出！將於工作日由專人聯繫。");
         this.reset();
-        btn.disabled = false;
+        btn.disabled = false; btn.innerText = '提交申請';
+    })
+    .catch(() => {
+        alert("連線失敗");
+        btn.disabled = false; btn.innerText = '提交申請';
     });
 });
 
-// 更新排程
+// 更新排程 (維持原有 mode=update)
 document.getElementById('scheduleForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const btn = document.getElementById('updateBtn');
-    btn.disabled = true;
+    btn.disabled = true; btn.innerText = '正在寫入資料...';
+    
     fetch(gasUrl + "?" + new URLSearchParams(new FormData(this)).toString(), { method: 'GET', mode: 'no-cors' })
     .then(() => {
-        alert("✅ 排程更新成功！");
+        alert("✅ 排程已成功更新！");
         this.reset();
-        btn.disabled = false;
+        btn.disabled = false; btn.innerText = '確認更新排程';
+    })
+    .catch(() => {
+        alert("連線失敗");
+        btn.disabled = false; btn.innerText = '確認更新排程';
     });
 });
 </script>
