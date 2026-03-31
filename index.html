@@ -13,7 +13,7 @@
             --text-color: #202124;
             --accent-color: #fbbc04;
             --error-color: #d93025;
-            --admin-color: #673AB7;
+            --admin-color: #673AB7; /* 新增管理員色系 */
         }
 
         body { 
@@ -33,6 +33,30 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
         }
 
+        /* 說明區塊 */
+        .instruction-card {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .instruction-title {
+            color: var(--secondary-color);
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 8px;
+            display: inline-block;
+        }
+        .instruction-item { margin-bottom: 15px; }
+        .instruction-item strong { color: var(--primary-color); display: block; font-size: 16px; margin-bottom: 4px; }
+        .instruction-item p, .instruction-item li { margin: 0; font-size: 15px; color: #5f6368; }
+        .instruction-item ul { padding-left: 20px; margin-top: 5px; }
+        .warning-text { color: var(--error-color); font-weight: bold; font-size: 14px; margin-top: 10px; }
+
         /* 頁籤設計 */
         .tabs { display: flex; margin-bottom: 30px; border-bottom: 2px solid #e0e0e0; gap: 10px; }
         .tab-btn { 
@@ -42,6 +66,7 @@
         .tab-btn.active { 
             color: var(--primary-color); border-bottom: 4px solid var(--primary-color); background-color: rgba(26, 115, 232, 0.1);
         }
+        /* 管理員專屬標籤樣式 */
         .tab-btn.admin-tab.active { 
             color: var(--admin-color); border-bottom-color: var(--admin-color); background-color: rgba(103, 58, 183, 0.1);
         }
@@ -62,22 +87,15 @@
             color: white; border: none; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 20px; 
         }
         .admin-btn { background: linear-gradient(135deg, #673AB7 0%, #512DA8 100%); }
-        .survey-btn { background: linear-gradient(135deg, #2D5D46 0%, #1a3a2b 100%); margin-top: 10px; }
 
         /* 表格樣式 */
-        table { border-collapse: separate; border-spacing: 0; width: 100%; margin-top: 25px; border-radius: 12px; overflow: hidden; border: 1px solid #e0e0e0; font-size: 14px; }
-        th { background-color: var(--secondary-color); color: white; padding: 12px; text-align: left; }
-        td { padding: 12px; border-bottom: 1px solid #f1f3f4; background-color: white; }
-        
+        table { border-collapse: separate; border-spacing: 0; width: 100%; margin-top: 25px; border-radius: 12px; overflow: hidden; border: 1px solid #e0e0e0; }
+        th { background-color: var(--secondary-color); color: white; padding: 15px; text-align: left; }
+        td { padding: 15px; border-bottom: 1px solid #f1f3f4; background-color: white; }
         .status-tag { padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 13px; }
         .status-ok { background-color: #e6fffa; color: #2c7a7b; }
         .status-wait { background-color: #fffaf0; color: #9c4221; }
-        
-        /* 問卷專屬樣式 */
-        #integrated-survey { 
-            background: #fdfdfd; padding: 25px; border: 2px solid #eee; border-radius: 12px; margin-top: 30px;
-        }
-        .score-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+        .sync-notice { background-color: #fff8e1; border-left: 5px solid var(--accent-color); padding: 15px; border-radius: 8px; margin-bottom: 25px; color: #856404; }
     </style>
 </head>
 <body>
@@ -90,35 +108,95 @@
     </div>
 
     <section id="submit-section" class="content-section active">
+        
+        <div class="instruction-card">
+            <div class="instruction-title">案件支援申請說明</div>
+            
+            <div class="instruction-item">
+                <strong>1. 申請方式</strong>
+                <p>請填寫下方線上申請表單完成申請登記，並可利用「案件進度查詢」網頁查詢是否完成登記。</p>
+            </div>
+
+            <div class="instruction-item">
+                <strong>2. 申請流程</strong>
+                <p>表單送出後，將於 3 個工作天內由專人聯繫確認相關資料。</p>
+            </div>
+
+            <div class="instruction-item">
+                <strong>3. 資料提供方式</strong>
+                <p>案件相關資料可寄至：<a href="mailto:orion0412@hotaidev.com.tw">orion0412@hotaidev.com.tw</a>，或於專人聯繫後再提供。</p>
+                <p><strong>應檢附資料：</strong></p>
+                <ul>
+                    <li>設備明細表</li>
+                    <li>系統圖面（電子檔）</li>
+                    <li><a href="https://drive.google.com/file/d/1fyiEjwuoOtYqpzB8j2ntkzab4CTxCrhM/view?usp=sharing" target="_blank" style="color: #d93025; font-weight: bold; text-decoration: underline;">試車前檢查表 (點此下載)</a>（試車申請案件需檢附）</li>
+                </ul>
+            </div>
+
+            <div class="instruction-item">
+                <strong>4. 派工安排</strong>
+                <p>資料確認齊全後，始安排試車派工。</p>
+                <p class="warning-text">※ 申請資料未齊全者，將暫緩派工安排。</p>
+            </div>
+
+            <div class="instruction-item">
+                <strong>5. 現場配合事項</strong>
+                <p>試車當日請由經銷商現場負責人全程會同。</p>
+            </div>
+
+            <div class="instruction-item">
+                <strong>6. 聯絡專線</strong>
+                <p>📞 02-2514-8887 #705</p>
+            </div>
+        </div>
+
         <form id="orderForm">
             <div class="form-section"><h3>案件資訊</h3></div>
-            <div class="form-group"><label>案件名稱 *</label><input type="text" name="caseName" required></div>
+            <div class="form-group"><label>案件名稱 *</label><input type="text" name="caseName" placeholder="請輸入案件名稱" required></div>
             <div class="form-group"><label>案件地址 *</label><input type="text" name="caseAddress" required></div>
             <div class="form-group">
                 <label>支援工作內容 *</label>
                 <select name="workType" required>
                     <option value="">請選擇支援項目</option>
                     <option value="VRV試車">VRV試車</option>
+                    <option value="VRV Q 汰換前檢查">VRV Q 汰換前檢查</option>
+                    <option value="VRV Q 汰換後檢查">VRV Q 汰換後檢查</option>
+                    <option value="VRV 案件技術輔導(已有案件，但沒有VRV經驗)">VRV 案件技術輔導(已有案件，但沒有VRV經驗)</option>
                     <option value="教育訓練">教育訓練</option>
+                    <option value="工程品質巡檢">工程品質巡檢</option>
                     <option value="其他">其他</option>
                 </select>
             </div>
+            <div class="form-group"><label>內容詳述 *</label><textarea name="description" rows="3" required></textarea></div>
+
             <div class="form-section"><h3>經銷商資訊</h3></div>
-            <div class="form-group"><label>經銷商名稱 *</label><input type="text" name="dealerName" required></div>
+            <div class="form-group"><label>經銷商名稱 *</label><input type="text" name="dealerName" placeholder="請輸入經銷商名稱" required></div>
             <div class="form-group"><label>聯絡人姓名 *</label><input type="text" name="dealerContactName" required></div>
             <div class="form-group"><label>聯絡人電話 *</label><input type="tel" name="dealerPhone" required></div>
+            <div class="form-group"><label>電子信箱</label><input type="email" name="dealerEmail"></div>
+            <div class="form-group"><label>LINE ID</label><input type="text" name="dealerLine"></div>
+
+            <div class="form-section"><h3>現場負責人（非業主）</h3></div>
+            <div class="form-group"><label>現場負責姓名 *</label><input type="text" name="siteContactName" required></div>
+            <div class="form-group"><label>現場負責電話 *</label><input type="tel" name="sitePhone" required></div>
+            <div class="form-group"><label>現場負責信箱</label><input type="email" name="siteEmail"></div>
+            <div class="form-group"><label>現場負責 LINE</label><input type="text" name="siteLine"></div>
+
             <button type="submit" id="submitBtn">提交申請</button>
         </form>
     </section>
 
     <section id="search-section" class="content-section">
-        <div class="form-group"><label>經銷商名稱</label><input type="text" id="qD" placeholder="輸入經銷商全名"></div>
-        <div class="form-group"><label>案件名稱</label><input type="text" id="qC" placeholder="輸入案件全名"></div>
-        <button onclick="queryData()">開始進度查詢</button>
-        
-        <div id="results"></div>
+        <div class="sync-notice">
+            <strong>💡 溫馨提醒：</strong><br>
+            1. 新提交案件請於 <strong>3-5 分鐘</strong> 後再行查詢。<br>
+            2. 查詢時，<strong>「經銷商名稱」</strong>與<strong>「案件名稱」</strong>須與申請填單時內容完全一致，方可讀取資料。
+        </div>
 
-        <div id="integrated-survey" style="display:none;">
+        <div class="form-group"><label>經銷商名稱</label><input type="text" id="qD" placeholder="請輸入經銷商名稱"></div>
+        <div class="form-group"><label>案件名稱</label><input type="text" id="qC" placeholder="請輸入案件名稱"></div>
+        <button onclick="queryData()">開始進度查詢</button>
+       <div id="integrated-survey" style="display:none;">
             <div class="form-section"><h3>🌟 服務回饋調查 (五大維度)</h3></div>
             <form id="surveyForm">
                 <input type="hidden" name="mode" value="survey">
@@ -172,27 +250,27 @@
         </div>
     </section>
 
+
     <section id="admin-section" class="content-section">
         <div id="admin-login">
             <div class="form-section"><h3>管理員驗證</h3></div>
-            <div class="form-group"><input type="password" id="adminPwd" placeholder="請輸入密碼"></div>
-            <button class="admin-btn" onclick="checkAdmin()">登入</button>
+            <div class="form-group">
+                <label>請輸入管理密碼</label>
+                <input type="password" id="adminPwd" placeholder="密碼">
+            </div>
+            <button class="admin-btn" onclick="checkAdmin()">登入專區</button>
         </div>
-
-        <div id="admin-content" style="display:none;">
+        <div id="admin-form" style="display:none;">
             <div class="form-section"><h3>更新案件排程</h3></div>
             <form id="scheduleForm">
                 <input type="hidden" name="mode" value="update">
-                <div class="form-group"><label>經銷商名稱</label><input type="text" name="dealerName" required></div>
-                <div class="form-group"><label>案件名稱</label><input type="text" name="caseName" required></div>
-                <div class="form-group"><label>排定日期</label><input type="date" name="pDate" required></div>
-                <div class="form-group"><label>負責工程師</label><input type="text" name="pEng" required></div>
+                <div class="form-group"><label>經銷商名稱 * (須完全一致)</label><input type="text" name="dealerName" required></div>
+                <div class="form-group"><label>案件名稱 * (須完全一致)</label><input type="text" name="caseName" required></div>
+                <div class="form-group"><label>排定日期 *</label><input type="date" name="pDate" required></div>
+                <div class="form-group"><label>負責工程師 *</label><input type="text" name="pEng" required></div>
+                <div class="form-group"><label>工程師電話 *</label><input type="tel" name="pTel" required></div>
                 <button type="submit" class="admin-btn" id="updateBtn">確認更新排程</button>
             </form>
-
-            <div class="form-section"><h3>主管看板：經銷商回饋訊息</h3></div>
-            <button onclick="fetchSurveyData()" style="background:#009688;">🔄 載入最新回饋資料</button>
-            <div id="surveyList" style="margin-top:20px; overflow-x:auto;"></div>
         </div>
     </section>
 </div>
@@ -218,7 +296,7 @@ function switchTab(t) {
 function checkAdmin() {
     if(document.getElementById('adminPwd').value === "daikin705") {
         document.getElementById('admin-login').style.display = "none";
-        document.getElementById('admin-content').style.display = "block";
+        document.getElementById('admin-form').style.display = "block";
     } else { alert("密碼錯誤"); }
 }
 
@@ -226,75 +304,38 @@ async function queryData() {
     const dName = document.getElementById('qD').value.trim();
     const cName = document.getElementById('qC').value.trim();
     const res = document.getElementById('results');
-    const surveyBox = document.getElementById('integrated-survey');
-    
     if(!dName || !cName) return alert("請輸入完整名稱");
-    res.innerHTML = "🔍 搜尋中...";
-    surveyBox.style.display = "none";
-
+    
+    res.innerHTML = "<p style='text-align:center; padding:20px; color:#666;'>🔍 正在安全連線雲端資料庫...</p>";
     try {
         const response = await fetch(`${sheetUrl}&t=${Date.now()}`);
         const raw = await response.text();
         const rows = raw.split(/\r?\n/).map(r => r.split(",").map(cell => cell.trim().replace(/^"|"$/g, '')));
         
         let found = false;
-        let html = `<table><tr><th>項目</th><th>內容</th></tr>`;
+        let html = `<table><tr><th>案件名稱</th><th>狀態</th><th>排定日期</th><th>負責工程師</th><th>聯絡電話</th></tr>`;
 
         for (let j = 1; j < rows[0].length; j++) {
             if (rows[1] && rows[1][j] === dName && rows[2] && rows[2][j] === cName) {
                 found = true;
-                const eng = rows[20] ? rows[20][j] : "指派中";
-                html += `<tr><td>案件名稱</td><td>${rows[2][j]}</td></tr>
-                         <tr><td>進度</td><td>${rows[19][j] ? '已排程' : '分派中'}</td></tr>
-                         <tr><td>工程師</td><td>${eng}</td></tr>`;
+                // 維持您原本正常的讀取邏輯
+                const pDate = rows[19] ? rows[19][j] : ""; 
+                const pEng  = rows[20] ? rows[20][j] : ""; 
+                const pTel  = rows[21] ? rows[21][j] : ""; 
+
+                const isDateSet = (pDate && pDate !== "" && pDate !== "0" && pDate !== "undefined");
                 
-                // 自動帶入問卷隱藏欄位
-                document.getElementById('sv_dealer').value = dName;
-                document.getElementById('sv_case').value = cName;
-                document.getElementById('sv_eng').value = eng;
-                surveyBox.style.display = "block";
-                break;
+                html += `<tr>
+                    <td>${rows[2][j]}</td>
+                    <td><span class="status-tag ${isDateSet ? 'status-ok' : 'status-wait'}">${isDateSet ? '已排程' : '分派中'}</span></td>
+                    <td>${isDateSet ? pDate : "待確認"}</td>
+                    <td>${(pEng && pEng !== "undefined") ? pEng : "指派中"}</td>
+                    <td>${(pTel && pTel !== "undefined") ? pTel : "--"}</td>
+                </tr>`;
             }
         }
-        res.innerHTML = found ? html + "</table>" : "查無資料";
-    } catch (e) { res.innerHTML = "連線異常"; }
-}
-
-// 提交回饋
-document.getElementById('surveyForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const btn = document.getElementById('surveyBtn');
-    btn.disabled = true; btn.innerText = '傳送回饋中...';
-    
-    fetch(gasUrl + "?" + new URLSearchParams(new FormData(this)).toString(), { method: 'GET', mode: 'no-cors' })
-    .then(() => {
-        alert("🎉 感謝您的回饋與心得！");
-        this.reset();
-        document.getElementById('integrated-survey').style.display = "none";
-        btn.disabled = false; btn.innerText = '送出評價回饋';
-    });
-});
-
-// 主管查詢回饋資料 (假設您在 Google Sheet 另開一頁 gid=XXXX 儲存回饋)
-async function fetchSurveyData() {
-    const list = document.getElementById('surveyList');
-    list.innerHTML = "正在讀取回饋...";
-    // 注意：這裡您需要將 gid 換成您儲存問卷回饋的那一頁 gid
-    const surveySheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSjbJC6VSPPicOPdwTHbcF3ETS5BSJnC_-HIvBNounFVLXik9NxzChJGqackA8HEWcfnkBMjUhWIUmQ/pub?gid=您的問卷GID&output=csv";
-    
-    try {
-        const response = await fetch(surveySheetUrl + "&t=" + Date.now());
-        const raw = await response.text();
-        const rows = raw.split(/\r?\n/).map(r => r.split(","));
-        
-        let html = "<table><tr><th>工程師</th><th>經銷商</th><th>評分(技/準/合/教/總)</th><th>最大收穫</th><th>建議</th></tr>";
-        for(let i=1; i<rows.length; i++){
-            if(rows[i][0]){
-                html += `<tr><td>${rows[i][3]}</td><td>${rows[i][1]}</td><td>${rows[i][4]}/${rows[i][5]}/${rows[i][6]}/${rows[i][7]}/${rows[i][8]}</td><td>${rows[i][9]}</td><td>${rows[i][10]}</td></tr>`;
-            }
-        }
-        list.innerHTML = html + "</table>";
-    } catch (e) { list.innerHTML = "讀取失敗，請確認問卷 GID 是否設定正確。"; }
+        res.innerHTML = found ? html + "</table>" : "<p style='color:#d93025; text-align:center; margin-top:20px;'>查無資料，請確認名稱是否正確。</p>";
+    } catch (e) { res.innerHTML = "<p style='text-align:center;'>連線異常。</p>"; }
 }
 
 // 提交申請
@@ -302,24 +343,40 @@ document.getElementById('orderForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const btn = document.getElementById('submitBtn');
     btn.disabled = true;
+    btn.innerText = '正在傳送申請...';
+    
     fetch(gasUrl + "?" + new URLSearchParams(new FormData(this)).toString(), { method: 'GET', mode: 'no-cors' })
     .then(() => {
-        alert("🎉 申請成功！");
+        alert("🎉 支援申請已成功送出！");
         this.reset();
         btn.disabled = false;
+        btn.innerText = '提交申請';
+    })
+    .catch(() => {
+        alert("連線失敗");
+        btn.disabled = false;
+        btn.innerText = '提交申請';
     });
 });
 
-// 更新排程
+// 更新排程 (工程師用)
 document.getElementById('scheduleForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const btn = document.getElementById('updateBtn');
     btn.disabled = true;
+    btn.innerText = '正在寫入資料...';
+    
     fetch(gasUrl + "?" + new URLSearchParams(new FormData(this)).toString(), { method: 'GET', mode: 'no-cors' })
     .then(() => {
-        alert("✅ 排程更新成功！");
+        alert("✅ 排程已成功更新！");
         this.reset();
         btn.disabled = false;
+        btn.innerText = '確認更新排程';
+    })
+    .catch(() => {
+        alert("連線失敗");
+        btn.disabled = false;
+        btn.innerText = '確認更新排程';
     });
 });
 </script>
