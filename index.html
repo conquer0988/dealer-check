@@ -202,13 +202,12 @@
 </div>
 
 <script>
-<script>
-// 1. 基本變數設定
+// 1. 基本設定
 const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSjbJC6VSPPicOPdwTHbcF3ETS5BSJnC_-HIvBNounFVLXik9NxzChJGqackA8HEWcfnkBMjUhWIUmQ/pub?gid=656272806&single=true&output=csv";
 const gasUrl = "https://script.google.com/macros/s/AKfycbydkRtSF_FeidEHkgUCStISZv-u07k0SmsaMq6-7twmP714lglPTh7AqUWKdwKvb5czNg/exec";
 const surveySheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSjbJC6VSPPicOPdwTHbcF3ETS5BSJnC_-HIvBNounFVLXik9NxzChJGqackA8HEWcfnkBMjUhWIUmQ/pub?gid=2027669544&output=csv";
 
-// 2. 頁籤切換功能
+// 2. 頁籤切換
 function switchTab(t) {
     document.querySelectorAll('.tab-btn, .content-section').forEach(el => el.classList.remove('active'));
     if(t === 'search') {
@@ -223,27 +222,21 @@ function switchTab(t) {
     }
 }
 
-// 3. 密碼驗證功能 (修復主管密碼辨識問題)
+// 3. 密碼驗證 (參考「已完成.html」最穩定的版本)
 function checkAdmin() {
-    const pwd = document.getElementById('adminPwd').value.trim();
-    const loginBox = document.getElementById('admin-login');
-    const adminForm = document.getElementById('admin-form');
-    const managerContent = document.getElementById('manager-content');
-
+    var pwd = document.getElementById('adminPwd').value;
     if(pwd === "daikin705") {
-        loginBox.style.display = "none";
-        adminForm.style.display = "block";
-        managerContent.style.display = "none";
+        document.getElementById('admin-login').style.display = "none";
+        document.getElementById('admin-form').style.display = "block";
     } else if(pwd === "我的小心肝") {
-        loginBox.style.display = "none";
-        adminForm.style.display = "none";
-        managerContent.style.display = "block";
-    } else { 
-        alert("密碼錯誤，請重新輸入"); 
+        document.getElementById('admin-login').style.display = "none";
+        document.getElementById('manager-content').style.display = "block";
+    } else {
+        alert("密碼錯誤！");
     }
 }
 
-// 4. 案件進度查詢 (修正欄位索引，解決查無資料問題)
+// 4. 案件查詢邏輯 (改回「已完成.html」的橫向掃描模式)
 async function queryData() {
     const dName = document.getElementById('qD').value.trim();
     const cName = document.getElementById('qC').value.trim();
@@ -251,7 +244,7 @@ async function queryData() {
     const surveyBox = document.getElementById('integrated-survey');
 
     if(!dName || !cName) return alert("請輸入完整名稱");
-    res.innerHTML = "<p style='text-align:center;'>🔍 正在同步雲端資料庫...</p>";
+    res.innerHTML = "<p style='text-align:center;'>🔍 正在連線雲端資料庫...</p>";
     surveyBox.style.display = "none";
 
     try {
@@ -262,37 +255,40 @@ async function queryData() {
         let found = false;
         let html = `<table><tr><th>案件名稱</th><th>狀態</th><th>排定日期</th><th>工程師</th></tr>`;
 
-        // 索引校正：試算表第17列(日期)在程式中是索引16，第18列(工程師)是索引17
-        for (let j = 1; j < rows[0].length; j++) {
-            if (rows[1][j] === dName && rows[2][j] === cName) {
+        // 改回最穩定的搜尋方式
+        for (let i = 1; i < rows.length; i++) {
+            // 假設：第 1 欄是經銷商，第 2 欄是案件名稱
+            if (rows[i][1] === dName && rows[i][2] === cName) {
                 found = true;
-                const pDate = rows[16] ? rows[16][j] : ""; 
-                const pEng  = rows[17] ? rows[17][j] : ""; 
+                const pDate = rows[i][16] || ""; // 排定日期
+                const pEng  = rows[i][17] || ""; // 工程師
                 const statusHtml = pDate ? '<span class="status-tag status-ok">已排程</span>' : '<span class="status-tag status-wait">分派中</span>';
                 
-                html += `<tr><td>${rows[2][j]}</td><td>${statusHtml}</td><td>${pDate || '待確認'}</td><td>${pEng || '指派中'}</td></tr>`;
+                html += `<tr><td>${rows[i][2]}</td><td>${statusHtml}</td><td>${pDate || '待確認'}</td><td>${pEng || '指派中'}</td></tr>`;
                 
-                // 預填問卷隱藏欄位
+                // 預填問卷
                 document.getElementById('sv_dealer').value = dName;
                 document.getElementById('sv_case').value = cName;
                 document.getElementById('sv_eng').value = pEng || "未指派";
                 surveyBox.style.display = "block";
             }
         }
-        res.innerHTML = found ? html + "</table>" : "<p style='color:#d93025; text-align:center;'>查無資料，請確認名稱是否正確。</p>";
-    } catch (e) { res.innerHTML = "<p style='text-align:center;'>連線異常，請稍後再試。</p>"; }
+        res.innerHTML = found ? html + "</table>" : "<p style='color:red; text-align:center;'>查無資料，請確認名稱是否正確。</p>";
+    } catch (e) {
+        res.innerHTML = "<p style='text-align:center;'>⚠️ 連線異常，請確認試算表已發佈至網路。</p>";
+    }
 }
 
-// 5. 主管專區資料載入 (保留並優化滿意度看板)
+// 5. 主管專區資料載入
 async function fetchSurveyData() {
     const list = document.getElementById('surveyList');
-    list.innerHTML = "<p>正在讀取最新回饋...</p>";
+    list.innerHTML = "讀取中...";
     try {
         const response = await fetch(surveySheetUrl + "&t=" + Date.now());
         const raw = await response.text();
         const rows = raw.split(/\r?\n/).map(r => r.split(",").map(cell => cell.trim().replace(/^"|"$/g, '')));
         
-        let html = "<table><tr><th>日期</th><th>工程師</th><th>經銷商</th><th>總分</th><th>建議</th></tr>";
+        let html = "<table><tr><th>日期</th><th>工程師</th><th>經銷商</th><th>評分</th><th>建議</th></tr>";
         for(let i=1; i<rows.length; i++){
             if(rows[i][1]){
                 html += `<tr>
@@ -304,25 +300,23 @@ async function fetchSurveyData() {
                 </tr>`;
             }
         }
-        list.innerHTML = rows.length > 1 ? html + "</table>" : "目前尚無資料。";
-    } catch (e) { list.innerHTML = "讀取失敗，請確認發佈設定。"; }
+        list.innerHTML = html + "</table>";
+    } catch (e) { list.innerHTML = "讀取失敗"; }
 }
 
-// 6. 表單提交事件監聽
+// 6. 事件監聽 (維持與 GAS 通訊)
 document.getElementById('orderForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const btn = document.getElementById('submitBtn');
-    btn.disabled = true; btn.innerText = '正在傳送...';
+    btn.disabled = true;
     fetch(gasUrl + "?" + new URLSearchParams(new FormData(this)).toString(), { method: 'GET', mode: 'no-cors' })
-    .then(() => { alert("🎉 申請成功！"); this.reset(); btn.disabled = false; btn.innerText = '提交申請'; });
+    .then(() => { alert("🎉 申請成功！"); this.reset(); btn.disabled = false; });
 });
 
 document.getElementById('scheduleForm').addEventListener('submit', function(e) {
     e.preventDefault();
-    const btn = document.getElementById('updateBtn');
-    btn.disabled = true;
     fetch(gasUrl + "?" + new URLSearchParams(new FormData(this)).toString(), { method: 'GET', mode: 'no-cors' })
-    .then(() => { alert("✅ 排程更新完成！"); this.reset(); btn.disabled = false; });
+    .then(() => { alert("✅ 排程更新完成！"); this.reset(); });
 });
 
 document.getElementById('surveyForm').addEventListener('submit', function(e) {
