@@ -384,7 +384,6 @@ function managerSearch() {
         html += `<tr><td>${item.time.split(' ')[0]}</td><td>${item.dealer}</td><td>${item.case}</td><td>${item.pEng || "--"}</td><td>${item.pTel || "--"}</td><td><span class="status-tag ${isDone ? 'status-ok' : 'status-wait'}">${isDone ? item.pDate : '待排'}</span></td></tr>`;
     });
     resDiv.innerHTML = html + "</table>";
-}
 // --- 部分 B: 過濾問卷 (新增的功能) ---
     const filteredSurveys = cachedSurveyData.filter(row => {
         // row[1] 經銷商, row[2] 案件, row[3] 工程師
@@ -433,64 +432,6 @@ document.getElementById('scheduleForm').addEventListener('submit', function(e) {
     fetch(gasUrl + "?" + new URLSearchParams(new FormData(this)).toString(), { method: 'GET', mode: 'no-cors' })
     .then(() => { alert("✅ 排程已成功更新！"); this.reset(); btn.disabled = false; btn.innerText = '確認更新排程'; });
 });
-// 新增功能：抓取問卷分頁 (GID: 2027669544)
-async function fetchSurveyData() {
-    // 改為向您的 GAS 發送請求，帶上 mode=getSurveyData
-    const listDiv = document.getElementById('survey-list-results');
-    const loadingUrl = `${gasUrl}?mode=getSurveyData`;
-
-    try {
-        // 因為是讀取資料，我們使用 fetch 並處理 JSON 回傳
-        const response = await fetch(loadingUrl);
-        const result = await response.json();
-
-        if (result.status !== "success") {
-            throw new Error(result.error || "資料讀取失敗");
-        }
-
-        const data = result.data; // 這就是從試算表抓回來的列資料陣列
-
-        if (data.length === 0) {
-            listDiv.innerHTML = "<p style='text-align:center; padding:20px;'>目前尚無問卷資料。</p>";
-            return;
-        }
-
-        let sums = { 4: 0, 5: 0, 6: 0, 7: 0, 8: 0 };
-        let html = `<table><tr><th>日期</th><th>工程師</th><th>技術</th><th>準時</th><th>配合</th><th>教育</th><th>總分</th><th>客戶回饋</th></tr>`;
-
-        data.forEach(row => {
-            // 累加評分 (Index 4 到 8)
-            for (let i = 4; i <= 8; i++) {
-                sums[i] += parseFloat(row[i]) || 0;
-            }
-
-            // 格式化日期：row[0] 是 GAS 回傳的日期字串
-            const dateStr = row[0] ? new Date(row[0]).toLocaleDateString() : '--';
-
-            html += `<tr>
-                <td>${dateStr}</td>
-                <td>${row[3] || '--'}</td>
-                <td style="text-align:center;">${row[4]}</td>
-                <td style="text-align:center;">${row[5]}</td>
-                <td style="text-align:center;">${row[6]}</td>
-                <td style="text-align:center;">${row[7]}</td>
-                <td style="text-align:center; font-weight:bold; color:var(--manager-color);">${row[8]}</td>
-                <td style="font-size:12px; color:#666;">${row[10] || row[9] || ''}</td>
-            </tr>`;
-        });
-
-        // 計算並顯示平均分
-        for (let i = 4; i <= 8; i++) {
-            const avg = (sums[i] / data.length).toFixed(1);
-            document.getElementById(`avg-${i}`).innerText = avg;
-        }
-        
-        listDiv.innerHTML = html + "</table>";
-    } catch (e) {
-        console.error("Survey Error:", e);
-        listDiv.innerHTML = "<p style='color:red; text-align:center;'>❌ 無法從伺服器載入問卷資料。</p>";
-    }
-}
 </script>
 </body>
 </html>
