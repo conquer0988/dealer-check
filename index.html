@@ -401,20 +401,75 @@ async function queryData() {
     const res = document.getElementById('results');
     if(!dName || !cName) return alert("請輸入完整名稱");
     res.innerHTML = "<p style='text-align:center; padding:20px; color:#666;'>🔍 正在安全連線雲端資料庫...</p>";
+async function sendSurvey() {
+    const btn = document.getElementById('svBtn');
+    const form = document.getElementById('inlineSurveyForm');
+    const formData = new FormData(form);
+    
+    // 根據您的 GAS 參數名稱進行組合
+    const params = new URLSearchParams(formData).toString();
+    const finalUrl = gasUrl + "?" + params;
+
+    btn.disabled = true;
+    btn.innerText = "提交中...";
     try {
         const response = await fetch(`${sheetUrl}&t=${Date.now()}`);
         const raw = await response.text();
         const rows = raw.split(/\r?\n/).map(r => r.split(",").map(cell => cell.trim().replace(/^"|"$/g, '')));
         let found = false;
         let html = `<table><tr><th>案件名稱</th><th>狀態</th><th>排定日期</th><th>負責工程師</th><th>聯絡電話</th></tr>`;
-        for (let j = 1; j < rows[0].length; j++) {
-            if (rows[1] && rows[1][j] === dName && rows[2] && rows[2][j] === cName) {
+       for(let j=1; j<rows[0].length; j++) {
+            if(rows[6][j] === qD && rows[2][j] === qC) {
                 found = true;
-                const pDate = rows[19][j]; const pEng = rows[20][j]; const pTel = rows[21][j];
+                const pDate = rows[19][j];
+                const pEng = rows[20][j] || '未指派';
+                const pTel = rows[21][j];
                 const isSet = (pDate && pDate !== "" && pDate !== "0" && pDate !== "undefined");
-                html += `<tr><td>${rows[2][j]}</td><td><span class="status-tag ${isSet ? 'status-ok':'status-wait'}">${isSet ? '已排程':'分派中'}</span></td><td>${isSet ? pDate:'待確認'}</td><td>${pEng || '指派中'}</td><td>${pTel || '--'}</td></tr>`;
+
+                // 顯示查詢結果表格列
+                html += `<tr>
+                    <td>${rows[2][j]}</td>
+                    <td><span class="status-tag ${isSet ? 'status-ok':'status-wait'}">${isSet ? '已排程':'分派中'}</span></td>
+                    <td>${isSet ? pDate : '待確認'}</td>
+                    <td>${pEng}</td>
+                    <td>${pTel || '--'}</td>
+                </tr>`;
+
+                // --- 如果已排程，直接在表格下方插入填寫介面 ---
+                if(isSet) {
+                    html += `</table>
+                    <div id="survey-box" style="margin-top:20px; padding:20px; border:2px solid #2D5D46; border-radius:12px; background:#f0fdf4;">
+                        <h3 style="color:#2D5D46; margin-top:0;">🌟 服務滿意度回饋</h3>
+                        <form id="inlineSurveyForm">
+                            <input type="hidden" name="mode" value="survey">
+                            <input type="hidden" name="sv_dealer" value="${qD}">
+                            <input type="hidden" name="sv_case" value="${qC}">
+                            <input type="hidden" name="sv_eng" value="${pEng}">
+                            
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+                                <div><label>技術評分(1-5)：</label><input type="number" name="scoreTech" min="1" max="5" value="5" required style="width:50px;"></div>
+                                <div><label>準時評分(1-5)：</label><input type="number" name="scoreTime" min="1" max="5" value="5" required style="width:50px;"></div>
+                                <div><label>配合評分(1-5)：</label><input type="number" name="scoreCoord" min="1" max="5" value="5" required style="width:50px;"></div>
+                                <div><label>教育評分(1-5)：</label><input type="number" name="scoreEdu" min="1" max="5" value="5" required style="width:50px;"></div>
+                            </div>
+                            <div style="margin-bottom:10px;">
+                                <label>總體評分(1-5)：</label><input type="number" name="scoreOverall" min="1" max="5" value="5" required style="width:50px;">
+                            </div>
+                            <div style="margin-bottom:10px;">
+                                <label>收穫最多的是什麼？</label><br>
+                                <input type="text" name="bestPart" style="width:100%; padding:5px;" placeholder="例如：技術指導...">
+                            </div>
+                            <div style="margin-bottom:10px;">
+                                <label>改進建議或表揚：</label><br>
+                                <textarea name="feedbackMsg" style="width:100%; height:60px; padding:5px;" placeholder="您的寶貴意見..."></textarea>
+                            </div>
+                            <button type="button" onclick="sendSurvey()" id="svBtn" style="background:#2D5D46; color:white; border:none; padding:10px 20px; border-radius:6px; cursor:pointer; width:100%;">提交滿意度</button>
+                        </form>
+                    </div>`;
+                }
             }
         }
+        // --- 替換結束 ---
         res.innerHTML = found ? html + "</table>" : "<p style='color:#d93025; text-align:center; margin-top:20px;'>查無資料，請確認名稱是否正確。</p>";
     } catch (e) { res.innerHTML = "連線異常"; }
 }
