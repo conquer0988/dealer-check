@@ -97,13 +97,7 @@
         .status-ok { background-color: #e6fffa; color: #2c7a7b; }
         .status-wait { background-color: #fffaf0; color: #9c4221; }
         .sync-notice { background-color: #fff8e1; border-left: 5px solid var(--accent-color); padding: 15px; border-radius: 8px; margin-bottom: 25px; color: #856404; }
-  /* --- 滿意度調查專屬樣式 --- */
-        #integrated-survey { 
-            background: #fdfdfd; padding: 25px; border: 2px dashed #2D5D46; border-radius: 12px; margin-top: 30px; 
-        }
-        .score-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
-        .survey-btn { background: linear-gradient(135deg, #2D5D46 0%, #1a3a2b 100%); color: white; }
-  </style>
+    </style>
 </head>
 <body>
 
@@ -203,60 +197,7 @@
         <div class="form-group"><label>案件名稱</label><input type="text" id="qC" placeholder="請輸入案件名稱"></div>
         <button onclick="queryData()">開始進度查詢</button>
         <div id="results"></div>
-<div id="integrated-survey" style="display:none;">
-            <div class="form-section"><h3>🌟 服務回饋調查 (五大維度)</h3></div>
-            <form id="surveyForm">
-                <input type="hidden" name="mode" value="survey">
-                <input type="hidden" name="sv_dealer" id="sv_dealer">
-                <input type="hidden" name="sv_case" id="sv_case">
-                <input type="hidden" name="sv_eng" id="sv_eng">
-
-                <div class="score-grid">
-                    <div class="form-group">
-                        <label>1. 技術專業度</label>
-                        <select name="scoreTech" required>
-                            <option value="5">5分 (極優)</option><option value="4">4分</option><option value="3">3分</option><option value="2">2分</option><option value="1">1分</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>2. 到達準時性</label>
-                        <select name="scoreTime" required>
-                            <option value="5">5分 (極優)</option><option value="4">4分</option><option value="3">3分</option><option value="2">2分</option><option value="1">1分</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>3. 現場配合度</label>
-                        <select name="scoreCoord" required>
-                            <option value="5">5分 (極優)</option><option value="4">4分</option><option value="3">3分</option><option value="2">2分</option><option value="1">1分</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>4. 教育成效</label>
-                        <select name="scoreEdu" required>
-                            <option value="5">5分 (極優)</option><option value="4">4分</option><option value="3">3分</option><option value="2">2分</option><option value="1">1分</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>5. 總體滿意度</label>
-                        <select name="scoreOverall" required>
-                            <option value="5">5分 (極優)</option><option value="4">4分</option><option value="3">3分</option><option value="2">2分</option><option value="1">1分</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>本次服務/教育中，您收穫最多的是哪個部分？</label>
-                    <textarea name="bestPart" rows="2" placeholder="請描述您的心得..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label>其他具體建議或表揚</label>
-                    <textarea name="feedbackMsg" rows="2" placeholder="您的建議是我們進步的動力..."></textarea>
-                </div>
-                <button type="submit" id="surveyBtn" class="survey-btn">送出評價回饋</button>
-            </form>
-        </div>
     </section>
-
 
     <section id="admin-section" class="content-section">
         <div id="admin-login">
@@ -293,7 +234,20 @@
                     <div class="stat-item"><div>平均完成天數</div><div class="stat-value" id="s-avg">--</div></div>
                 </div>
             </div>
-            <div id="manager-results"></div>
+<div id="survey-report-section" style="margin-top: 30px; border-top: 2px solid #eee; padding-top: 20px; margin-bottom: 30px;">
+    <h3 style="color: var(--manager-color);">🌟 全方位服務品質看板 (五大指標)</h3>
+    
+    <div class="stats-box">
+        <div class="stat-item"><small>技術專業</small><div class="stat-value" id="avg-4">--</div></div>
+        <div class="stat-item"><small>準時抵達</small><div class="stat-value" id="avg-5">--</div></div>
+        <div class="stat-item"><small>配合態度</small><div class="stat-value" id="avg-6">--</div></div>
+        <div class="stat-item"><small>教育成效</small><div class="stat-value" id="avg-7">--</div></div>
+        <div class="stat-item" style="background:#fce4ec; border:1px solid #f8bbd0;"><small>總體滿意</small><div class="stat-value" id="avg-8">--</div></div>
+    </div>
+
+    <div id="survey-list-results">正在讀取問卷明細...</div>
+</div>            
+<div id="manager-results"></div>
         </div>
     </section>
 </div>
@@ -329,6 +283,7 @@ function checkAdmin() {
         document.getElementById('admin-form').style.display = "none";
         document.getElementById('manager-view').style.display = "block";
         fetchManagerData();
+fetchSurveyData();    // ★ 新增這行：觸發問卷抓取
     } else { alert("密碼錯誤"); }
 }
 
@@ -387,69 +342,26 @@ async function queryData() {
     const dName = document.getElementById('qD').value.trim();
     const cName = document.getElementById('qC').value.trim();
     const res = document.getElementById('results');
-    const surveyBox = document.getElementById('integrated-survey'); // 取得問卷區塊
-    
     if(!dName || !cName) return alert("請輸入完整名稱");
     res.innerHTML = "<p style='text-align:center; padding:20px; color:#666;'>🔍 正在安全連線雲端資料庫...</p>";
-    surveyBox.style.display = "none"; // 每次查詢前先隱藏問卷
-
     try {
         const response = await fetch(`${sheetUrl}&t=${Date.now()}`);
         const raw = await response.text();
         const rows = raw.split(/\r?\n/).map(r => r.split(",").map(cell => cell.trim().replace(/^"|"$/g, '')));
-        
         let found = false;
         let html = `<table><tr><th>案件名稱</th><th>狀態</th><th>排定日期</th><th>負責工程師</th><th>聯絡電話</th></tr>`;
-        
         for (let j = 1; j < rows[0].length; j++) {
             if (rows[1] && rows[1][j] === dName && rows[2] && rows[2][j] === cName) {
                 found = true;
-                const pDate = rows[19][j]; 
-                const pEng = rows[20][j]; 
-                const pTel = rows[21][j];
+                const pDate = rows[19][j]; const pEng = rows[20][j]; const pTel = rows[21][j];
                 const isSet = (pDate && pDate !== "" && pDate !== "0" && pDate !== "undefined");
-                
                 html += `<tr><td>${rows[2][j]}</td><td><span class="status-tag ${isSet ? 'status-ok':'status-wait'}">${isSet ? '已排程':'分派中'}</span></td><td>${isSet ? pDate:'待確認'}</td><td>${pEng || '指派中'}</td><td>${pTel || '--'}</td></tr>`;
-                
-                // --- 滿意度調查連動核心 ---
-                if (isSet) {
-                    // 1. 自動帶入隱藏欄位值
-                    document.getElementById('sv_dealer').value = dName;
-                    document.getElementById('sv_case').value = cName;
-                    document.getElementById('sv_eng').value = pEng || "未指派";
-                    
-                    // 2. 顯示問卷區塊
-                    surveyBox.style.display = "block";
-                }
             }
         }
         res.innerHTML = found ? html + "</table>" : "<p style='color:#d93025; text-align:center; margin-top:20px;'>查無資料，請確認名稱是否正確。</p>";
     } catch (e) { res.innerHTML = "連線異常"; }
 }
 
-// 滿意度調查表單提交 (新增部分)
-document.getElementById('surveyForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const btn = document.getElementById('surveyBtn');
-    btn.disabled = true;
-    btn.innerText = '傳送回饋中...';
-    
-    fetch(gasUrl + "?" + new URLSearchParams(new FormData(this)).toString(), { method: 'GET', mode: 'no-cors' })
-    .then(() => {
-        alert("🎉 感謝您的回饋與心得！");
-        this.reset();
-        document.getElementById('integrated-survey').style.display = "none";
-        btn.disabled = false;
-        btn.innerText = '送出評價回饋';
-    })
-    .catch(() => {
-        alert("傳送失敗，請稍後再試");
-        btn.disabled = false;
-        btn.innerText = '送出評價回饋';
-    });
-});
-
-// 原有的提交申請邏輯
 document.getElementById('orderForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const btn = document.getElementById('submitBtn'); btn.disabled = true; btn.innerText = '正在傳送申請...';
@@ -457,13 +369,57 @@ document.getElementById('orderForm').addEventListener('submit', function(e) {
     .then(() => { alert("🎉 支援申請已成功送出！"); this.reset(); btn.disabled = false; btn.innerText = '提交申請'; });
 });
 
-// 原有的更新排程邏輯
 document.getElementById('scheduleForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const btn = document.getElementById('updateBtn'); btn.disabled = true; btn.innerText = '正在寫入資料...';
     fetch(gasUrl + "?" + new URLSearchParams(new FormData(this)).toString(), { method: 'GET', mode: 'no-cors' })
     .then(() => { alert("✅ 排程已成功更新！"); this.reset(); btn.disabled = false; btn.innerText = '確認更新排程'; });
 });
+// 新增功能：抓取問卷分頁 (GID: 2027669544)
+async function fetchSurveyData() {
+    const surveySheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSjbJC6VSPPicOPdwTHbcF3ETS5BSJnC_-HIvBNounFVLXik9NxzChJGqackA8HEWcfnkBMjUhWIUmQ/pub?gid=2027669544&single=true&output=csv";
+    const listDiv = document.getElementById('survey-list-results');
+
+    try {
+        const response = await fetch(`${surveySheetUrl}&t=${Date.now()}`);
+        const raw = await response.text();
+        // 解析 CSV 數據
+        const rows = raw.split(/\r?\n/).map(r => r.split(",").map(cell => cell.trim().replace(/^"|"$/g, '')));
+        // 過濾掉標題列與空白列
+        const data = rows.slice(1).filter(r => r[0] !== "");
+
+        let sums = { 4: 0, 5: 0, 6: 0, 7: 0, 8: 0 }; // 對應 E 到 I 欄位
+        let html = `<table><tr><th>日期</th><th>工程師</th><th>技術</th><th>準時</th><th>配合</th><th>教育</th><th>總分</th><th>客戶回饋</th></tr>`;
+
+        data.forEach(row => {
+            // 累加五項指標分數
+            for (let i = 4; i <= 8; i++) {
+                sums[i] += parseFloat(row[i]) || 0;
+            }
+
+            html += `<tr>
+                <td>${row[0].split(' ')[0]}</td>
+                <td>${row[3] || '--'}</td>
+                <td style="text-align:center;">${row[4]}</td>
+                <td style="text-align:center;">${row[5]}</td>
+                <td style="text-align:center;">${row[6]}</td>
+                <td style="text-align:center;">${row[7]}</td>
+                <td style="text-align:center; font-weight:bold; color:var(--manager-color);">${row[8]}</td>
+                <td style="font-size:12px; color:#666;">${row[10] || row[9] || ''}</td>
+            </tr>`;
+        });
+
+        // 計算並顯示五項指標的平均分
+        for (let i = 4; i <= 8; i++) {
+            const avg = data.length > 0 ? (sums[i] / data.length).toFixed(1) : "--";
+            document.getElementById(`avg-${i}`).innerText = avg;
+        }
+        
+        listDiv.innerHTML = html + "</table>";
+    } catch (e) {
+        listDiv.innerHTML = "<p style='color:red;'>無法載入問卷明細資料</p>";
+    }
+}
 </script>
 </body>
 </html>
