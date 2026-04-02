@@ -377,28 +377,40 @@ document.getElementById('scheduleForm').addEventListener('submit', function(e) {
 });
 // 新增功能：抓取問卷分頁 (GID: 2027669544)
 async function fetchSurveyData() {
-    const surveySheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSjbJC6VSPPicOPdwTHbcF3ETS5BSJnC_-HIvBNounFVLXik9NxzChJGqackA8HEWcfnkBMjUhWIUmQ/pub?gid=2027669544&single=true&output=csv";
+    // 改為向您的 GAS 發送請求，帶上 mode=getSurveyData
     const listDiv = document.getElementById('survey-list-results');
+    const loadingUrl = `${gasUrl}?mode=getSurveyData`;
 
     try {
-        const response = await fetch(`${surveySheetUrl}&t=${Date.now()}`);
-        const raw = await response.text();
-        // 解析 CSV 數據
-        const rows = raw.split(/\r?\n/).map(r => r.split(",").map(cell => cell.trim().replace(/^"|"$/g, '')));
-        // 過濾掉標題列與空白列
-        const data = rows.slice(1).filter(r => r[0] !== "");
+        // 因為是讀取資料，我們使用 fetch 並處理 JSON 回傳
+        const response = await fetch(loadingUrl);
+        const result = await response.json();
 
-        let sums = { 4: 0, 5: 0, 6: 0, 7: 0, 8: 0 }; // 對應 E 到 I 欄位
+        if (result.status !== "success") {
+            throw new Error(result.error || "資料讀取失敗");
+        }
+
+        const data = result.data; // 這就是從試算表抓回來的列資料陣列
+
+        if (data.length === 0) {
+            listDiv.innerHTML = "<p style='text-align:center; padding:20px;'>目前尚無問卷資料。</p>";
+            return;
+        }
+
+        let sums = { 4: 0, 5: 0, 6: 0, 7: 0, 8: 0 };
         let html = `<table><tr><th>日期</th><th>工程師</th><th>技術</th><th>準時</th><th>配合</th><th>教育</th><th>總分</th><th>客戶回饋</th></tr>`;
 
         data.forEach(row => {
-            // 累加五項指標分數
+            // 累加評分 (Index 4 到 8)
             for (let i = 4; i <= 8; i++) {
                 sums[i] += parseFloat(row[i]) || 0;
             }
 
+            // 格式化日期：row[0] 是 GAS 回傳的日期字串
+            const dateStr = row[0] ? new Date(row[0]).toLocaleDateString() : '--';
+
             html += `<tr>
-                <td>${row[0].split(' ')[0]}</td>
+                <td>${dateStr}</td>
                 <td>${row[3] || '--'}</td>
                 <td style="text-align:center;">${row[4]}</td>
                 <td style="text-align:center;">${row[5]}</td>
@@ -409,15 +421,16 @@ async function fetchSurveyData() {
             </tr>`;
         });
 
-        // 計算並顯示五項指標的平均分
+        // 計算並顯示平均分
         for (let i = 4; i <= 8; i++) {
-            const avg = data.length > 0 ? (sums[i] / data.length).toFixed(1) : "--";
+            const avg = (sums[i] / data.length).toFixed(1);
             document.getElementById(`avg-${i}`).innerText = avg;
         }
         
         listDiv.innerHTML = html + "</table>";
     } catch (e) {
-        listDiv.innerHTML = "<p style='color:red;'>無法載入問卷明細資料</p>";
+        console.error("Survey Error:", e);
+        listDiv.innerHTML = "<p style='color:red; text-align:center;'>❌ 無法從伺服器載入問卷資料。</p>";
     }
 }
 </script>
