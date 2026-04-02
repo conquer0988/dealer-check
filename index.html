@@ -234,73 +234,12 @@
                     <div class="stat-item"><div>平均完成天數</div><div class="stat-value" id="s-avg">--</div></div>
                 </div>
             </div>
-<div id="survey-report-section" style="margin-top: 30px; border-top: 2px solid #eee; padding-top: 20px; margin-bottom: 30px;">
-    <h3 style="color: var(--manager-color);">🌟 全方位服務品質看板 (五大指標)</h3>
-    
-    <div class="stats-box">
-        <div class="stat-item"><small>技術專業</small><div class="stat-value" id="avg-4">--</div></div>
-        <div class="stat-item"><small>準時抵達</small><div class="stat-value" id="avg-5">--</div></div>
-        <div class="stat-item"><small>配合態度</small><div class="stat-value" id="avg-6">--</div></div>
-        <div class="stat-item"><small>教育成效</small><div class="stat-value" id="avg-7">--</div></div>
-        <div class="stat-item" style="background:#fce4ec; border:1px solid #f8bbd0;"><small>總體滿意</small><div class="stat-value" id="avg-8">--</div></div>
-    </div>
-
-    <div id="survey-list-results">正在讀取問卷明細...</div>
-</div>            
-<div id="manager-results"></div>
+            <div id="manager-results"></div>
         </div>
     </section>
 </div>
 
 <script>
-// 1. 在開頭新增變數
-let cachedSurveyData = []; 
-// ★★★ 請將 renderSurveyTable 整段貼在這裡 ★★★
-function renderSurveyTable(data) {
-    const listDiv = document.getElementById('survey-list-results');
-    if (!data || data.length === 0) {
-        listDiv.innerHTML = "<p style='text-align:center; padding:20px;'>無符合條件的問卷。</p>";
-        [4,5,6,7,8].forEach(i => document.getElementById(`avg-${i}`).innerText = "--");
-        return;
-    }
-
-    let sums = { 4: 0, 5: 0, 6: 0, 7: 0, 8: 0 };
-    let html = `<table><tr><th>日期</th><th>工程師</th><th>技術</th><th>準時</th><th>配合</th><th>教育</th><th>總分</th><th>客戶回饋</th></tr>`;
-
-    data.forEach(row => {
-        for (let i = 4; i <= 8; i++) sums[i] += parseFloat(row[i]) || 0;
-        const dateStr = row[0] ? new Date(row[0]).toLocaleDateString() : '--';
-        html += `<tr>
-            <td>${dateStr}</td>
-            <td>${row[3] || '--'}</td>
-            <td style="text-align:center;">${row[4]}</td>
-            <td style="text-align:center;">${row[5]}</td>
-            <td style="text-align:center;">${row[6]}</td>
-            <td style="text-align:center;">${row[7]}</td>
-            <td style="text-align:center; font-weight:bold; color:var(--manager-color);">${row[8]}</td>
-            <td style="font-size:12px; color:#666;">${row[10] || row[9] || ''}</td>
-        </tr>`;
-    });
-
-    // 更新五大指標平均分數
-    for (let i = 4; i <= 8; i++) {
-        document.getElementById(`avg-${i}`).innerText = (sums[i] / data.length).toFixed(1);
-    }
-    listDiv.innerHTML = html + "</table>";
-}
-// ★★★ 貼到這裡結束 ★★★
-// 2. 修改 fetchSurveyData 函式 (只改存入變數的部分)
-async function fetchSurveyData() {
-    const loadingUrl = `${gasUrl}?mode=getSurveyData`;
-    try {
-        const response = await fetch(loadingUrl);
-        const result = await response.json();
-        if (result.status === "success") {
-            cachedSurveyData = result.data; // ★ 將抓到的原始陣列存起來
-            renderSurveyTable(cachedSurveyData); // 初次顯示全部
-        }
-    } catch (e) { console.error("抓取問卷失敗", e); }
-}
 const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSjbJC6VSPPicOPdwTHbcF3ETS5BSJnC_-HIvBNounFVLXik9NxzChJGqackA8HEWcfnkBMjUhWIUmQ/pub?gid=656272806&single=true&output=csv";
 const gasUrl = "https://script.google.com/macros/s/AKfycbydkRtSF_FeidEHkgUCStISZv-u07k0SmsaMq6-7twmP714lglPTh7AqUWKdwKvb5czNg/exec";
 
@@ -331,7 +270,6 @@ function checkAdmin() {
         document.getElementById('admin-form').style.display = "none";
         document.getElementById('manager-view').style.display = "block";
         fetchManagerData();
-fetchSurveyData();    // ★ 新增這行：觸發問卷抓取
     } else { alert("密碼錯誤"); }
 }
 
@@ -384,89 +322,33 @@ function managerSearch() {
         html += `<tr><td>${item.time.split(' ')[0]}</td><td>${item.dealer}</td><td>${item.case}</td><td>${item.pEng || "--"}</td><td>${item.pTel || "--"}</td><td><span class="status-tag ${isDone ? 'status-ok' : 'status-wait'}">${isDone ? item.pDate : '待排'}</span></td></tr>`;
     });
     resDiv.innerHTML = html + "</table>";
-// --- 部分 B: 過濾問卷 (新增的功能) ---
-    const filteredSurveys = cachedSurveyData.filter(row => {
-        // row[1] 經銷商, row[2] 案件, row[3] 工程師
-        return (row[1] && row[1].toLowerCase().includes(keyword)) ||
-               (row[2] && row[2].toLowerCase().includes(keyword)) ||
-               (row[3] && row[3].toLowerCase().includes(keyword));
-    });
-    
-    renderSurveyTable(filteredSurveys); // 呼叫上面寫好的渲染函式
 }
 
 async function queryData() {
-    const qD = document.getElementById('qD').value.trim();
-    const qC = document.getElementById('qC').value.trim();
+    const dName = document.getElementById('qD').value.trim();
+    const cName = document.getElementById('qC').value.trim();
     const res = document.getElementById('results');
-    if(!qD || !qC) { alert("請輸入經銷商與案件名稱"); return; }
-    res.innerHTML = "查詢中...";
-
+    if(!dName || !cName) return alert("請輸入完整名稱");
+    res.innerHTML = "<p style='text-align:center; padding:20px; color:#666;'>🔍 正在安全連線雲端資料庫...</p>";
     try {
-        const response = await fetch(csvUrl);
-        const data = await response.text();
-        const rows = data.split('\n').map(row => row.split(','));
+        const response = await fetch(`${sheetUrl}&t=${Date.now()}`);
+        const raw = await response.text();
+        const rows = raw.split(/\r?\n/).map(r => r.split(",").map(cell => cell.trim().replace(/^"|"$/g, '')));
         let found = false;
-        // 先建立表格標頭
-        let tableHtml = `<table><tr><th>案件名稱</th><th>狀態</th><th>排定日期</th><th>工程師</th><th>電話</th></tr>`;
-        let surveyHtml = ""; // 用來存放滿意度表單
-
-        for(let j=1; j<rows[0].length; j++) {
-            if(rows[6][j] === qD && rows[2][j] === qC) {
+        let html = `<table><tr><th>案件名稱</th><th>狀態</th><th>排定日期</th><th>負責工程師</th><th>聯絡電話</th></tr>`;
+        for (let j = 1; j < rows[0].length; j++) {
+            if (rows[1] && rows[1][j] === dName && rows[2] && rows[2][j] === cName) {
                 found = true;
-                const pDate = rows[19][j];
-                const pEng = rows[20][j] || '未指派';
-                const pTel = rows[21][j];
+                const pDate = rows[19][j]; const pEng = rows[20][j]; const pTel = rows[21][j];
                 const isSet = (pDate && pDate !== "" && pDate !== "0" && pDate !== "undefined");
-
-                // 增加表格列
-                tableHtml += `<tr>
-                    <td>${rows[2][j]}</td>
-                    <td><span class="status-tag ${isSet ? 'status-ok':'status-wait'}">${isSet ? '已排程':'分派中'}</span></td>
-                    <td>${isSet ? pDate : '待確認'}</td>
-                    <td>${pEng}</td>
-                    <td>${pTel || '--'}</td>
-                </tr>`;
-
-                // 如果已排程，準備滿意度表單 (放在表格外)
-                if(isSet) {
-                    surveyHtml = `
-                    <div id="survey-box" style="margin-top:20px; padding:20px; border:2px solid #2D5D46; border-radius:12px; background:#f0fdf4;">
-                        <h3 style="color:#2D5D46; margin-top:0;">🌟 服務滿意度回饋</h3>
-                        <form id="inlineSurveyForm">
-                            <input type="hidden" name="mode" value="survey">
-                            <input type="hidden" name="sv_dealer" value="${qD}">
-                            <input type="hidden" name="sv_case" value="${qC}">
-                            <input type="hidden" name="sv_eng" value="${pEng}">
-                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
-                                <div><label>技術(1-5)：</label><input type="number" name="scoreTech" min="1" max="5" value="5" style="width:45px;"></div>
-                                <div><label>準時(1-5)：</label><input type="number" name="scoreTime" min="1" max="5" value="5" style="width:45px;"></div>
-                                <div><label>配合(1-5)：</label><input type="number" name="scoreCoord" min="1" max="5" value="5" style="width:45px;"></div>
-                                <div><label>教育(1-5)：</label><input type="number" name="scoreEdu" min="1" max="5" value="5" style="width:45px;"></div>
-                            </div>
-                            <div style="margin-bottom:10px;">
-                                <label>總體評分(1-5)：</label><input type="number" name="scoreOverall" min="1" max="5" value="5" style="width:45px;">
-                            </div>
-                            <div style="margin-bottom:10px;">
-                                <label>收穫最多的是什麼？</label><br>
-                                <input type="text" name="bestPart" style="width:100%; padding:5px;">
-                            </div>
-                            <div style="margin-bottom:10px;">
-                                <label>建議或表揚：</label><br>
-                                <textarea name="feedbackMsg" style="width:100%; height:60px; padding:5px;"></textarea>
-                            </div>
-                            <button type="button" onclick="sendSurvey()" id="svBtn" style="background:#2D5D46; color:white; border:none; padding:10px 20px; border-radius:6px; cursor:pointer; width:100%;">提交滿意度</button>
-                        </form>
-                    </div>`;
-                }
+                html += `<tr><td>${rows[2][j]}</td><td><span class="status-tag ${isSet ? 'status-ok':'status-wait'}">${isSet ? '已排程':'分派中'}</span></td><td>${isSet ? pDate:'待確認'}</td><td>${pEng || '指派中'}</td><td>${pTel || '--'}</td></tr>`;
             }
         }
-        
-        // 組合結果：表格結束標籤 + 滿意度表單
-        res.innerHTML = found ? (tableHtml + "</table>" + surveyHtml) : "<p style='color:#d93025; text-align:center; margin-top:20px;'>查無資料，請確認名稱是否正確。</p>";
-        
+        res.innerHTML = found ? html + "</table>" : "<p style='color:#d93025; text-align:center; margin-top:20px;'>查無資料，請確認名稱是否正確。</p>";
     } catch (e) { res.innerHTML = "連線異常"; }
-}document.getElementById('orderForm').addEventListener('submit', function(e) {
+}
+
+document.getElementById('orderForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const btn = document.getElementById('submitBtn'); btn.disabled = true; btn.innerText = '正在傳送申請...';
     fetch(gasUrl + "?" + new URLSearchParams(new FormData(this)).toString(), { method: 'GET', mode: 'no-cors' })
@@ -479,30 +361,6 @@ document.getElementById('scheduleForm').addEventListener('submit', function(e) {
     fetch(gasUrl + "?" + new URLSearchParams(new FormData(this)).toString(), { method: 'GET', mode: 'no-cors' })
     .then(() => { alert("✅ 排程已成功更新！"); this.reset(); btn.disabled = false; btn.innerText = '確認更新排程'; });
 });
-async function sendSurvey() {
-    const btn = document.getElementById('svBtn');
-    const form = document.getElementById('inlineSurveyForm');
-    if (!form) return;
-
-    const params = new URLSearchParams(new FormData(form)).toString();
-    const finalUrl = gasUrl + "?" + params;
-
-    btn.disabled = true;
-    btn.innerText = "提交中...";
-
-    try {
-        await fetch(finalUrl, { method: 'GET', mode: 'no-cors' });
-        document.getElementById('survey-box').innerHTML = `
-            <div style="text-align:center; padding:10px; color:#2D5D46;">
-                <h3>✅ 感謝回饋！</h3>
-                <p>資料已成功回傳系統。</p>
-            </div>`;
-    } catch (e) {
-        alert("提交失敗");
-        btn.disabled = false;
-        btn.innerText = "重新提交";
-    }
-}
 </script>
 </body>
 </html>
