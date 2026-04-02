@@ -234,12 +234,73 @@
                     <div class="stat-item"><div>平均完成天數</div><div class="stat-value" id="s-avg">--</div></div>
                 </div>
             </div>
-            <div id="manager-results"></div>
+<div id="survey-report-section" style="margin-top: 30px; border-top: 2px solid #eee; padding-top: 20px; margin-bottom: 30px;">
+    <h3 style="color: var(--manager-color);">🌟 全方位服務品質看板 (五大指標)</h3>
+    
+    <div class="stats-box">
+        <div class="stat-item"><small>技術專業</small><div class="stat-value" id="avg-4">--</div></div>
+        <div class="stat-item"><small>準時抵達</small><div class="stat-value" id="avg-5">--</div></div>
+        <div class="stat-item"><small>配合態度</small><div class="stat-value" id="avg-6">--</div></div>
+        <div class="stat-item"><small>教育成效</small><div class="stat-value" id="avg-7">--</div></div>
+        <div class="stat-item" style="background:#fce4ec; border:1px solid #f8bbd0;"><small>總體滿意</small><div class="stat-value" id="avg-8">--</div></div>
+    </div>
+
+    <div id="survey-list-results">正在讀取問卷明細...</div>
+</div>            
+<div id="manager-results"></div>
         </div>
     </section>
 </div>
 
 <script>
+// 1. 在開頭新增變數
+let cachedSurveyData = []; 
+// ★★★ 請將 renderSurveyTable 整段貼在這裡 ★★★
+function renderSurveyTable(data) {
+    const listDiv = document.getElementById('survey-list-results');
+    if (!data || data.length === 0) {
+        listDiv.innerHTML = "<p style='text-align:center; padding:20px;'>無符合條件的問卷。</p>";
+        [4,5,6,7,8].forEach(i => document.getElementById(`avg-${i}`).innerText = "--");
+        return;
+    }
+
+    let sums = { 4: 0, 5: 0, 6: 0, 7: 0, 8: 0 };
+    let html = `<table><tr><th>日期</th><th>工程師</th><th>技術</th><th>準時</th><th>配合</th><th>教育</th><th>總分</th><th>客戶回饋</th></tr>`;
+
+    data.forEach(row => {
+        for (let i = 4; i <= 8; i++) sums[i] += parseFloat(row[i]) || 0;
+        const dateStr = row[0] ? new Date(row[0]).toLocaleDateString() : '--';
+        html += `<tr>
+            <td>${dateStr}</td>
+            <td>${row[3] || '--'}</td>
+            <td style="text-align:center;">${row[4]}</td>
+            <td style="text-align:center;">${row[5]}</td>
+            <td style="text-align:center;">${row[6]}</td>
+            <td style="text-align:center;">${row[7]}</td>
+            <td style="text-align:center; font-weight:bold; color:var(--manager-color);">${row[8]}</td>
+            <td style="font-size:12px; color:#666;">${row[10] || row[9] || ''}</td>
+        </tr>`;
+    });
+
+    // 更新五大指標平均分數
+    for (let i = 4; i <= 8; i++) {
+        document.getElementById(`avg-${i}`).innerText = (sums[i] / data.length).toFixed(1);
+    }
+    listDiv.innerHTML = html + "</table>";
+}
+// ★★★ 貼到這裡結束 ★★★
+// 2. 修改 fetchSurveyData 函式 (只改存入變數的部分)
+async function fetchSurveyData() {
+    const loadingUrl = `${gasUrl}?mode=getSurveyData`;
+    try {
+        const response = await fetch(loadingUrl);
+        const result = await response.json();
+        if (result.status === "success") {
+            cachedSurveyData = result.data; // ★ 將抓到的原始陣列存起來
+            renderSurveyTable(cachedSurveyData); // 初次顯示全部
+        }
+    } catch (e) { console.error("抓取問卷失敗", e); }
+}
 const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSjbJC6VSPPicOPdwTHbcF3ETS5BSJnC_-HIvBNounFVLXik9NxzChJGqackA8HEWcfnkBMjUhWIUmQ/pub?gid=656272806&single=true&output=csv";
 const gasUrl = "https://script.google.com/macros/s/AKfycbydkRtSF_FeidEHkgUCStISZv-u07k0SmsaMq6-7twmP714lglPTh7AqUWKdwKvb5czNg/exec";
 
@@ -270,6 +331,7 @@ function checkAdmin() {
         document.getElementById('admin-form').style.display = "none";
         document.getElementById('manager-view').style.display = "block";
         fetchManagerData();
+fetchSurveyData();    // ★ 新增這行：觸發問卷抓取
     } else { alert("密碼錯誤"); }
 }
 
@@ -322,6 +384,15 @@ function managerSearch() {
         html += `<tr><td>${item.time.split(' ')[0]}</td><td>${item.dealer}</td><td>${item.case}</td><td>${item.pEng || "--"}</td><td>${item.pTel || "--"}</td><td><span class="status-tag ${isDone ? 'status-ok' : 'status-wait'}">${isDone ? item.pDate : '待排'}</span></td></tr>`;
     });
     resDiv.innerHTML = html + "</table>";
+// --- 部分 B: 過濾問卷 (新增的功能) ---
+    const filteredSurveys = cachedSurveyData.filter(row => {
+        // row[1] 經銷商, row[2] 案件, row[3] 工程師
+        return (row[1] && row[1].toLowerCase().includes(keyword)) ||
+               (row[2] && row[2].toLowerCase().includes(keyword)) ||
+               (row[3] && row[3].toLowerCase().includes(keyword));
+    });
+    
+    renderSurveyTable(filteredSurveys); // 呼叫上面寫好的渲染函式
 }
 
 async function queryData() {
@@ -347,7 +418,6 @@ async function queryData() {
         res.innerHTML = found ? html + "</table>" : "<p style='color:#d93025; text-align:center; margin-top:20px;'>查無資料，請確認名稱是否正確。</p>";
     } catch (e) { res.innerHTML = "連線異常"; }
 }
-
 document.getElementById('orderForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const btn = document.getElementById('submitBtn'); btn.disabled = true; btn.innerText = '正在傳送申請...';
