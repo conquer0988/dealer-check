@@ -406,32 +406,13 @@ async function queryData() {
         const raw = await response.text();
         const rows = raw.split(/\r?\n/).map(r => r.split(",").map(cell => cell.trim().replace(/^"|"$/g, '')));
         let found = false;
-        
-        // 修改表格標題，增加「服務評分」欄位
-        let html = `<table><tr><th>案件名稱</th><th>狀態</th><th>排定日期</th><th>負責工程師</th><th>服務評分</th></tr>`;
-        
+        let html = `<table><tr><th>案件名稱</th><th>狀態</th><th>排定日期</th><th>負責工程師</th><th>聯絡電話</th></tr>`;
         for (let j = 1; j < rows[0].length; j++) {
             if (rows[1] && rows[1][j] === dName && rows[2] && rows[2][j] === cName) {
                 found = true;
-                const pDate = rows[19][j]; 
-                const pEng = rows[20][j]; 
-                const pTel = rows[21][j];
+                const pDate = rows[19][j]; const pEng = rows[20][j]; const pTel = rows[21][j];
                 const isSet = (pDate && pDate !== "" && pDate !== "0" && pDate !== "undefined");
-                
-                // ★ 關鍵：如果是已排程，產生問卷連結按鈕
-                let surveyBtn = '--';
-                if(isSet) {
-                    const surveyUrl = `https://docs.google.com/forms/d/e/1FAIpQLSe-0Pnt_8_K1_Gf6o4-Q-oD8-W36f6-S8_kQZ7_kY9_kQZ7_kQ/viewform?entry.1354388301=${encodeURIComponent(dName)}&entry.410141364=${encodeURIComponent(cName)}&entry.2132711667=${encodeURIComponent(pEng)}`;
-                    surveyBtn = `<a href="${surveyUrl}" target="_blank" style="background:#e91e63; color:white; padding:5px 10px; border-radius:5px; text-decoration:none; font-size:12px;">填寫問卷</a>`;
-                }
-
-                html += `<tr>
-                    <td>${rows[2][j]}</td>
-                    <td><span class="status-tag ${isSet ? 'status-ok':'status-wait'}">${isSet ? '已排程':'分派中'}</span></td>
-                    <td>${isSet ? pDate : '待確認'}</td>
-                    <td>${pEng || '指派中'}</td>
-                    <td style="text-align:center;">${surveyBtn}</td>
-                </tr>`;
+                html += `<tr><td>${rows[2][j]}</td><td><span class="status-tag ${isSet ? 'status-ok':'status-wait'}">${isSet ? '已排程':'分派中'}</span></td><td>${isSet ? pDate:'待確認'}</td><td>${pEng || '指派中'}</td><td>${pTel || '--'}</td></tr>`;
             }
         }
         res.innerHTML = found ? html + "</table>" : "<p style='color:#d93025; text-align:center; margin-top:20px;'>查無資料，請確認名稱是否正確。</p>";
