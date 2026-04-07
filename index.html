@@ -395,7 +395,7 @@ function managerSearch() {
     renderSurveyTable(filteredSurveys); // 呼叫上面寫好的渲染函式
 }
 
-// --- 案件進度查詢 (已修正變數名稱與表格結構) ---
+ // --- 案件進度查詢 (修正迴圈邏輯與索引錯誤) ---
     async function queryData() {
         const qD = document.getElementById('qD').value.trim();
         const qC = document.getElementById('qC').value.trim();
@@ -409,26 +409,33 @@ function managerSearch() {
             const data = await response.text();
             const rows = data.split('\n').map(row => row.split(','));
             let found = false;
-            let html = `<table><tr><th>案件名稱</th><th>狀態</th><th>日期</th><th>工程師</th><th>電話</th></tr>`;
+            let tableHtml = `<table><tr><th>案件名稱</th><th>狀態</th><th>日期</th><th>工程師</th><th>電話</th></tr>`;
             let surveyHtml = ""; 
 
-            for(let j=1; j<rows[0].length; j++) {
-                if(rows[6][j] === qD && rows[2][j] === qC) {
-                    found = true;
-                    const pDate = rows[19][j];
-                    const pEng = rows[20][j] || '未指派';
-                    const pTel = rows[21][j];
-                    const isSet = (pDate && pDate !== "" && pDate !== "0" && pDate !== "undefined");
+            // 修正 1: j 應該小於 rows.length (總行數)
+            for(let j=1; j < rows.length; j++) {
+                if (!rows[j] || rows[j].length < 22) continue; // 跳過空行或欄位不足的行
 
-                    html += `<tr>
-                        <td>${rows[2][j]}</td>
+                // 修正 2: 應該是 rows[j][index] (第 j 行的第幾個欄位)
+                const dealerName = rows[j][6] ? rows[j][6].trim() : "";
+                const caseName = rows[j][2] ? rows[j][2].trim() : "";
+
+                if(dealerName === qD && caseName === qC) {
+                    found = true;
+                    const pDate = rows[j][19]; // 第 19 欄: 日期
+                    const pEng = rows[j][20] || '未指派'; // 第 20 欄: 工程師
+                    const pTel = rows[j][21]; // 第 21 欄: 電話
+                    const isSet = (pDate && pDate !== "" && pDate !== "0" && pDate !== "undefined" && pDate !== "待確認");
+
+                    tableHtml += `<tr>
+                        <td>${rows[j][2]}</td>
                         <td><span class="status-tag ${isSet ? 'status-ok':'status-wait'}">${isSet ? '已排程':'分派中'}</span></td>
                         <td>${isSet ? pDate : '待確認'}</td>
                         <td>${pEng}</td>
                         <td>${pTel || '--'}</td>
                     </tr>`;
 
-                    // 如果已排程，顯示滿意度調查
+                    // 如果已排程，顯示 5 評分 + 2 開放式問題
                     if(isSet && surveyHtml === "") {
                         surveyHtml = `
                         <div id="survey-box" style="margin-top:20px; padding:20px; border:2px solid #2D5D46; border-radius:12px; background:#f0fdf4;">
@@ -438,22 +445,25 @@ function managerSearch() {
                                 <input type="hidden" name="sv_dealer" value="${qD}">
                                 <input type="hidden" name="sv_case" value="${qC}">
                                 <input type="hidden" name="sv_eng" value="${pEng}">
+                                
                                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
-                                    <div><label>技術(1-5)：</label><input type="number" name="scoreTech" min="1" max="5" value="5" style="width:40px;"></div>
-                                    <div><label>準時(1-5)：</label><input type="number" name="scoreTime" min="1" max="5" value="5" style="width:40px;"></div>
-                                    <div><label>配合(1-5)：</label><input type="number" name="scoreCoord" min="1" max="5" value="5" style="width:40px;"></div>
-                                    <div><label>教育(1-5)：</label><input type="number" name="scoreEdu" min="1" max="5" value="5" style="width:40px;"></div>
+                                    <div><label style="font-size:13px;">技術評分(1-5)：</label><input type="number" name="scoreTech" min="1" max="5" value="5" style="width:45px; padding:3px;"></div>
+                                    <div><label style="font-size:13px;">準時評分(1-5)：</label><input type="number" name="scoreTime" min="1" max="5" value="5" style="width:45px; padding:3px;"></div>
+                                    <div><label style="font-size:13px;">配合評分(1-5)：</label><input type="number" name="scoreCoord" min="1" max="5" value="5" style="width:45px; padding:3px;"></div>
+                                    <div><label style="font-size:13px;">教育評分(1-5)：</label><input type="number" name="scoreEdu" min="1" max="5" value="5" style="width:45px; padding:3px;"></div>
                                 </div>
-                                <div style="margin-bottom:10px;">
-                                    <label>總體評分(1-5)：</label><input type="number" name="scoreOverall" min="1" max="5" value="5" style="width:40px;">
+                                <div style="margin-bottom:15px;">
+                                    <label style="font-size:13px;">總體評分(1-5)：</label><input type="number" name="scoreOverall" min="1" max="5" value="5" style="width:45px; padding:3px;">
                                 </div>
-                                <div style="margin-bottom:10px;">
-                                    <label>收穫最多的：</label><input type="text" name="bestPart" style="width:100%; padding:5px; box-sizing:border-box;">
+                                <div style="margin-bottom:15px;">
+                                    <label style="font-size:13px;">1. 本次服務收穫最多的是？</label><br>
+                                    <input type="text" name="bestPart" style="width:100%; padding:8px; margin-top:5px; border:1px solid #ccc; border-radius:4px;" placeholder="例如：故障排除技巧...">
                                 </div>
-                                <div style="margin-bottom:10px;">
-                                    <label>建議或表揚：</label><textarea name="feedbackMsg" style="width:100%; height:50px; padding:5px; box-sizing:border-box;"></textarea>
+                                <div style="margin-bottom:15px;">
+                                    <label style="font-size:13px;">2. 改進建議或表揚：</label><br>
+                                    <textarea name="feedbackMsg" style="width:100%; height:60px; padding:8px; margin-top:5px; border:1px solid #ccc; border-radius:4px;" placeholder="您的寶貴意見..."></textarea>
                                 </div>
-                                <button type="button" onclick="sendSurvey()" id="svBtn" style="background:#2D5D46; color:white; border:none; padding:10px; border-radius:6px; cursor:pointer; width:100%; font-weight:bold;">提交滿意度回饋</button>
+                                <button type="button" onclick="sendSurvey()" id="svBtn" style="background:#2D5D46; color:white; border:none; padding:12px; border-radius:8px; cursor:pointer; width:100%; font-weight:bold;">提交滿意度調查</button>
                             </form>
                         </div>`;
                     }
@@ -461,17 +471,17 @@ function managerSearch() {
             }
 
             if(found) {
-                // 確保表格標籤有正確關閉，且後面才接問卷
-                res.innerHTML = html + "</table>" + surveyHtml;
+                res.innerHTML = tableHtml + "</table>" + surveyHtml;
             } else {
                 res.innerHTML = "<p style='color:#d93025; text-align:center; margin-top:20px;'>查無資料，請確認名稱是否正確。</p>";
             }
         } catch (e) { 
             console.error(e);
-            res.innerHTML = "連線異常，請確認試算表已發佈為 CSV 格式。"; 
+            res.innerHTML = "連線異常，請確認試算表 CSV 網址是否正確。"; 
         }
     }
-    // --- 滿意度調查提交功能 (新增) ---
+
+    // --- 滿意度調查提交功能 ---
     async function sendSurvey() {
         const btn = document.getElementById('svBtn');
         const form = document.getElementById('inlineSurveyForm');
@@ -488,7 +498,7 @@ function managerSearch() {
             document.getElementById('survey-box').innerHTML = `
                 <div style="text-align:center; padding:15px; color:#2D5D46;">
                     <h3 style="margin:0;">✅ 感謝您的回饋！</h3>
-                    <p style="margin-top:10px;">您的意見已成功提交至「滿意度回饋」分頁。</p>
+                    <p style="margin-top:10px;">資料已傳送到「滿意度回饋」分頁。</p>
                 </div>`;
         } catch (e) {
             alert("提交失敗，請檢查網路連線");
@@ -497,7 +507,7 @@ function managerSearch() {
         }
     }
 
-    // --- 原有表單提交邏輯 (保留不變) ---
+    // --- 保留原本的其他提交邏輯 ---
     document.getElementById('orderForm').addEventListener('submit', function(e) {
         e.preventDefault();
         const btn = document.getElementById('submitBtn'); btn.disabled = true; btn.innerText = '正在傳送申請...';
