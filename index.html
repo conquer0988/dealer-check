@@ -395,7 +395,7 @@ function managerSearch() {
     renderSurveyTable(filteredSurveys); // 呼叫上面寫好的渲染函式
 }
 
-// --- 案件進度查詢 (完全依照舊版 Word 成功邏輯修正) ---
+// --- 案件進度查詢 (地毯式比對 Word 檔後的最終修正版) ---
     async function queryData() {
         const qD = document.getElementById('qD').value.trim();
         const qC = document.getElementById('qC').value.trim();
@@ -404,33 +404,42 @@ function managerSearch() {
         res.innerHTML = "查詢中...";
 
         try {
+            // 確保這裡是用您檔案定義的 sheetUrl
             const response = await fetch(sheetUrl); 
             const data = await response.text();
-            // 完全保留您原始的解析方式
+            
+            // 比對 Word 檔邏輯：將資料切成二維陣列
             const rows = data.split('\n').map(row => row.split(','));
+            
             let found = false;
             let html = `<table><tr><th>案件名稱</th><th>狀態</th><th>日期</th><th>工程師</th><th>電話</th></tr>`;
             let surveyHtml = ""; 
 
-            // 這是您原本成功的迴圈邏輯：rows[0].length 代表橫向欄位數
-            for(let j=1; j<rows[0].length; j++) {
-                // 嚴格遵守您原本的索引：rows[6]是經銷商, rows[2]是案件名稱
-                if(rows[6][j] === qD && rows[2][j] === qC) {
+            // 嚴格比對 Word 檔迴圈：j=1; j < rows[0].length
+            for(let j=1; j < rows[0].length; j++) {
+                
+                // 關鍵修正點：加上 .trim() 移除看不見的換行符號，確保比對成功
+                const dealerInSheet = rows[6][j] ? rows[6][j].trim() : "";
+                const caseInSheet = rows[2][j] ? rows[2][j].trim() : "";
+
+                if(dealerInSheet === qD && caseInSheet === qC) {
                     found = true;
-                    const pDate = rows[19][j]; // 日期
-                    const pEng = rows[20][j] || '未指派'; // 工程師
-                    const pTel = rows[21][j]; // 電話
-                    const isSet = (pDate && pDate !== "" && pDate !== "0" && pDate !== "undefined");
+                    // 完全依照 Word 檔索引 19, 20, 21
+                    const pDate = rows[19][j] ? rows[19][j].trim() : "";
+                    const pEng = rows[20][j] ? rows[20][j].trim() : "指派中";
+                    const pTel = rows[21][j] ? rows[21][j].trim() : "--";
+                    
+                    const isSet = (pDate && pDate !== "" && pDate !== "0" && pDate !== "undefined" && pDate !== "待確認");
 
                     html += `<tr>
                         <td>${rows[2][j]}</td>
                         <td><span class="status-tag ${isSet ? 'status-ok':'status-wait'}">${isSet ? '已排程':'分派中'}</span></td>
                         <td>${isSet ? pDate : '待確認'}</td>
                         <td>${pEng}</td>
-                        <td>${pTel || '--'}</td>
+                        <td>${pTel}</td>
                     </tr>`;
 
-                    // 只有「已排程」才顯示滿意度
+                    // 如果已排程，顯示滿意度表單
                     if(isSet && surveyHtml === "") {
                         surveyHtml = `
                         <div id="survey-box" style="margin-top:20px; padding:20px; border:2px solid #2D5D46; border-radius:12px; background:#f0fdf4;">
@@ -450,11 +459,11 @@ function managerSearch() {
                                     <label style="font-size:12px;">總體評分(1-5)：</label><input type="number" name="scoreOverall" min="1" max="5" value="5" style="width:40px;">
                                 </div>
                                 <div style="margin-bottom:10px;">
-                                    <label style="font-size:12px;">1. 本次服務收穫最多的是？</label><br>
+                                    <label style="font-size:12px;">本次服務收穫最多的是？</label><br>
                                     <input type="text" name="bestPart" style="width:100%; padding:5px; box-sizing:border-box;">
                                 </div>
                                 <div style="margin-bottom:10px;">
-                                    <label style="font-size:12px;">2. 改進建議或表揚：</label><br>
+                                    <label style="font-size:12px;">建議或表揚：</label><br>
                                     <textarea name="feedbackMsg" style="width:100%; height:50px; padding:5px; box-sizing:border-box;"></textarea>
                                 </div>
                                 <button type="button" onclick="sendSurvey()" id="svBtn" style="background:#2D5D46; color:white; border:none; padding:10px; border-radius:6px; cursor:pointer; width:100%; font-weight:bold;">提交滿意度回饋</button>
@@ -471,7 +480,7 @@ function managerSearch() {
             }
         } catch (e) { 
             console.error(e);
-            res.innerHTML = "連線異常"; 
+            res.innerHTML = "連線異常，請確認試算表網址。"; 
         }
     }
  // --- 滿意度調查提交功能 ---
