@@ -395,109 +395,104 @@ function managerSearch() {
     renderSurveyTable(filteredSurveys); // 呼叫上面寫好的渲染函式
 }
 
-// --- 案件進度查詢 (整合物件化邏輯與滿意度功能) ---
+// --- 案件進度查詢 (僅變動滿意度評分介面，其餘邏輯保留) ---
     async function queryData() {
         const qD = document.getElementById('qD').value.trim();
         const qC = document.getElementById('qC').value.trim();
         const res = document.getElementById('results');
 
-        if(!qD || !qC) {
-            alert("請輸入經銷商與案件名稱");
-            return;
-        }
-
+        if(!qD || !qC) { alert("請輸入經銷商與案件名稱"); return; }
         res.innerHTML = "查詢中...";
 
         try {
             const response = await fetch(sheetUrl);
             const text = await response.text();
 
-            // 1. 正確解析 CSV（處理換行與特殊字元）
+            // 1. 正確解析 CSV (保留物件化邏輯)
             const rows = text.split(/\r?\n/).map(r => {
-                // 使用正規表示法處理可能包含逗號的內容，並過濾空行
                 const matches = r.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
                 return matches ? matches : [];
             }).filter(r => r.length > 0);
 
-            // 2. 轉成「物件陣列」（以第一欄標題為 Key）
-            // 根據您的 Word 檔，標題是在 rows[i][0]
             const headers = rows.map(r => r[0] ? r[0].trim() : "");
             let dataList = [];
-
-            // 橫向遍歷每一列資料 (從 j=1 開始)
             for(let j = 1; j < rows[0].length; j++) {
                 let obj = {};
                 for(let i = 0; i < rows.length; i++) {
-                    if(headers[i]) {
-                        obj[headers[i]] = rows[i][j] ? rows[i][j].trim() : "";
-                    }
+                    if(headers[i]) obj[headers[i]] = rows[i][j] ? rows[i][j].trim() : "";
                 }
                 dataList.push(obj);
             }
 
-            // 3. 執行查詢
-            const result = dataList.find(item =>
-                item["經銷商名稱"] === qD &&
-                item["案件名稱"] === qC
-            );
+            // 2. 執行查詢
+            const result = dataList.find(item => item["經銷商名稱"] === qD && item["案件名稱"] === qC);
 
             if(result) {
                 const pDate = result["排定日期"];
                 const pEng  = result["負責工程師"] || "指派中";
                 const pTel  = result["工程師電話"] || "--";
-                const isSet = pDate && pDate !== "" && pDate !== "0" && pDate !== "undefined" && pDate !== "待確認";
+                const isSet = pDate && pDate !== "" && pDate !== "0" && pDate !== "待確認";
 
                 let html = `
                 <table>
-                    <tr>
-                        <th>案件名稱</th>
-                        <th>狀態</th>
-                        <th>日期</th>
-                        <th>工程師</th>
-                        <th>電話</th>
-                    </tr>
+                    <tr><th>案件名稱</th><th>狀態</th><th>日期</th><th>工程師</th><th>電話</th></tr>
                     <tr>
                         <td>${result["案件名稱"]}</td>
-                        <td>
-                            <span class="status-tag ${isSet ? 'status-ok':'status-wait'}">
-                                ${isSet ? '已排程':'分派中'}
-                            </span>
-                        </td>
+                        <td><span class="status-tag ${isSet ? 'status-ok':'status-wait'}">${isSet ? '已排程':'分派中'}</span></td>
                         <td>${isSet ? pDate : '待確認'}</td>
                         <td>${pEng}</td>
                         <td>${pTel}</td>
                     </tr>
                 </table>`;
 
-                // 4. 滿意度回饋表單邏輯 (僅在已排程時顯示)
+                // 3. 滿意度回饋表單 (依要求改為勾選式，5分為最高分)
                 let surveyHtml = "";
                 if(isSet) {
+                    // 定義五個指標
+                    const metrics = [
+                        { id: "scoreTech", label: "1. 技術能力評分" },
+                        { id: "scoreTime", label: "2. 準時抵達評分" },
+                        { id: "scoreCoord", label: "3. 現場配合評分" },
+                        { id: "scoreEdu", label: "4. 教育訓練評分" },
+                        { id: "scoreOverall", label: "5. 總體評價評分" }
+                    ];
+
+                    let metricsHtml = metrics.map(m => `
+                        <div style="margin-bottom:15px; border-bottom:1px dashed #e0e0e0; padding-bottom:10px;">
+                            <label style="display:block; font-weight:bold; margin-bottom:8px; color:#2D5D46;">${m.label}</label>
+                            <div style="display:flex; justify-content: space-between; max-width:280px; margin-left:5px;">
+                                ${[1,2,3,4,5].map(v => `
+                                    <label style="text-align:center; cursor:pointer; flex:1;">
+                                        <input type="radio" name="${m.id}" value="${v}" ${v===5?'checked':''} style="transform: scale(1.2); cursor:pointer;"><br>
+                                        <span style="font-size:12px; color:#666;">${v}分</span>
+                                    </label>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `).join('');
+
                     surveyHtml = `
                     <div id="survey-box" style="margin-top:20px; padding:20px; border:2px solid #2D5D46; border-radius:12px; background:#f0fdf4;">
-                        <h3 style="color:#2D5D46; margin-top:0;">🌟 服務滿意度回饋</h3>
+                        <h3 style="color:#2D5D46; margin-top:0; border-bottom:2px solid #2D5D46; padding-bottom:5px;">🌟 服務滿意度回饋</h3>
+                        <p style="font-size:12px; color:#2D5D46; margin-bottom:15px;">感謝您的支持，請點選評分 (5分最高，1分最低)：</p>
                         <form id="inlineSurveyForm">
                             <input type="hidden" name="mode" value="survey">
                             <input type="hidden" name="sv_dealer" value="${qD}">
                             <input type="hidden" name="sv_case" value="${qC}">
                             <input type="hidden" name="sv_eng" value="${pEng}">
-                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
-                                <div><label style="font-size:12px;">技術評分(1-5)：</label><input type="number" name="scoreTech" min="1" max="5" value="5" style="width:40px;"></div>
-                                <div><label style="font-size:12px;">準時評分(1-5)：</label><input type="number" name="scoreTime" min="1" max="5" value="5" style="width:40px;"></div>
-                                <div><label style="font-size:12px;">配合評分(1-5)：</label><input type="number" name="scoreCoord" min="1" max="5" value="5" style="width:40px;"></div>
-                                <div><label style="font-size:12px;">教育評分(1-5)：</label><input type="number" name="scoreEdu" min="1" max="5" value="5" style="width:40px;"></div>
+                            
+                            ${metricsHtml}
+
+                            <div style="margin-top:15px;">
+                                <label style="display:block; font-weight:bold; color:#2D5D46;">本次服務收穫最多的是？</label>
+                                <input type="text" name="bestPart" placeholder="請簡述您的收穫" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; box-sizing:border-box;">
                             </div>
-                            <div style="margin-bottom:10px;">
-                                <label style="font-size:12px;">總體評分(1-5)：</label><input type="number" name="scoreOverall" min="1" max="5" value="5" style="width:40px;">
+                            <div style="margin-top:15px;">
+                                <label style="display:block; font-weight:bold; color:#2D5D46;">建議或表揚：</label>
+                                <textarea name="feedbackMsg" placeholder="您的建議是我們前進的動力" style="width:100%; height:60px; padding:8px; border:1px solid #ccc; border-radius:4px; box-sizing:border-box;"></textarea>
                             </div>
-                            <div style="margin-bottom:10px;">
-                                <label style="font-size:12px;">本次服務收穫最多的是？</label><br>
-                                <input type="text" name="bestPart" style="width:100%; padding:5px; box-sizing:border-box;">
-                            </div>
-                            <div style="margin-bottom:10px;">
-                                <label style="font-size:12px;">建議或表揚：</label><br>
-                                <textarea name="feedbackMsg" style="width:100%; height:50px; padding:5px; box-sizing:border-box;"></textarea>
-                            </div>
-                            <button type="button" onclick="sendSurvey()" id="svBtn" style="background:#2D5D46; color:white; border:none; padding:10px; border-radius:6px; cursor:pointer; width:100%; font-weight:bold;">提交滿意度回饋</button>
+                            
+                            <button type="button" onclick="sendSurvey()" id="svBtn" style="margin-top:20px; background:#2D5D46; color:white; border:none; padding:12px; border-radius:6px; cursor:pointer; width:100%; font-weight:bold; font-size:16px;">提交滿意度回饋</button>
                         </form>
                     </div>`;
                 }
@@ -507,13 +502,11 @@ function managerSearch() {
             } else {
                 res.innerHTML = `<p style="color:red; text-align:center; margin-top:20px;">查無資料（名稱需完全一致）</p>`;
             }
-
         } catch (e) {
             console.error(e);
-            res.innerHTML = "讀取失敗，請確認試算表權限或網址";
+            res.innerHTML = "讀取失敗，請確認網路連線";
         }
     }
-
     // --- 滿意度調查提交功能 ---
     async function sendSurvey() {
         const btn = document.getElementById('svBtn');
