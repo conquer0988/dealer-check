@@ -395,8 +395,7 @@ function managerSearch() {
     renderSurveyTable(filteredSurveys); // 呼叫上面寫好的渲染函式
 }
 
-// --- 案件進度查詢 (僅修改此函式以加入滿意度介面) ---
-    async function queryData() {
+async function queryData() {
         const qD = document.getElementById('qD').value.trim();
         const qC = document.getElementById('qC').value.trim();
         const res = document.getElementById('results');
@@ -405,14 +404,23 @@ function managerSearch() {
 
         try {
             const response = await fetch(csvUrl);
+            if (!response.ok) throw new Error("無法取得 CSV 資料"); 
             const data = await response.text();
             const rows = data.split('\n').map(row => row.split(','));
+            
+            // 安全檢查：確保 CSV 至少有足夠的列數
+            if (rows.length < 22) throw new Error("CSV 資料格式不符，請檢查試算表欄位數");
+
             let found = false;
             let html = `<table><tr><th>案件名稱</th><th>狀態</th><th>日期</th><th>工程師</th><th>電話</th></tr>`;
-            let surveyHtml = ""; // 用於存放滿意度區塊
+            let surveyHtml = ""; 
 
-            for(let j=1; j<rows[0].length; j++) {
-                if(rows[6][j] === qD && rows[2][j] === qC) {
+            for(let j=1; j < rows[0].length; j++) {
+                // 安全檢查：確保該欄位存在再進行 trim 與比較
+                const dealerName = rows[6] ? rows[6][j]?.trim() : "";
+                const caseName = rows[2] ? rows[2][j]?.trim() : "";
+
+                if(dealerName === qD && caseName === qC) {
                     found = true;
                     const pDate = rows[19][j];
                     const pEng = rows[20][j] || '未指派';
@@ -427,8 +435,8 @@ function managerSearch() {
                         <td>${pTel || '--'}</td>
                     </tr>`;
 
-                    // 如果「已排程」，則顯示滿意度調查表單
-                    if(isSet) {
+                    // 如果已排程，顯示滿意度區塊
+                    if(isSet && surveyHtml === "") {
                         surveyHtml = `
                         <div id="survey-box" style="margin-top:20px; padding:20px; border:2px solid #2D5D46; border-radius:12px; background:#f0fdf4;">
                             <h3 style="color:#2D5D46; margin-top:0;">🌟 服務滿意度回饋</h3>
@@ -437,35 +445,38 @@ function managerSearch() {
                                 <input type="hidden" name="sv_dealer" value="${qD}">
                                 <input type="hidden" name="sv_case" value="${qC}">
                                 <input type="hidden" name="sv_eng" value="${pEng}">
-                                
-                                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
-                                    <div><label style="font-size:13px;">技術評分(1-5)：</label><input type="number" name="scoreTech" min="1" max="5" value="5" required style="width:50px; padding:5px;"></div>
-                                    <div><label style="font-size:13px;">準時評分(1-5)：</label><input type="number" name="scoreTime" min="1" max="5" value="5" required style="width:50px; padding:5px;"></div>
-                                    <div><label style="font-size:13px;">配合評分(1-5)：</label><input type="number" name="scoreCoord" min="1" max="5" value="5" required style="width:50px; padding:5px;"></div>
-                                    <div><label style="font-size:13px;">教育評分(1-5)：</label><input type="number" name="scoreEdu" min="1" max="5" value="5" required style="width:50px; padding:5px;"></div>
+                                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+                                    <div><label style="font-size:12px;">技術(1-5)：</label><input type="number" name="scoreTech" min="1" max="5" value="5" style="width:40px;"></div>
+                                    <div><label style="font-size:12px;">準時(1-5)：</label><input type="number" name="scoreTime" min="1" max="5" value="5" style="width:40px;"></div>
+                                    <div><label style="font-size:12px;">配合(1-5)：</label><input type="number" name="scoreCoord" min="1" max="5" value="5" style="width:40px;"></div>
+                                    <div><label style="font-size:12px;">教育(1-5)：</label><input type="number" name="scoreEdu" min="1" max="5" value="5" style="width:40px;"></div>
                                 </div>
-                                <div style="margin-bottom:15px;">
-                                    <label style="font-size:13px;">總體評分(1-5)：</label><input type="number" name="scoreOverall" min="1" max="5" value="5" required style="width:50px; padding:5px;">
+                                <div style="margin-bottom:10px;">
+                                    <label style="font-size:12px;">總體評分(1-5)：</label><input type="number" name="scoreOverall" min="1" max="5" value="5" style="width:40px;">
                                 </div>
-                                <div style="margin-bottom:15px;">
-                                    <label style="font-size:13px;">收穫最多的是什麼？</label><br>
-                                    <input type="text" name="bestPart" style="width:100%; padding:8px; margin-top:5px;" placeholder="例如：故障排除技巧...">
+                                <div style="margin-bottom:10px;">
+                                    <label style="font-size:12px;">收穫最多的：</label><input type="text" name="bestPart" style="width:100%; padding:5px; box-sizing:border-box;">
                                 </div>
-                                <div style="margin-bottom:15px;">
-                                    <label style="font-size:13px;">改進建議或表揚：</label><br>
-                                    <textarea name="feedbackMsg" style="width:100%; height:60px; padding:8px; margin-top:5px;" placeholder="您的寶貴意見..."></textarea>
+                                <div style="margin-bottom:10px;">
+                                    <label style="font-size:12px;">建議或表揚：</label><textarea name="feedbackMsg" style="width:100%; height:50px; padding:5px; box-sizing:border-box;"></textarea>
                                 </div>
-                                <button type="button" onclick="sendSurvey()" id="svBtn" style="background:#2D5D46; color:white; border:none; padding:12px; border-radius:8px; cursor:pointer; width:100%; font-weight:bold;">提交滿意度調查</button>
+                                <button type="button" onclick="sendSurvey()" id="svBtn" style="background:#2D5D46; color:white; border:none; padding:10px; border-radius:6px; cursor:pointer; width:100%; font-weight:bold;">提交滿意度回饋</button>
                             </form>
                         </div>`;
                     }
                 }
             }
-            // 組合表格與調查問卷
-            res.innerHTML = found ? (html + "</table>" + surveyHtml) : "<p style='color:#d93025; text-align:center; margin-top:20px;'>查無資料，請確認名稱是否正確。</p>";
-        } catch (e) { res.innerHTML = "連線異常"; }
-    }
 
+            if(found) {
+                res.innerHTML = html + "</table>" + surveyHtml;
+            } else {
+                res.innerHTML = "<p style='color:#d93025; text-align:center; margin-top:20px;'>查無資料，請確認名稱是否正確。</p>";
+            }
+        } catch (e) { 
+            console.error(e);
+            res.innerHTML = "連線異常，請檢查 CSV 網址是否正確。"; 
+        }
+    }
     // --- 滿意度調查提交功能 (新增) ---
     async function sendSurvey() {
         const btn = document.getElementById('svBtn');
