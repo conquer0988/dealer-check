@@ -341,23 +341,34 @@ async function fetchManagerData() {
         const response = await fetch(`${sheetUrl}&t=${Date.now()}`);
         const raw = await response.text();
         const rows = raw.split(/\r?\n/).map(r => r.split(",").map(cell => cell.trim().replace(/^"|"$/g, '')));
+        
+        // --- 聰明的自動定位功能 ---
+        const findRow = (key) => rows.findIndex(r => r[0] && r[0].includes(key));
+        
+        const idxDate = findRow("排定日期");  // 自動找「排定日期」在哪一行
+        const idxEng  = findRow("負責工程師");
+        const idxTel  = findRow("工程師電話");
+
         cachedData = [];
         for(let j=1; j<rows[0].length; j++) {
             if(rows[1] && rows[1][j]) {
                 cachedData.push({
-                    time:   rows[0][j],  // 第 1 列 (進單日期)
-    dealer: rows[1][j],  // 第 2 列 (經銷商)
-    case:   rows[2][j],  // 第 3 列 (案件名稱)
-    pDate:  rows[16][j], // 您圖片紅字 17 
-    pEng:   rows[17][j], // 您圖片紅字 18 
-    pTel:   rows[18][j]  // 您圖片紅字 19 
+                    time:   rows[0][j],  // 進單日期
+                    dealer: rows[1][j],  // 經銷商
+                    case:   rows[2][j],  // 案件名稱
+                    // 如果找不到關鍵字就用您確定的 19, 20, 21，有的話就用自動定位的
+                    pDate:  idxDate !== -1 ? rows[idxDate][j] : rows[19][j],
+                    pEng:   idxEng  !== -1 ? rows[idxEng][j]  : rows[20][j],
+                    pTel:   idxTel  !== -1 ? rows[idxTel][j]  : rows[21][j]
                 });
             }
         }
         managerSearch();
-    } catch(e) { alert("讀取雲端資料失敗"); }
+    } catch(e) { 
+        console.error(e);
+        alert("讀取雲端資料失敗，請確認網路或連結"); 
+    }
 }
-
 function managerSearch() {
     const keyword = document.getElementById('mSearch').value.toLowerCase();
     const resDiv = document.getElementById('manager-results');
