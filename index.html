@@ -540,78 +540,79 @@ function managerSearch() {
         }
     }
 
-// --- 新增：主管管理中心搜尋與天數計算函數 ---
 async function searchAdminData() {
-    const q = document.getElementById('adminSearchInput').value.trim().toLowerCase();
-    const res = document.getElementById('adminSearchResults');
-    if (!q) { alert("請輸入關鍵字"); return; }
+        const q = document.getElementById('adminSearchInput').value.trim().toLowerCase();
+        const res = document.getElementById('adminSearchResults');
+        if (!q) { alert("請輸入關鍵字"); return; }
 
-    res.innerHTML = "搜尋中...";
+        res.innerHTML = "搜尋中...";
 
-    try {
-        const response = await fetch(sheetUrl);
-        const text = await response.text();
-        // 配合您的資料結構 (縱向儲存)
-        const rows = text.split('\n').map(row => row.split(','));
+        try {
+            const response = await fetch(sheetUrl);
+            const text = await response.text();
+            // 這裡將 CSV 轉為陣列：rows[i] 代表每一列資料
+            const rows = text.split('\n').map(row => row.split(','));
 
-        let html = `<table><tr><th>進單日期</th><th>經銷商</th><th>案件名稱</th><th>工程師</th><th>電話</th><th>排定日期</th><th>處理天數</th></tr>`;
-        let foundCount = 0;
-        let totalDays = 0;
+            let html = `<table><tr><th>進單日期</th><th>經銷商</th><th>案件名稱</th><th>工程師</th><th>電話</th><th>排定日期</th><th>處理天數</th></tr>`;
+            let foundCount = 0;
+            let totalDays = 0;
 
-        // j 是資料的行數 (Column)，從 1 開始避開標題
-        for (let j = 1; j < rows[0].length; j++) {
-            // 根據您的 Excel (image_be1201.jpg) 精確索引：
-            const entryDate = rows[0][j] ? rows[0][j].trim() : "";  // 欄位 A (0)
-            const caseName  = rows[2][j] ? rows[2][j].trim() : "";   // 欄位 C (2)
-            const dealer    = rows[6][j] ? rows[6][j].trim() : "";   // 欄位 G (6)
-            const schedDate = rows[19][j] ? rows[19][j].trim() : ""; // 欄位 T (19)
-            const engName   = rows[20][j] ? rows[20][j].trim() : ""; // 欄位 U (20)
-            const tel       = rows[21][j] ? rows[21][j].trim() : ""; // 欄位 V (21)
+            // 從第 1 列開始（跳過標題列 rows[0]）
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                if (row.length < 5) continue; // 跳過空行
 
-            // 模糊搜尋經銷商或案件
-            if (dealer.toLowerCase().includes(q) || caseName.toLowerCase().includes(q)) {
-                let diffDays = "--";
-                
-                // 計算「排定日期」與「進單日期」的差距
-                if (entryDate && schedDate && schedDate !== "待確認" && schedDate !== "0") {
-                    const d1 = new Date(entryDate);
-                    const d2 = new Date(schedDate);
-                    if (!isNaN(d1) && !isNaN(d2)) {
-                        const diff = Math.floor((d2 - d1) / (1000 * 60 * 60 * 24));
-                        diffDays = diff >= 0 ? diff : 0;
-                        totalDays += diffDays;
-                        foundCount++;
+                // --- 根據您的截圖 image_beeb7c.jpg 精確對應索引 ---
+                const entryDate = row[0] ? row[0].trim() : "";  // A 欄: 進單日期
+                const dealer    = row[6] ? row[6].trim() : "";  // G 欄: 經銷商
+                const caseName  = row[2] ? row[2].trim() : "";  // C 欄: 案件名稱
+                const schedDate = row[19] ? row[19].trim() : ""; // T 欄: 排定日期
+                const engName   = row[20] ? row[20].trim() : ""; // U 欄: 工程師
+                const tel       = row[21] ? row[21].trim() : ""; // V 欄: 電話
+
+                // 模糊搜尋經銷商或案件
+                if (dealer.toLowerCase().includes(q) || caseName.toLowerCase().includes(q)) {
+                    let diffDays = "--";
+                    
+                    // 計算處理天數 (排定日期 - 進單日期)
+                    if (entryDate && schedDate && schedDate !== "待確認" && schedDate !== "0" && schedDate !== "") {
+                        const d1 = new Date(entryDate);
+                        const d2 = new Date(schedDate);
+                        if (!isNaN(d1.getTime()) && !isNaN(d2.getTime())) {
+                            const diff = Math.floor((d2 - d1) / (1000 * 60 * 60 * 24));
+                            diffDays = diff >= 0 ? diff : 0;
+                            totalDays += diffDays;
+                            foundCount++;
+                        }
                     }
+
+                    html += `<tr>
+                        <td>${entryDate}</td>
+                        <td style="font-weight:bold; color:#1A73E8;">${dealer}</td>
+                        <td>${caseName}</td>
+                        <td>${engName}</td>
+                        <td>${tel}</td>
+                        <td>${schedDate}</td>
+                        <td style="color:#d93025; font-weight:bold;">${diffDays === "--" ? "--" : diffDays + " 天"}</td>
+                    </tr>`;
                 }
-
-                html += `<tr>
-                    <td>${entryDate}</td>
-                    <td style="font-weight:bold; color:#1A73E8;">${dealer}</td>
-                    <td>${caseName}</td>
-                    <td>${engName}</td>
-                    <td>${tel}</td>
-                    <td>${schedDate}</td>
-                    <td style="color:#d93025; font-weight:bold;">${diffDays === "--" ? "--" : diffDays + " 天"}</td>
-                </tr>`;
             }
+
+            // 計算並顯示平均天數
+            const avg = foundCount > 0 ? (totalDays / foundCount).toFixed(1) : 0;
+            const summary = `
+                <div style="background:#e8f0fe; padding:12px; border-radius:8px; margin-bottom:15px; border:1px solid #1A73E8;">
+                    <strong>🔍 搜尋結果：</strong>共找到 ${foundCount} 筆 | 
+                    <strong>平均完成天數：</strong><span style="color:#d93025; font-size:18px; font-weight:bold;">${avg}</span> 天
+                </div>`;
+
+            res.innerHTML = (foundCount > 0) ? summary + html + "</table>" : "<p style='text-align:center; color:red;'>查無資料</p>";
+
+        } catch (e) {
+            console.error(e);
+            res.innerHTML = "搜尋連線異常，請確認 CSV 連結是否有效";
         }
-
-        // 計算平均完成天數
-        const avg = foundCount > 0 ? (totalDays / foundCount).toFixed(1) : 0;
-        const summary = `
-            <div style="background:#e8f0fe; padding:12px; border-radius:8px; margin-bottom:15px; border:1px solid #1A73E8;">
-                <strong>🔍 搜尋結果：</strong>共找到 ${foundCount} 筆 | 
-                <strong>平均完成天數：</strong><span style="color:#d93025; font-size:18px; font-weight:bold;">${avg}</span> 天
-            </div>`;
-
-        res.innerHTML = (foundCount > 0) ? summary + html + "</table>" : "<p style='text-align:center; color:red;'>查無資料</p>";
-
-    } catch (e) {
-        console.error(e);
-        res.innerHTML = "搜尋連線異常，請檢查 sheetUrl 是否正確";
-    }
-}
-    // --- 保留原本的其他提交邏輯 ---
+    }    // --- 保留原本的其他提交邏輯 ---
     document.getElementById('orderForm').addEventListener('submit', function(e) {
         e.preventDefault();
         const btn = document.getElementById('submitBtn'); btn.disabled = true; btn.innerText = '正在傳送申請...';
