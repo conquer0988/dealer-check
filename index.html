@@ -548,19 +548,20 @@ async function searchAdminData() {
     res.innerHTML = "搜尋中...";
 
     try {
-        const response = await fetch(sheetUrl); // 確保這是指向「案件資訊」分頁的 URL
+        const response = await fetch(sheetUrl);
         const text = await response.text();
 
-        // ✅ 使用您提供的「欄位名稱抓取」邏輯
+        // 1. 解析 CSV 並清理多餘空白與引號
         const rows = text.split('\n').map(r => 
             r.split(',').map(cell => cell.replace(/^"|"$/g, '').trim())
         );
 
-        // ✅ 轉成「物件陣列」（以第一列作為 Headers）
+        // 2. 定義標題（第一欄內容）
         const headers = rows.map(r => r[0]); 
-        let dataList = [];
 
-        // 轉置資料 (您的 CSV 結構是標題在第一欄，資料在右邊各行)
+        // 3. 建立資料清單 (j 是資料的「行」，從第 1 行開始，因為第 0 行是標題名稱)
+        let dataList = [];
+        // rows[0].length 是總共有幾件案子
         for (let j = 1; j < rows[0].length; j++) {
             let obj = {};
             for (let i = 0; i < rows.length; i++) {
@@ -571,29 +572,30 @@ async function searchAdminData() {
             dataList.push(obj);
         }
 
-        // ✅ 開始模糊搜尋並計算
+        // 4. 搜尋與計算
         let html = `<table><tr><th>進單日期</th><th>經銷商</th><th>案件名稱</th><th>工程師</th><th>排定日期</th><th>處理天數</th></tr>`;
         let foundCount = 0;
         let totalDays = 0;
 
         dataList.forEach(item => {
-            // 模糊搜尋支援：經銷商名稱 或 案件名稱
+            // 根據截圖，請確保標題名稱與 Excel 完全一致（包含空白）
             const dealer = item["經銷商名稱"] || "";
             const caseName = item["案件名稱"] || "";
             const entryDate = item["進單日期"] || "";
             const schedDate = item["排定日期"] || "";
 
+            // 執行模糊搜尋
             if (dealer.toLowerCase().includes(q) || caseName.toLowerCase().includes(q)) {
                 let diffDays = "--";
                 
-                // 🕒 計算處理天數 (排定日期 - 進單日期)
-                if (entryDate && schedDate && schedDate !== "待確認" && schedDate !== "0") {
+                // 計算處理天數 (排定日期 - 進單日期)
+                if (entryDate && schedDate && schedDate !== "待確認" && schedDate !== "0" && schedDate !== "") {
                     const d1 = new Date(entryDate);
                     const d2 = new Date(schedDate);
-                    if (!isNaN(d1) && !isNaN(d2)) {
+                    if (!isNaN(d1.getTime()) && !isNaN(d2.getTime())) {
                         const diff = Math.floor((d2 - d1) / (1000 * 60 * 60 * 24));
                         diffDays = diff >= 0 ? diff : 0;
-                        totalDays += (typeof diffDays === 'number' ? diffDays : 0);
+                        totalDays += diffDays;
                         foundCount++;
                     }
                 }
@@ -609,21 +611,22 @@ async function searchAdminData() {
             }
         });
 
-        // ✅ 計算平均值並渲染
-        const avg = (foundCount > 0) ? (totalDays / foundCount).toFixed(1) : 0;
+        // 5. 顯示結果
+        const avg = foundCount > 0 ? (totalDays / foundCount).toFixed(1) : 0;
         const summary = `
             <div style="background:#e8f0fe; padding:12px; border-radius:8px; margin-bottom:15px; border:1px solid #1A73E8;">
                 <strong>🔍 搜尋結果：</strong>共找到 ${foundCount} 筆 | 
                 <strong>平均完成天數：</strong><span style="color:#d93025; font-size:18px; font-weight:bold;">${avg}</span> 天
             </div>`;
 
-        res.innerHTML = (foundCount > 0) ? summary + html + "</table>" : "<p style='text-align:center; color:red;'>查無此經銷商或案件</p>";
+        res.innerHTML = (foundCount > 0) ? summary + html + "</table>" : "<p style='text-align:center; color:red;'>查無資料，請檢查關鍵字</p>";
 
     } catch (e) {
-        console.error(e);
-        res.innerHTML = "讀取失敗，請確認 sheetUrl 是否正確";
+        console.error("搜尋錯誤:", e);
+        res.innerHTML = "讀取失敗，請確認試算表權限或連結。";
     }
-}// --- 保留原本的其他提交邏輯 ---
+}
+// --- 保留原本的其他提交邏輯 ---
     document.getElementById('orderForm').addEventListener('submit', function(e) {
         e.preventDefault();
         const btn = document.getElementById('submitBtn'); btn.disabled = true; btn.innerText = '正在傳送申請...';
