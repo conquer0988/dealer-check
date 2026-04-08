@@ -471,30 +471,37 @@ function managerSearch() {
                         </div>
                     `).join('');
 
-                    surveyHtml = `
-                    <div id="survey-box" style="margin-top:20px; padding:20px; border:2px solid #2D5D46; border-radius:12px; background:#f0fdf4;">
-                        <h3 style="color:#2D5D46; margin-top:0; border-bottom:2px solid #2D5D46; padding-bottom:5px;">🌟 服務滿意度回饋</h3>
-                        <p style="font-size:12px; color:#2D5D46; margin-bottom:15px;">感謝您的支持，請點選評分 (5分最高，1分最低)：</p>
-                        <form id="inlineSurveyForm">
-                            <input type="hidden" name="mode" value="survey">
-                            <input type="hidden" name="sv_dealer" value="${qD}">
-                            <input type="hidden" name="sv_case" value="${qC}">
-                            <input type="hidden" name="sv_eng" value="${pEng}">
-                            
-                            ${metricsHtml}
-
-                            <div style="margin-top:15px;">
-                                <label style="display:block; font-weight:bold; color:#2D5D46;">本次服務收穫最多的是？</label>
-                                <input type="text" name="bestPart" placeholder="請簡述您的收穫" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; box-sizing:border-box;">
-                            </div>
-                            <div style="margin-top:15px;">
-                                <label style="display:block; font-weight:bold; color:#2D5D46;">建議或表揚：</label>
-                                <textarea name="feedbackMsg" placeholder="您的建議是我們前進的動力" style="width:100%; height:60px; padding:8px; border:1px solid #ccc; border-radius:4px; box-sizing:border-box;"></textarea>
-                            </div>
-                            
-                            <button type="button" onclick="sendSurvey()" id="svBtn" style="margin-top:20px; background:#2D5D46; color:white; border:none; padding:12px; border-radius:6px; cursor:pointer; width:100%; font-weight:bold; font-size:16px;">提交滿意度回饋</button>
-                        </form>
-                    </div>`;
+                  // 滿意度問卷 HTML (請將這段覆蓋您原本的 surveyHtml 變數)
+        surveyHtml = `
+        <div id="survey-box" style="margin-top:20px; padding:15px; border:2px solid #2D5D46; border-radius:12px; background:#f0fdf4;">
+            <h4 style="margin:0 0 10px 0; color:#2D5D46; text-align:center;">🌟 服務滿意度回饋</h4>
+            <form id="inlineSurveyForm">
+                <input type="hidden" name="mode" value="survey">
+                <input type="hidden" name="sv_dealer" value="${qD}"> 
+                <input type="hidden" name="sv_case" value="${qC}">
+                <input type="hidden" name="sv_eng" value="${pEng}">
+                
+                <div style="margin-bottom:10px;">
+                    <label>本次服務評分：</label>
+                    <select name="sv_score" style="width:100%; padding:5px; border-radius:4px;">
+                        <option value="5">⭐⭐⭐⭐⭐ 完美</option>
+                        <option value="4">⭐⭐⭐⭐ 滿意</option>
+                        <option value="3">⭐⭐⭐ 普通</option>
+                        <option value="2">⭐⭐ 待加強</option>
+                        <option value="1">⭐ 不滿意</option>
+                    </select>
+                </div>
+                <div style="margin-bottom:10px;">
+                    <label>本次服務收穫最多的是？</label>
+                    <textarea name="sv_feedback" rows="2" style="width:100%; padding:5px; border-radius:4px;" placeholder="例如：故障排除說明清晰..."></textarea>
+                </div>
+                <div style="margin-bottom:10px;">
+                    <label>建議或表揚：</label>
+                    <textarea name="sv_praise" rows="2" style="width:100%; padding:5px; border-radius:4px;" placeholder="對工程師的勉勵或改進建議..."></textarea>
+                </div>
+                <button type="button" id="svBtn" onclick="sendSurvey()" style="width:100%; background:#2D5D46; color:white; border:none; padding:8px; border-radius:8px; cursor:pointer;">提交回饋</button>
+            </form>
+        </div>`;
                 }
 
                 res.innerHTML = html + surveyHtml;
@@ -533,6 +540,77 @@ function managerSearch() {
         }
     }
 
+// --- 新增：主管管理中心搜尋與天數計算函數 ---
+async function searchAdminData() {
+    const q = document.getElementById('adminSearchInput').value.trim().toLowerCase();
+    const res = document.getElementById('adminSearchResults');
+    if (!q) { alert("請輸入關鍵字"); return; }
+
+    res.innerHTML = "搜尋中...";
+
+    try {
+        const response = await fetch(sheetUrl);
+        const text = await response.text();
+        // 配合您的資料結構 (縱向儲存)
+        const rows = text.split('\n').map(row => row.split(','));
+
+        let html = `<table><tr><th>進單日期</th><th>經銷商</th><th>案件名稱</th><th>工程師</th><th>電話</th><th>排定日期</th><th>處理天數</th></tr>`;
+        let foundCount = 0;
+        let totalDays = 0;
+
+        // j 是資料的行數 (Column)，從 1 開始避開標題
+        for (let j = 1; j < rows[0].length; j++) {
+            // 根據您的 Excel (image_be1201.jpg) 精確索引：
+            const entryDate = rows[0][j] ? rows[0][j].trim() : "";  // 欄位 A (0)
+            const caseName  = rows[2][j] ? rows[2][j].trim() : "";   // 欄位 C (2)
+            const dealer    = rows[6][j] ? rows[6][j].trim() : "";   // 欄位 G (6)
+            const schedDate = rows[19][j] ? rows[19][j].trim() : ""; // 欄位 T (19)
+            const engName   = rows[20][j] ? rows[20][j].trim() : ""; // 欄位 U (20)
+            const tel       = rows[21][j] ? rows[21][j].trim() : ""; // 欄位 V (21)
+
+            // 模糊搜尋經銷商或案件
+            if (dealer.toLowerCase().includes(q) || caseName.toLowerCase().includes(q)) {
+                let diffDays = "--";
+                
+                // 計算「排定日期」與「進單日期」的差距
+                if (entryDate && schedDate && schedDate !== "待確認" && schedDate !== "0") {
+                    const d1 = new Date(entryDate);
+                    const d2 = new Date(schedDate);
+                    if (!isNaN(d1) && !isNaN(d2)) {
+                        const diff = Math.floor((d2 - d1) / (1000 * 60 * 60 * 24));
+                        diffDays = diff >= 0 ? diff : 0;
+                        totalDays += diffDays;
+                        foundCount++;
+                    }
+                }
+
+                html += `<tr>
+                    <td>${entryDate}</td>
+                    <td style="font-weight:bold; color:#1A73E8;">${dealer}</td>
+                    <td>${caseName}</td>
+                    <td>${engName}</td>
+                    <td>${tel}</td>
+                    <td>${schedDate}</td>
+                    <td style="color:#d93025; font-weight:bold;">${diffDays === "--" ? "--" : diffDays + " 天"}</td>
+                </tr>`;
+            }
+        }
+
+        // 計算平均完成天數
+        const avg = foundCount > 0 ? (totalDays / foundCount).toFixed(1) : 0;
+        const summary = `
+            <div style="background:#e8f0fe; padding:12px; border-radius:8px; margin-bottom:15px; border:1px solid #1A73E8;">
+                <strong>🔍 搜尋結果：</strong>共找到 ${foundCount} 筆 | 
+                <strong>平均完成天數：</strong><span style="color:#d93025; font-size:18px; font-weight:bold;">${avg}</span> 天
+            </div>`;
+
+        res.innerHTML = (foundCount > 0) ? summary + html + "</table>" : "<p style='text-align:center; color:red;'>查無資料</p>";
+
+    } catch (e) {
+        console.error(e);
+        res.innerHTML = "搜尋連線異常，請檢查 sheetUrl 是否正確";
+    }
+}
     // --- 保留原本的其他提交邏輯 ---
     document.getElementById('orderForm').addEventListener('submit', function(e) {
         e.preventDefault();
