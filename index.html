@@ -540,79 +540,95 @@ function managerSearch() {
         }
     }
 
+// --- 使用「欄位名稱」抓取資料的模糊搜尋版本 ---
 async function searchAdminData() {
-        const q = document.getElementById('adminSearchInput').value.trim().toLowerCase();
-        const res = document.getElementById('adminSearchResults');
-        if (!q) { alert("請輸入關鍵字"); return; }
+    const q = document.getElementById('adminSearchInput').value.trim().toLowerCase();
+    const res = document.getElementById('adminSearchResults');
+    if (!q) { alert("請輸入關鍵字"); return; }
 
-        res.innerHTML = "搜尋中...";
+    res.innerHTML = "搜尋中...";
 
-        try {
-            const response = await fetch(sheetUrl);
-            const text = await response.text();
-            // 這裡將 CSV 轉為陣列：rows[i] 代表每一列資料
-            const rows = text.split('\n').map(row => row.split(','));
+    try {
+        const response = await fetch(sheetUrl);
+        const text = await response.text();
 
-            let html = `<table><tr><th>進單日期</th><th>經銷商</th><th>案件名稱</th><th>工程師</th><th>電話</th><th>排定日期</th><th>處理天數</th></tr>`;
-            let foundCount = 0;
-            let totalDays = 0;
+        // 1. 正確解析 CSV 並轉置資料（因為您的資料標題在第一欄）
+        const rows = text.split('\n').map(r => 
+            r.split(',').map(cell => cell.replace(/^"|"$/g, '').trim())
+        );
 
-            // 從第 1 列開始（跳過標題列 rows[0]）
-            for (let i = 1; i < rows.length; i++) {
-                const row = rows[i];
-                if (row.length < 5) continue; // 跳過空行
+        // 提取標題（第一欄的所有內容）
+        const headers = rows.map(r => r[0]); 
 
-                // --- 根據您的截圖 image_beeb7c.jpg 精確對應索引 ---
-                const entryDate = row[0] ? row[0].trim() : "";  // A 欄: 進單日期
-                const dealer    = row[6] ? row[6].trim() : "";  // G 欄: 經銷商
-                const caseName  = row[2] ? row[2].trim() : "";  // C 欄: 案件名稱
-                const schedDate = row[19] ? row[19].trim() : ""; // T 欄: 排定日期
-                const engName   = row[20] ? row[20].trim() : ""; // U 欄: 工程師
-                const tel       = row[21] ? row[21].trim() : ""; // V 欄: 電話
-
-                // 模糊搜尋經銷商或案件
-                if (dealer.toLowerCase().includes(q) || caseName.toLowerCase().includes(q)) {
-                    let diffDays = "--";
-                    
-                    // 計算處理天數 (排定日期 - 進單日期)
-                    if (entryDate && schedDate && schedDate !== "待確認" && schedDate !== "0" && schedDate !== "") {
-                        const d1 = new Date(entryDate);
-                        const d2 = new Date(schedDate);
-                        if (!isNaN(d1.getTime()) && !isNaN(d2.getTime())) {
-                            const diff = Math.floor((d2 - d1) / (1000 * 60 * 60 * 24));
-                            diffDays = diff >= 0 ? diff : 0;
-                            totalDays += diffDays;
-                            foundCount++;
-                        }
-                    }
-
-                    html += `<tr>
-                        <td>${entryDate}</td>
-                        <td style="font-weight:bold; color:#1A73E8;">${dealer}</td>
-                        <td>${caseName}</td>
-                        <td>${engName}</td>
-                        <td>${tel}</td>
-                        <td>${schedDate}</td>
-                        <td style="color:#d93025; font-weight:bold;">${diffDays === "--" ? "--" : diffDays + " 天"}</td>
-                    </tr>`;
+        // 2. 轉成物件陣列
+        let dataList = [];
+        // 從第 1 行 (資料行) 開始跑，j 是橫向的資料索引
+        for (let j = 1; j < rows[0].length; j++) {
+            let obj = {};
+            for (let i = 0; i < rows.length; i++) {
+                if (headers[i]) {
+                    // 將每一列的標題作為 key，對應的資料作為 value
+                    obj[headers[i]] = rows[i][j] || "";
                 }
             }
-
-            // 計算並顯示平均天數
-            const avg = foundCount > 0 ? (totalDays / foundCount).toFixed(1) : 0;
-            const summary = `
-                <div style="background:#e8f0fe; padding:12px; border-radius:8px; margin-bottom:15px; border:1px solid #1A73E8;">
-                    <strong>🔍 搜尋結果：</strong>共找到 ${foundCount} 筆 | 
-                    <strong>平均完成天數：</strong><span style="color:#d93025; font-size:18px; font-weight:bold;">${avg}</span> 天
-                </div>`;
-
-            res.innerHTML = (foundCount > 0) ? summary + html + "</table>" : "<p style='text-align:center; color:red;'>查無資料</p>";
-
-        } catch (e) {
-            console.error(e);
-            res.innerHTML = "搜尋連線異常，請確認 CSV 連結是否有效";
+            dataList.push(obj);
         }
-    }    // --- 保留原本的其他提交邏輯 ---
+
+        // 3. 執行模糊搜尋與 HTML 生成
+        let html = `<table><tr><th>進單日期</th><th>經銷商</th><th>案件名稱</th><th>工程師</th><th>電話</th><th>排定日期</th><th>處理天數</th></tr>`;
+        let foundCount = 0;
+        let totalDays = 0;
+
+        dataList.forEach(item => {
+            // 模糊搜尋：經銷商名稱 或 案件名稱 (請確保名稱與 Excel 標題完全一致)
+            const dealer = item["經銷商名稱"] || "";
+            const caseName = item["案件名稱"] || "";
+            const entryDate = item["進單日期"] || "";
+            const schedDate = item["排定日期"] || "";
+
+            if (dealer.toLowerCase().includes(q) || caseName.toLowerCase().includes(q)) {
+                let diffDays = "--";
+                
+                // 計算處理天數 (排定日期 - 進單日期)
+                if (entryDate && schedDate && schedDate !== "待確認" && schedDate !== "0" && schedDate !== "") {
+                    const d1 = new Date(entryDate);
+                    const d2 = new Date(schedDate);
+                    if (!isNaN(d1) && !isNaN(d2)) {
+                        const diff = Math.floor((d2 - d1) / (1000 * 60 * 60 * 24));
+                        diffDays = diff >= 0 ? diff : 0;
+                        totalDays += diffDays;
+                        foundCount++;
+                    }
+                }
+
+                html += `<tr>
+                    <td>${entryDate}</td>
+                    <td style="font-weight:bold; color:#1A73E8;">${dealer}</td>
+                    <td>${caseName}</td>
+                    <td>${item["負責工程師"] || ""}</td>
+                    <td>${item["工程師電話"] || ""}</td>
+                    <td>${schedDate}</td>
+                    <td style="color:#d93025; font-weight:bold;">${diffDays === "--" ? "--" : diffDays + " 天"}</td>
+                </tr>`;
+            }
+        });
+
+        // 4. 計算平均天數並顯示
+        const avg = foundCount > 0 ? (totalDays / foundCount).toFixed(1) : 0;
+        const summary = `
+            <div style="background:#e8f0fe; padding:12px; border-radius:8px; margin-bottom:15px; border:1px solid #1A73E8;">
+                <strong>🔍 搜尋結果：</strong>共找到 ${foundCount} 筆 | 
+                <strong>平均完成天數：</strong><span style="color:#d93025; font-size:18px; font-weight:bold;">${avg}</span> 天
+            </div>`;
+
+        res.innerHTML = (foundCount > 0) ? summary + html + "</table>" : "<p style='text-align:center; color:red;'>查無相關資料</p>";
+
+    } catch (e) {
+        console.error("搜尋發生錯誤:", e);
+        res.innerHTML = "搜尋失敗，請檢查資料欄位名稱是否正確。";
+    }
+}
+// --- 保留原本的其他提交邏輯 ---
     document.getElementById('orderForm').addEventListener('submit', function(e) {
         e.preventDefault();
         const btn = document.getElementById('submitBtn'); btn.disabled = true; btn.innerText = '正在傳送申請...';
